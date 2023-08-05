@@ -73,6 +73,11 @@ class Explorateur:
 
     def search(self, initial_state: BaseState, goal_state: BaseState = None) -> Path:
         pass
+        num_nodes = 0
+
+
+
+
     #     mNumNodes = 0;
     #
     #     IStateCollection open = StateStorageFactory.create(mOpenStorageType);
