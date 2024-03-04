@@ -24,7 +24,7 @@ class Stack(BaseStorage):
     def remove(self, state: BaseState) -> BaseState:
         """
         """
-        self.storage.remove(state)
+        return self.storage.remove(state)
 
     @abc.abstractmethod
     def is_empty(self) -> bool:

@@ -76,8 +76,6 @@ class Explorateur:
         num_nodes = 0
 
 
-
-
     #     mNumNodes = 0;
     #
     #     IStateCollection open = StateStorageFactory.create(mOpenStorageType);

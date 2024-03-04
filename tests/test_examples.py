@@ -10,6 +10,8 @@ from tests.test_base import BaseTest
 
 class ExampleTest(BaseTest):
 
-    def test_tautology(self):
+    def test_dfs_example(self):
+        self.assertEqual(True, False)
 
-        self.assertEqual(True, True)
+    def test_bfs_example(self):
+        self.assertEqual(True, False)
