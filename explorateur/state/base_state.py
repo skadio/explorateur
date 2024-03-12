@@ -1,13 +1,18 @@
 import abc
 from typing import List, NoReturn
 from explorateur.state.base_move import BaseMove
+from explorateur.state.base_variable import BaseVariable
 from explorateur.search.transition import Transition
 
 
 class BaseState(metaclass=abc.ABCMeta):
 
+    variable_assignments = {}
+    unassigned_variables: List[BaseVariable] = []
+
+
     @abc.abstractmethod
-    def __init__(self):
+    def __init__(self, variable_assignments, unassigned_variables):
         """Abstract method.
         """
         pass
@@ -25,7 +30,7 @@ class BaseState(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_data(self):
+    def get_data(self) -> dict:
         """
         """
         pass
@@ -47,3 +52,11 @@ class BaseState(metaclass=abc.ABCMeta):
         """
         """
         pass
+
+    @abc.abstractmethod
+    def is_valid(self) -> bool:
+        """
+        """
+        
+        pass
+
