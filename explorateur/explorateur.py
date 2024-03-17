@@ -11,8 +11,7 @@ import copy as cp
 
 from explorateur.state.base_state import BaseState
 from explorateur.utils import check_true, Constants
-from explorateur.state.state_with_transition import TransitionState
-from explorateur.search.transition import Transition
+from explorateur.search.transition import Transition, TransitionState
 
 from enum import Enum
 
@@ -85,9 +84,8 @@ class Explorateur:
 
     def search(self, initial_state: BaseState, goal_state: BaseState = None) -> BaseState:
 
-        states = deque(TransitionState)
-        states.append(curr_transition_state)
         curr_transition_state = TransitionState(initial_state)
+        states: deque[TransitionState] = deque([curr_transition_state])
         curr_state = initial_state
         while states:
             if self.exploration_type == SearchType.DepthFirst:
@@ -100,10 +98,12 @@ class Explorateur:
                 return curr_state
 
             valid_moves = curr_state.get_valid_moves()
+
+            print("curr_state", curr_state.get_data())
             
             for move in valid_moves:
                 successor = cp.deepcopy(curr_state)
-                if not move.execute(successor):
+                if not successor.execute(move):
                     continue
                 new_transition = Transition(curr_transition_state, move)
                 new_transition_state = TransitionState(successor)

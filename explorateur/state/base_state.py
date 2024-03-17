@@ -43,3 +43,10 @@ class BaseState(metaclass=abc.ABCMeta):
         
         pass
 
+    @abc.abstractmethod
+    def execute(self, move: BaseMove) -> bool:
+        """ Execute the given move on the state.
+        """
+        pass
+
+

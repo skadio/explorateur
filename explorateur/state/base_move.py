@@ -1,6 +1,5 @@
 import abc
 
-from explorateur.state.base_state import BaseState
 
 
 
@@ -12,11 +11,11 @@ class BaseMove(metaclass=abc.ABCMeta):
         """
         pass
 
-    @abc.abstractmethod
-    def execute(self, state: BaseState) -> bool:
-        """ Execute the move on the given state.
-        """
-        pass
+    # @abc.abstractmethod
+    # def execute(self, state: BaseState) -> bool:
+    #     """ Execute the move on the given state.
+    #     """
+    #     pass
 
     # @abc.abstractmethod
     # def undo(self, state: BaseState) -> bool:

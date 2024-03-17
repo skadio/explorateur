@@ -3,26 +3,68 @@
 import random
 from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur, SearchType
-from SAT_Classes.SAT_state import SATState
+from tests.SAT_Class import SATState
 
 
-class ExampleTest(BaseTest):
-
-    # def main():
-    #     # dfs = ExplorationType.DepthFirst(1)
-
-    def test_dfs_example(self):
-        seed = random.randint(0,100000)
-        explorer = Explorateur(SearchType.DepthFirst, seed)
-        clauses = [(1,2,3), (-1,2)]
+def generate_vars(clauses):
         vars = set()
         for c in clauses:
             for v in c:
-                vars.add(v)
-        starting_state = SATState({}, clauses, vars)
+                vars.add(abs(v))
+        return vars
+
+
+class SAT_Tests(BaseTest):
+    seed = random.randint(0,100000)
+
+    
+    def test_dfs_1(self):
+        explorer = Explorateur(SearchType.DepthFirst, self.seed)
+        clauses = [(1,2,3), (-1,2)]
+
+        starting_state = SATState()
+        starting_state.clauses = clauses
+        starting_state.unassigned_variables = generate_vars(clauses)
+        
         sol_state = explorer.search(starting_state)
         print(sol_state)
-        self.assertEqual(True, False)
+        self.assertNotEqual(sol_state, None)
+    
+    def test_dfs_2(self):
+        explorer = Explorateur(SearchType.DepthFirst, self.seed)
+        clauses = [(1, -2, 0), (-1,-2,0), (2,3,0), (-3,2,0), (1,4,0)]
+
+        starting_state = SATState()
+        starting_state.clauses = clauses
+        starting_state.unassigned_variables = generate_vars(clauses)
+
+        
+        sol_state = explorer.search(starting_state)
+        print(sol_state)
+        self.assertEqual(sol_state, None)
+
+    def test_bfs_2(self):
+        explorer = Explorateur(SearchType.BreadthFirst, self.seed)
+        clauses = [(1, -2, 0), (-1,-2,0), (2,3,0), (-3,2,0), (1,4,0)]
+
+        starting_state = SATState()
+        starting_state.clauses = clauses
+        starting_state.unassigned_variables = generate_vars(clauses)
+
+        
+        sol_state = explorer.search(starting_state)
+        print(sol_state)
+        self.assertEqual(sol_state, None)
+
+
+
+# 1 -2 4 0
+# 1 -2 5 0
+# -2 -4 -5 0
+# 1 2 3 4 0
+# 1 2 3 -4 0
+# 1 2 -3 5 0
+# 1 2 -3 -5 0
 
     # def test_bfs_example(self):
     #     self.assertEqual(True, False)

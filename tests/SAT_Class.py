@@ -1,15 +1,22 @@
 from typing import List, NoReturn
-from SAT_move import SATMove
+from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
+class SATMove(BaseMove):
 
+    def __init__(self, variable, variable_assignment):
+        self.variable = variable
+        self.variable_assignment = variable_assignment
+
+
+        
 class SATState(BaseState):
 
     def __init__(self):
         self.variable_assignments = {}
         self.clauses = []
         self.unassigned_variables = set() 
-
+    
     def get_valid_moves(self) -> List[SATMove]:
         """
         """
@@ -26,10 +33,12 @@ class SATState(BaseState):
         for clause in self.clauses:
             isSatisfied = False
             for var in clause:
-                if var > 0 and self.assignments[abs(var)]:
+                if abs(var) not in self.variable_assignments.keys():
+                    continue
+                if var > 0 and self.variable_assignments[abs(var)]:
                     isSatisfied = True
                     break
-                elif var < 0 and not self.assignments[abs(var)]:
+                elif var < 0 and not self.variable_assignments[abs(var)]:
                     isSatisfied = True
                     break
             if not isSatisfied:
@@ -49,15 +58,20 @@ class SATState(BaseState):
         for clause in self.clauses:
             isUnsatisfiable = True
             for var in clause:
-                if var > 0 and self.assignments[abs(var)]:
+                if abs(var) not in self.variable_assignments.keys():
                     isUnsatisfiable = False
                     break
-                elif var < 0 and not self.assignments[abs(var)]:
+                elif var > 0 and self.variable_assignments[abs(var)]:
                     isUnsatisfiable = False
                     break
-                elif abs(var) not in self.variable_assignments.keys():
+                elif var < 0 and not self.variable_assignments[abs(var)]:
                     isUnsatisfiable = False
                     break
             if isUnsatisfiable:
                 return False
         return True
+
+    def execute(self, move: SATMove) -> bool:
+        self.variable_assignments[abs(move.variable)] = move.variable_assignment
+        self.unassigned_variables.remove(abs(move.variable))
+        return self.is_valid()
