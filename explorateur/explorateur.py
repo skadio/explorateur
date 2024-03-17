@@ -2,68 +2,80 @@
 # -*- coding: utf-8 -*-
 
 
-from typing import NamedTuple, NoReturn
-
+from typing import NoReturn
+from collections import deque
 import numpy as np
+import copy as cp
 
-from explorateur.search.path import Path
+
+
 from explorateur.state.base_state import BaseState
-from explorateur.utils import Num, check_true, Constants
+from explorateur.utils import check_true, Constants
+from explorateur.state.state_with_transition import TransitionState
+from explorateur.search.transition import Transition
+
+from enum import Enum
+
+class SearchType(Enum):
+    DepthFirst = 1
+    BreadthFirst = 2
+    BestFirst = 3
+
+# class _StorageType(NamedTuple):
+#     class Stack(NamedTuple):
+#         param: Num = 0.05
+
+#         def _validate(self):
+#             check_true(isinstance(self.param, (int, float)), TypeError("param must be an integer or float."))
+
+#     class Queue(NamedTuple):
+#         param: Num = 1.0
+
+#         def _validate(self):
+#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+
+#     class Hash(NamedTuple):
+#         param: Num = 1.0
+
+#         def _validate(self):
+#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+
+#     class PriorityQueue(NamedTuple):
+#         param: Num = 1.0
+
+#         def _validate(self):
+#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
 
 
-class _StorageType(NamedTuple):
-    class Stack(NamedTuple):
-        param: Num = 0.05
+# class ExplorationType(NamedTuple):
+#     class DepthFirst(NamedTuple):
+#         _storage_type: _StorageType = _StorageType.Stack
 
-        def _validate(self):
-            check_true(isinstance(self.param, (int, float)), TypeError("param must be an integer or float."))
+#         def _validate(self):
+#             check_true(isinstance(self.param, (int, float)), TypeError("param must be an integer or float."))
 
-    class Queue(NamedTuple):
-        param: Num = 1.0
+#     class BestFirst(NamedTuple):
+#         _storage_type: _StorageType = _StorageType.PriorityQueue
 
-        def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+#         def _validate(self):
+#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
 
-    class Hash(NamedTuple):
-        param: Num = 1.0
+#     class BreadthFirst(NamedTuple):
+#         param: Num = 1.0
 
-        def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+#         def _validate(self):
+#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
 
-    class PriorityQueue(NamedTuple):
-        param: Num = 1.0
-
-        def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
-
-
-class ExplorationType(NamedTuple):
-    class DepthFirst(NamedTuple):
-        _storage_type: _StorageType = _StorageType.Stack
-
-        def _validate(self):
-            check_true(isinstance(self.param, (int, float)), TypeError("param must be an integer or float."))
-
-    class BestFirst(NamedTuple):
-        _storage_type: _StorageType = _StorageType.PriorityQueue
-
-        def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
-
-    class BreadthFirst(NamedTuple):
-        param: Num = 1.0
-
-        def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
 
 
 class Explorateur:
 
-    def __init__(self, exploration_type: ExplorationType, seed: int = Constants.default_seed):
+    def __init__(self, exploration_type: SearchType, seed: int = Constants.default_seed):
         # Validate arguments
-        Explorateur._validate_args(seed)
+        # Explorateur._validate_args(seed)
 
         self.exploration_type = exploration_type
+
 
         # Save the arguments
         self.seed = seed
@@ -71,9 +83,75 @@ class Explorateur:
         # Create the random number generator
         self._rng = np.random.RandomState(seed=self.seed)
 
-    def search(self, initial_state: BaseState, goal_state: BaseState = None) -> Path:
-        pass
-        num_nodes = 0
+    def search(self, initial_state: BaseState, goal_state: BaseState = None) -> BaseState:
+
+        states = deque(TransitionState)
+        states.append(curr_transition_state)
+        curr_transition_state = TransitionState(initial_state)
+        curr_state = initial_state
+        while states:
+            if self.exploration_type == SearchType.DepthFirst:
+                curr_transition_state = states.pop() 
+            elif self.exploration_type == SearchType.BreadthFirst:
+                curr_transition_state = states.popleft() 
+            curr_state = curr_transition_state.base_state
+
+            if curr_state.is_solution():
+                return curr_state
+
+            valid_moves = curr_state.get_valid_moves()
+            
+            for move in valid_moves:
+                successor = cp.deepcopy(curr_state)
+                if not move.execute(successor):
+                    continue
+                new_transition = Transition(curr_transition_state, move)
+                new_transition_state = TransitionState(successor)
+                new_transition_state.set_transition(new_transition)
+                states.append(new_transition_state)
+        return None
+
+                
+
+            
+
+    #   for (int m = 0; m < moves.size(); m++)
+    #       {
+    #         IMove move = moves.get(m);
+    #
+    #         if(verbosity > 3)
+    #           System.out.println("Apply move: " + move);
+    #
+    #         // Execute move on a copy since we maintain sets of states
+    #         IState successor = state.copy();
+    #
+    #         // move failed, continue with remaining nodes
+    #         if(!move.execute(successor))
+    #         {
+    #           if(verbosity > 3)
+    #             System.out.println("Move failed!");
+    #           continue;
+    #         }
+    #
+    #         // In graph search, skip already visited state
+    #         if(mSearchType.isGraphSearch() && closed.contains(successor))
+    #         {
+    #           continue;
+    #         }
+    #
+    #         int depth = (trans == null)? 1 : trans.depth + 1;
+    #
+    #         // Record previous move for solution trace.
+    #         successor.setTransition(new Transition(move, state, depth));
+    #
+    #         // if still within depth bound, add to the open set
+    #         if (depth < mDepthBound)
+    #         {
+    #           open.insert(successor);
+    #         }
+    #       }
+            
+            
 
 
     #     mNumNodes = 0;
