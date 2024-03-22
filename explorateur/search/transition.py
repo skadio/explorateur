@@ -19,3 +19,7 @@ class TransitionState: #rename this
 
     def set_transition(self, transition: Optional[Transition]):
         self.transition = transition
+
+
+#state.py (put transition state in there right now, one is the one the user gave us and the other one is the internal one)
+# _BaseState --> internal one (look at what the prof will have emailed us)

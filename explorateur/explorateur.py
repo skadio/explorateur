@@ -89,7 +89,7 @@ class Explorateur:
 
         #internal state -- need to work on the naming
         curr_transition_state = TransitionState(initial_state)
-        #factory set up, have htis function somewhere else that removes the next one
+        #factory set up, have htis function somewhere else that removes the next one (this will break for best first)
         states: deque[TransitionState] = deque([curr_transition_state])  #what is this syntax, also this own't work with best-first because it uses a priority queue
         curr_state = initial_state
         while states:
