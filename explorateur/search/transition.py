@@ -9,7 +9,7 @@ class Transition:
         self.move = move
 
 
-class TransitionState:
+class TransitionState: #rename this
     def __init__(self, base_state: BaseState):
         self.base_state = base_state
         self.transition: Optional[Transition] = None

@@ -15,10 +15,12 @@ from explorateur.search.transition import Transition, TransitionState
 
 from enum import Enum
 
-class SearchType(Enum):
+class SearchType(Enum): #this should be ExplorationType, search will be defined by get_moves, put this in lexical order
     DepthFirst = 1
     BreadthFirst = 2
     BestFirst = 3
+
+    #enum might have a parameter associated with it (but unsure if we need this or not)
 
 # class _StorageType(NamedTuple):
 #     class Stack(NamedTuple):
@@ -67,6 +69,7 @@ class SearchType(Enum):
 
 
 
+#USE: PEP-8
 class Explorateur:
 
     def __init__(self, exploration_type: SearchType, seed: int = Constants.default_seed):
@@ -84,8 +87,10 @@ class Explorateur:
 
     def search(self, initial_state: BaseState, goal_state: BaseState = None) -> BaseState:
 
+        #internal state -- need to work on the naming
         curr_transition_state = TransitionState(initial_state)
-        states: deque[TransitionState] = deque([curr_transition_state])
+        #factory set up, have htis function somewhere else that removes the next one
+        states: deque[TransitionState] = deque([curr_transition_state])  #what is this syntax, also this own't work with best-first because it uses a priority queue
         curr_state = initial_state
         while states:
             if self.exploration_type == SearchType.DepthFirst:
@@ -101,6 +106,7 @@ class Explorateur:
 
             print("curr_state", curr_state.get_data())
             
+            #note -- this is not a binary search
             for move in valid_moves:
                 successor = cp.deepcopy(curr_state)
                 if not successor.execute(move):

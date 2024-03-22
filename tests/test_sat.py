@@ -34,6 +34,7 @@ class SAT_Tests(BaseTest):
         explorer = Explorateur(SearchType.DepthFirst, self.seed)
         clauses = [(1, -2, 0), (-1,-2,0), (2,3,0), (-3,2,0), (1,4,0)]
 
+        #could move the following setup into SATState()
         starting_state = SATState()
         starting_state.clauses = clauses
         starting_state.unassigned_variables = generate_vars(clauses)
@@ -58,13 +59,6 @@ class SAT_Tests(BaseTest):
 
 
 
-# 1 -2 4 0
-# 1 -2 5 0
-# -2 -4 -5 0
-# 1 2 3 4 0
-# 1 2 3 -4 0
-# 1 2 -3 5 0
-# 1 2 -3 -5 0
-
-    # def test_bfs_example(self):
-    #     self.assertEqual(True, False)
+# Comments
+# pep-8 for ofrmatting, test_simple from class
+        
