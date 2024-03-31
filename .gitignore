@@ -13,6 +13,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+explorateur_venv/
 *.swp
 
 # Jupyter Notebook

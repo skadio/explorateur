@@ -1,5 +1,6 @@
 import abc
-from explorateur.state.base_state import BaseState
+from explorateur.state._base_state import _BaseState
+
 
 
 class BaseStorage(metaclass=abc.ABCMeta):
@@ -11,13 +12,12 @@ class BaseStorage(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def insert(self, state: BaseState):
+    def insert(self, state: _BaseState):
         """
         """
-        pass
 
     @abc.abstractmethod
-    def remove(self, state: BaseState) -> BaseState:
+    def remove(self, state: _BaseState) -> _BaseState:
         """
         """
         pass
@@ -35,7 +35,7 @@ class BaseStorage(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def contains(self, state: BaseState) -> BaseState:
+    def contains(self, state: _BaseState) -> _BaseState:
         """
         """
         pass

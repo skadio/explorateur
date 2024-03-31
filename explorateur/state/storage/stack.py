@@ -1,52 +1,34 @@
-import abc
+from collections  import deque
+from typing import Deque
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state.base_state import BaseState
-
-from collections import deque
 
 
 class Stack(BaseStorage):
 
-    @abc.abstractmethod
     def __init__(self):
-        """Abstract method.
-        """
         super().__init__()
-        self.storage: deque = deque()
+        self.storage: Deque[BaseState] = deque()
 
-    @abc.abstractmethod
     def insert(self, state: BaseState):
-        """
-        """
         self.storage.append(state)
 
-    @abc.abstractmethod
-    def remove(self, state: BaseState) -> BaseState:
-        """
-        """
-        return self.storage.remove(state)
+    def remove(self) -> BaseState:
+        return self.storage.pop()
 
-    @abc.abstractmethod
     def is_empty(self) -> bool:
-        """
-        """
-        pass
+        return len(self.storage) == 0
 
-    @abc.abstractmethod
     def get_size(self) -> int:
-        """
-        """
-        pass
+        return len(self.storage)
 
-    @abc.abstractmethod
     def contains(self, state: BaseState) -> BaseState:
-        """
-        """
+        if state in self.storage:
+            return state
+        return None
 
-    @abc.abstractmethod
     def __iter__(self):
         pass
 
-    @abc.abstractmethod
     def __next__(self):
         pass
