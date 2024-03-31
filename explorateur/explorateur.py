@@ -34,9 +34,6 @@ class Explorateur:
         states: BaseStorage[_BaseState] = StorageFactory.create(self.exploration_type.storage_type) #list of internal sta
         states.insert(_initial_state)
         
-        _initial_state = _BaseState(initial_state)
-        states: BaseStorage[_BaseState] = StorageFactory.create(self.exploration_type._storage_type) #list of internal sta
-        states.insert(_initial_state)
         while not states.is_empty():
             _current = states.remove()
             if _current.is_solution():

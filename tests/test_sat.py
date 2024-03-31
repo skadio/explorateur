@@ -74,13 +74,13 @@ class SATState(BaseState):
         for clause in self.clauses:
             is_unsatisfiable = True
             for literal in clause:
-                if abs(literal) not in self.variable_assignments.keys():
+                if abs(literal) not in self.var_to_val.keys():
                     is_unsatisfiable  = False
                     break
-                elif literal > 0 and self.variable_assignments[abs(literal)]:
+                elif literal > 0 and self.var_to_val[abs(literal)]:
                     is_unsatisfiable  = False
                     break
-                elif literal < 0 and not self.variable_assignments[abs(literal)]:
+                elif literal < 0 and not self.var_to_val[abs(literal)]:
                     is_unsatisfiable  = False
                     break
             if is_unsatisfiable:
