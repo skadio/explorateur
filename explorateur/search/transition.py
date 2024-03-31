@@ -19,4 +19,3 @@ class Transition:
 
 #     def set_transition(self, transition: Optional[Transition]):
 #         self.transition = transition
-

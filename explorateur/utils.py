@@ -50,4 +50,3 @@ def reset(dictionary: Dict, value) -> NoReturn:
     Maps every key to the given value.
     """
     dictionary.update({}.fromkeys(dictionary, value))
-

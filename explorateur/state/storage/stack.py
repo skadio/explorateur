@@ -1,4 +1,4 @@
-from collections  import deque
+from collections import deque
 from typing import Deque
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state.base_state import BaseState

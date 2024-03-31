@@ -6,7 +6,7 @@ from typing import List, Union, Optional
 
 class BaseTest(unittest.TestCase):
 
-    # A list common to all tests 
+    # A list common to all tests
     xx = []
 
     @staticmethod

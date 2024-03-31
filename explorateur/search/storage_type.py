@@ -2,6 +2,7 @@
 from explorateur.utils import check_true
 from typing import NamedTuple
 
+
 class _StorageType(NamedTuple):
     class Stack(NamedTuple):
         """Stack type"""
@@ -16,18 +17,21 @@ class _StorageType(NamedTuple):
         param: float = 1.0
 
         def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+            check_true(0 < self.param, ValueError(
+                "The value of param must be greater than zero."))
 
     class Hash(NamedTuple):
         """Hash type"""
         param: float = 1.0
 
         def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+            check_true(0 < self.param, ValueError(
+                "The value of param must be greater than zero."))
 
     class PriorityQueue(NamedTuple):
         """PQ type"""
         param: float = 1.0
 
         def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+            check_true(0 < self.param, ValueError(
+                "The value of param must be greater than zero."))

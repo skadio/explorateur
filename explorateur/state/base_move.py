@@ -1,8 +1,6 @@
 import abc
 
 
-
-
 class BaseMove(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
@@ -23,7 +21,7 @@ class BaseMove(metaclass=abc.ABCMeta):
     #     """
     #     pass
 
-    # Not sure where this would be used, validity should be a function of a state 
+    # Not sure where this would be used, validity should be a function of a state
     # b/c access to constraints is only in the state, not in the move
     # @abc.abstractmethod
     # def is_valid(self, state: BaseState) -> bool:

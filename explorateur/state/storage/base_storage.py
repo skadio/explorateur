@@ -2,7 +2,6 @@ import abc
 from explorateur.state._base_state import _BaseState
 
 
-
 class BaseStorage(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
@@ -17,7 +16,7 @@ class BaseStorage(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def remove(self, state: _BaseState) -> _BaseState:
+    def remove(self) -> _BaseState:
         """
         """
         pass

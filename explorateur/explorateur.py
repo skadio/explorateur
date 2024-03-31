@@ -13,7 +13,9 @@ from explorateur.state.storage.factory import StorageFactory
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.search.exploration_type import ExplorationType
 
-#USE: PEP-8
+# USE: PEP-8
+
+
 class Explorateur:
 
     def __init__(self, exploration_type: ExplorationType, seed: int = Constants.default_seed):
@@ -21,7 +23,6 @@ class Explorateur:
         # Explorateur._validate_args(seed)
 
         self.exploration_type = exploration_type
-
 
         # Save the arguments
         self.seed = seed
@@ -31,15 +32,16 @@ class Explorateur:
 
     def search(self, initial_state: BaseState, goal_state: BaseState = None) -> BaseState:
         _initial_state = _BaseState(initial_state)
-        states: BaseStorage[_BaseState] = StorageFactory.create(self.exploration_type.storage_type) #list of internal sta
+        states: BaseStorage[_BaseState] = StorageFactory.create(
+            self.exploration_type.storage_type)  # list of internal sta
         states.insert(_initial_state)
-        
+
         while not states.is_empty():
             _current = states.remove()
             if _current.is_solution():
                 return _current
             moves = _current.get_moves()
-            #note -- this is not a binary search
+            # note -- this is not a binary search
             for move in moves:
                 _successor = cp.deepcopy(_current)
                 if not _successor.execute(move):
@@ -48,10 +50,6 @@ class Explorateur:
                 _successor.set_transition(new_transition)
                 states.insert(_successor)
         return None
-
-                
-
-            
 
     #   for (int m = 0; m < moves.size(); m++)
     #       {
@@ -88,9 +86,6 @@ class Explorateur:
     #           open.insert(successor);
     #         }
     #       }
-            
-            
-
 
     #     mNumNodes = 0;
     #
@@ -190,4 +185,5 @@ class Explorateur:
         """
 
         # Seed
-        check_true(isinstance(seed, int), TypeError("The seed must be an integer."))
+        check_true(isinstance(seed, int), TypeError(
+            "The seed must be an integer."))

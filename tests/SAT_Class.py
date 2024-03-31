@@ -2,22 +2,22 @@ from typing import List, NoReturn
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
+
 class SATMove(BaseMove):
 
     def __init__(self, variable, variable_assignment):
-        self.variable = variable  #variable
+        self.variable = variable  # variable
         self.value = variable_assignment
-        # self.variable_assignment = variable_assignment 
+        # self.variable_assignment = variable_assignment
 
 
-        
 class SATState(BaseState):
 
     def __init__(self):
-        self.variable_assignments = {}  #varToVal (naming convention)
+        self.variable_assignments = {}  # varToVal (naming convention)
         self.clauses = []
-        self.unassigned_variables = set() 
-    
+        self.unassigned_variables = set()
+
     def get_valid_moves(self) -> List[SATMove]:
         """
         """
@@ -54,7 +54,6 @@ class SATState(BaseState):
         """
         pass
 
-
     def is_valid(self) -> bool:
         for clause in self.clauses:
             isUnsatisfiable = True
@@ -73,7 +72,9 @@ class SATState(BaseState):
         return True
 
     def execute(self, move: SATMove) -> bool:
-        self.variable_assignments[abs(move.variable)] = move.variable_assignment  #don't need the absolute 
+        # don't need the absolute
+        self.variable_assignments[abs(
+            move.variable)] = move.variable_assignment
         self.unassigned_variables.remove(abs(move.variable))
-        #can move is_valid() to inside this function, the contract for execute should also include letting us know if the move was successful or not 
+        # can move is_valid() to inside this function, the contract for execute should also include letting us know if the move was successful or not
         return self.is_valid()

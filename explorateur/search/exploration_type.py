@@ -1,10 +1,12 @@
-from explorateur.utils import check_true
 from typing import NamedTuple
+from explorateur.utils import check_true
 from explorateur.search.storage_type import _StorageType
+
 
 class ExplorationType(NamedTuple):
     """Exploration Type"""
     storage_type: _StorageType
+
     class DepthFirst(NamedTuple):
         "DepthFirst Type"
         storage_type: _StorageType = _StorageType.Stack()
@@ -20,7 +22,8 @@ class ExplorationType(NamedTuple):
         param: float = 1.0
 
         def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+            check_true(0 < self.param, ValueError(
+                "The value of param must be greater than zero."))
 
     class BreadthFirst(NamedTuple):
         "BreadthFirst Type"
@@ -28,5 +31,5 @@ class ExplorationType(NamedTuple):
         param: float = 1.0
 
         def _validate(self):
-            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
-
+            check_true(0 < self.param, ValueError(
+                "The value of param must be greater than zero."))

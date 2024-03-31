@@ -10,18 +10,20 @@ from typing import List, NoReturn
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
+
 class SATMove(BaseMove):
 
     def __init__(self, variable, variable_assignment):
-        self.variable = variable  
+        self.variable = variable
         self.value = variable_assignment
+
 
 class SATState(BaseState):
 
     def __init__(self, clauses):
-        self.var_to_val = {}  
+        self.var_to_val = {}
         self.clauses = clauses
-        self.unassigned_variables = self.generate_vars(self.clauses) 
+        self.unassigned_variables = self.generate_vars(self.clauses)
 
     def generate_vars(self, clauses):
         vars = set()
@@ -29,7 +31,7 @@ class SATState(BaseState):
             for v in c:
                 vars.add(abs(v))
         return vars
-    
+
     def get_moves(self) -> List[SATMove]:
         """
         """
@@ -59,43 +61,41 @@ class SATState(BaseState):
         return True
 
     def get_data(self) -> dict:
-        return self.var_to_val 
+        return self.var_to_val
 
     def set_data(self) -> NoReturn:
         """
         """
-        pass        
+        pass
 
     def execute(self, move: SATMove) -> bool:
-        self.var_to_val[move.variable] = move.value  #don't need the absolute 
+        self.var_to_val[move.variable] = move.value  # don't need the absolute
         self.unassigned_variables.remove(move.variable)
-        
-        #checking the validity of the move
+
+        # checking the validity of the move
         for clause in self.clauses:
             is_unsatisfiable = True
             for literal in clause:
                 if abs(literal) not in self.var_to_val.keys():
-                    is_unsatisfiable  = False
+                    is_unsatisfiable = False
                     break
                 elif literal > 0 and self.var_to_val[abs(literal)]:
-                    is_unsatisfiable  = False
+                    is_unsatisfiable = False
                     break
                 elif literal < 0 and not self.var_to_val[abs(literal)]:
-                    is_unsatisfiable  = False
+                    is_unsatisfiable = False
                     break
             if is_unsatisfiable:
                 return False
         return True
 
 
-
 class SAT_Tests(BaseTest):
-    seed = random.randint(0,100000)
+    seed = random.randint(0, 100000)
 
-    
     def test_dfs_1(self):
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
-        clauses = [(1,2,3), (-1,2)]
+        clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
 
@@ -103,12 +103,11 @@ class SAT_Tests(BaseTest):
         print(sol_state)
         self.assertTrue(sol_state.is_solution())
 
-    
     def test_dfs_2(self):
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
-        clauses = [(1, -2), (-1,-2), (2,3), (-3,2), (1,4)]
+        clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
-        #could move the following setup into SATState()
+        # could move the following setup into SATState()
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state)
         print(sol_state)
@@ -116,26 +115,23 @@ class SAT_Tests(BaseTest):
 
     def test_bfs_1(self):
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
-        clauses = [(1,2,3), (-1,2)]
+        clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state)
         print(sol_state)
         self.assertTrue(sol_state.is_solution())
 
-
     def test_bfs_2(self):
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
-        clauses = [(1, -2), (-1,-2), (2,3), (-3,2), (1,4)]
+        clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
-        
+
         sol_state = explorer.search(starting_state)
         print(sol_state)
         self.assertEqual(sol_state, None)
 
 
-
 # Comments
 # pep-8 for ofrmatting, test_simple from class, maybe get rid of the state folder so the importbecomes explorateur.base_state
-        
