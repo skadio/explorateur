@@ -8,7 +8,6 @@ class BaseStorage(metaclass=abc.ABCMeta):
     def __init__(self):
         """Abstract method.
         """
-        pass
 
     @abc.abstractmethod
     def insert(self, state: _BaseState):
@@ -19,25 +18,21 @@ class BaseStorage(metaclass=abc.ABCMeta):
     def remove(self) -> _BaseState:
         """
         """
-        pass
 
     @abc.abstractmethod
     def is_empty(self) -> bool:
         """
         """
-        pass
 
     @abc.abstractmethod
     def get_size(self) -> int:
         """
         """
-        pass
 
     @abc.abstractmethod
     def contains(self, state: _BaseState) -> _BaseState:
         """
         """
-        pass
 
     @abc.abstractmethod
     def __iter__(self):

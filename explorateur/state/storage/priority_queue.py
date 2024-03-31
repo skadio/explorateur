@@ -3,7 +3,6 @@ import heapq
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state.base_state import BaseState
 
-from collections import deque
 
 # need to figure out what they key is to push + where is it going to be stored
 

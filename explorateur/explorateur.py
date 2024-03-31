@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
-from typing import NoReturn, NamedTuple
-import numpy as np
+from typing import NoReturn
 import copy as cp
+import numpy as np
 
 from explorateur.state.base_state import BaseState
 from explorateur.utils import check_true, Constants

@@ -1,7 +1,5 @@
-
-from explorateur.utils import check_true
 from typing import NamedTuple
-
+from explorateur.utils import check_true
 
 class _StorageType(NamedTuple):
     class Stack(NamedTuple):

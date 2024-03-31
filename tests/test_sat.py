@@ -26,11 +26,11 @@ class SATState(BaseState):
         self.unassigned_variables = self.generate_vars(self.clauses)
 
     def generate_vars(self, clauses):
-        vars = set()
+        variables = set()
         for c in clauses:
             for v in c:
-                vars.add(abs(v))
-        return vars
+                variables.add(abs(v))
+        return variables
 
     def get_moves(self) -> List[SATMove]:
         """
@@ -48,7 +48,7 @@ class SATState(BaseState):
         for clause in self.clauses:
             is_satisfied = False
             for literal in clause:
-                if abs(literal) not in self.var_to_val.keys():
+                if abs(literal) not in self.var_to_val:
                     continue
                 if literal > 0 and self.var_to_val[abs(literal)]:
                     is_satisfied = True
