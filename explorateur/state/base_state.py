@@ -35,7 +35,6 @@ class BaseState(metaclass=abc.ABCMeta):
         pass
 
 
-
     @abc.abstractmethod
     def execute(self, move: BaseMove) -> bool:
         """ Execute the given move on the state and returns a boolean on whether or not the execution on the previous state

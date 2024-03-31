@@ -1,78 +1,81 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 
-from typing import NoReturn
-from collections import deque
+from typing import NoReturn, NamedTuple
 import numpy as np
 import copy as cp
 
-
-
 from explorateur.state.base_state import BaseState
 from explorateur.utils import check_true, Constants
+from explorateur.state._base_state import _BaseState
 from explorateur.search.transition import Transition, TransitionState
-
-from enum import Enum
-
-class SearchType(Enum): #this should be ExplorationType, search will be defined by get_moves, put this in lexical order
-    DepthFirst = 1
-    BreadthFirst = 2
-    BestFirst = 3
-
-    #enum might have a parameter associated with it (but unsure if we need this or not)
-
-# class _StorageType(NamedTuple):
-#     class Stack(NamedTuple):
-#         param: Num = 0.05
-
-#         def _validate(self):
-#             check_true(isinstance(self.param, (int, float)), TypeError("param must be an integer or float."))
-
-#     class Queue(NamedTuple):
-#         param: Num = 1.0
-
-#         def _validate(self):
-#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
-
-#     class Hash(NamedTuple):
-#         param: Num = 1.0
-
-#         def _validate(self):
-#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
-
-#     class PriorityQueue(NamedTuple):
-#         param: Num = 1.0
-
-#         def _validate(self):
-#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+from explorateur.state.storage.factory import StorageFactory
+from explorateur.state.storage.base_storage import BaseStorage
 
 
-# class ExplorationType(NamedTuple):
-#     class DepthFirst(NamedTuple):
-#         _storage_type: _StorageType = _StorageType.Stack
+class _StorageType(NamedTuple):
+    class Stack(NamedTuple):
+        """Stack type"""
+        param: float = 0.05
 
-#         def _validate(self):
-#             check_true(isinstance(self.param, (int, float)), TypeError("param must be an integer or float."))
+        def _validate(self):
+            check_true(isinstance(self.param, (int, float)),
+                       TypeError("param must be an integer or float."))
 
-#     class BestFirst(NamedTuple):
-#         _storage_type: _StorageType = _StorageType.PriorityQueue
+    class Queue(NamedTuple):
+        """Queue type"""
+        param: float = 1.0
 
-#         def _validate(self):
-#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+        def _validate(self):
+            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
 
-#     class BreadthFirst(NamedTuple):
-#         param: Num = 1.0
+    class Hash(NamedTuple):
+        """Hash type"""
+        param: float = 1.0
 
-#         def _validate(self):
-#             check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+        def _validate(self):
+            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+
+    class PriorityQueue(NamedTuple):
+        """PQ type"""
+        param: float = 1.0
+
+        def _validate(self):
+            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+
+class ExplorationType(NamedTuple):
+    """Exploration Type"""
+    class DepthFirst(NamedTuple):
+        "DepthFirst Type"
+        _storage_type: _StorageType = _StorageType.Stack
+        param: float = 1.0
+
+        def _validate(self):
+            check_true(isinstance(self.param, (int, float)),
+                       TypeError("param must be an integer or float."))
+
+    class BestFirst(NamedTuple):
+        "BestFirst Type"
+        _storage_type: _StorageType = _StorageType.PriorityQueue
+        param: float = 1.0
+
+        def _validate(self):
+            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
+
+    class BreadthFirst(NamedTuple):
+        "BreadthFirst Type"
+        _storage_type: _StorageType = _StorageType.Queue
+        param: float = 1.0
+
+        def _validate(self):
+            check_true(0 < self.param, ValueError("The value of param must be greater than zero."))
 
 
 
 #USE: PEP-8
 class Explorateur:
 
-    def __init__(self, exploration_type: SearchType, seed: int = Constants.default_seed):
+    def __init__(self, exploration_type: ExplorationType, seed: int = Constants.default_seed):
         # Validate arguments
         # Explorateur._validate_args(seed)
 
@@ -87,34 +90,26 @@ class Explorateur:
 
     def search(self, initial_state: BaseState, goal_state: BaseState = None) -> BaseState:
 
-        #internal state -- need to work on the naming
-        curr_transition_state = TransitionState(initial_state)
-        #factory set up, have htis function somewhere else that removes the next one (this will break for best first)
-        states: deque[TransitionState] = deque([curr_transition_state])  #what is this syntax, also this own't work with best-first because it uses a priority queue
-        curr_state = initial_state
+        _initial_state = _BaseState(initial_state)
+        states: BaseStorage[_BaseState] = StorageFactory.create(self.exploration_type._storage_type) #list of internal sta
+        states.insert(_initial_state)
         while states:
-            if self.exploration_type == SearchType.DepthFirst:
-                curr_transition_state = states.pop() 
-            elif self.exploration_type == SearchType.BreadthFirst:
-                curr_transition_state = states.popleft() 
-            curr_state = curr_transition_state.base_state
+            _current = states.remove()
+            if _current.is_solution():
+                return _current.is_solution()
 
-            if curr_state.is_solution():
-                return curr_state
+            valid_moves = _current.user_state.get_valid_moves()
 
-            valid_moves = curr_state.get_valid_moves()
-
-            print("curr_state", curr_state.get_data())
+            # print("curr_state", curr_state.get_data())
             
             #note -- this is not a binary search
             for move in valid_moves:
-                successor = cp.deepcopy(curr_state)
-                if not successor.execute(move):
+                _successor = cp.deepcopy(_current)
+                if not _successor.user_state.execute(move):
                     continue
-                new_transition = Transition(curr_transition_state, move)
-                new_transition_state = TransitionState(successor)
-                new_transition_state.set_transition(new_transition)
-                states.append(new_transition_state)
+                new_transition = Transition(_current, move)
+                _successor.set_transition(new_transition)
+                states.append(_successor)
         return None
 
                 
