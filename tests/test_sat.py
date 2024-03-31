@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import random
-from tests.test_base import BaseTest
-from explorateur.explorateur import Explorateur, SearchType
-from tests.SAT_Class import SATState
+from test_base import BaseTest
+from explorateur.explorateur import Explorateur, ExplorationType
+# from tests.SAT_Class import SATState
 
 from typing import List, NoReturn
 from explorateur.state.base_move import BaseMove
@@ -15,8 +15,6 @@ class SATMove(BaseMove):
         self.variable = variable  #variable
         self.value = variable_assignment
 
-
-        
 class SATState(BaseState):
 
     def __init__(self, clauses):
@@ -24,7 +22,7 @@ class SATState(BaseState):
         self.clauses = clauses
         self.unassigned_variables = self.generate_vars(self.clauses) 
 
-    def generate_vars(clauses):
+    def generate_vars(self, clauses):
         vars = set()
         for c in clauses:
             for v in c:
@@ -65,31 +63,28 @@ class SATState(BaseState):
     def set_data(self) -> NoReturn:
         """
         """
-        pass
-
-
-    def is_valid(self) -> bool:
-        for clause in self.clauses:
-            isUnsatisfiable = True
-            for var in clause:
-                if abs(var) not in self.variable_assignments.keys():
-                    isUnsatisfiable = False
-                    break
-                elif var > 0 and self.variable_assignments[abs(var)]:
-                    isUnsatisfiable = False
-                    break
-                elif var < 0 and not self.variable_assignments[abs(var)]:
-                    isUnsatisfiable = False
-                    break
-            if isUnsatisfiable:
-                return False
-        return True
+        pass        
 
     def execute(self, move: SATMove) -> bool:
         self.variable_assignments[move.variable] = move.variable_assignment  #don't need the absolute 
         self.unassigned_variables.remove(move.variable)
-        #can move is_valid() to inside this function, the contract for execute should also include letting us know if the move was successful or not 
-        return self.is_valid()
+        
+        #checking the validity of the move
+        for clause in self.clauses:
+            is_unsatisfiable = True
+            for literal in clause:
+                if abs(literal) not in self.variable_assignments.keys():
+                    is_unsatisfiable  = False
+                    break
+                elif literal > 0 and self.variable_assignments[abs(literal)]:
+                    is_unsatisfiable  = False
+                    break
+                elif literal < 0 and not self.variable_assignments[abs(literal)]:
+                    is_unsatisfiable  = False
+                    break
+            if is_unsatisfiable:
+                return False
+        return True
 
 
 
@@ -98,7 +93,7 @@ class SAT_Tests(BaseTest):
 
     
     def test_dfs_1(self):
-        explorer = Explorateur(SearchType.DepthFirst, self.seed)
+        explorer = Explorateur(ExplorationType.DepthFirst, self.seed)
         clauses = [(1,2,3), (-1,2)]
 
         starting_state = SATState(clauses)
@@ -108,7 +103,7 @@ class SAT_Tests(BaseTest):
         self.assertNotEqual(sol_state, None)
     
     def test_dfs_2(self):
-        explorer = Explorateur(SearchType.DepthFirst, self.seed)
+        explorer = Explorateur(ExplorationType.DepthFirst, self.seed)
         clauses = [(1, -2, 0), (-1,-2,0), (2,3,0), (-3,2,0), (1,4,0)]
 
         #could move the following setup into SATState()
@@ -120,7 +115,7 @@ class SAT_Tests(BaseTest):
         self.assertEqual(sol_state, None)
 
     def test_bfs_2(self):
-        explorer = Explorateur(SearchType.BreadthFirst, self.seed)
+        explorer = Explorateur(ExplorationType.BreadthFirst, self.seed)
         clauses = [(1, -2, 0), (-1,-2,0), (2,3,0), (-3,2,0), (1,4,0)]
 
         starting_state = SATState(clauses)
