@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import random
+import logging
 from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
@@ -16,6 +17,10 @@ class SATMove(BaseMove):
     def __init__(self, variable, variable_assignment):
         self.variable = variable
         self.value = variable_assignment
+    
+    def __str__(self) -> str:
+        return f"Setting variable: {self.variable} to {self.value}"
+    
 
 
 class SATState(BaseState):
@@ -89,9 +94,32 @@ class SATState(BaseState):
                 return False
         return True
 
+    # def objective_function(self) -> float:
+    #     # this is a trivial function, not necessarily helpful to solving the problem faster
+    #     total_trues = 0
+    #     for var in self.var_to_val:
+    #         if self.var_to_val[var] == True:
+    #             total_trues += 1
+    #     return float(total_trues)
+    
+    def objective_function(self):
+        return 0.0
+
+    # def objective_function(self) -> float:
+    #     total_falses = 0
+    #     for var in self.var_to_val:
+    #         if self.var_to_val[var] == False:
+    #             total_falses += 1
+    #     return total_falses
+    
+    def __str__(self) -> str:
+        return str(self.var_to_val)
+    
+
 
 class SAT_Tests(BaseTest):
     seed = random.randint(0, 100000)
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
     def test_dfs_1(self):
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
@@ -100,17 +128,17 @@ class SAT_Tests(BaseTest):
         starting_state = SATState(clauses)
 
         sol_state = explorer.search(starting_state)
-        print(sol_state)
+        explorer.print_path(sol_state)
+        explorer.visualize_tree("tmp/test_dfs_1")
         self.assertTrue(sol_state.is_solution())
 
     def test_dfs_2(self):
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
-        # could move the following setup into SATState()
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state)
-        print(sol_state)
+        explorer.visualize_tree("tmp/test_dfs_2")
         self.assertEqual(sol_state, None)
 
     def test_bfs_1(self):
@@ -119,7 +147,8 @@ class SAT_Tests(BaseTest):
 
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state)
-        print(sol_state)
+        explorer.print_path(sol_state)
+        explorer.visualize_tree("tmp/test_bfs_1")
         self.assertTrue(sol_state.is_solution())
 
     def test_bfs_2(self):
@@ -129,8 +158,19 @@ class SAT_Tests(BaseTest):
         starting_state = SATState(clauses)
 
         sol_state = explorer.search(starting_state)
-        print(sol_state)
+        explorer.visualize_tree("tmp/test_bfs_2")
         self.assertEqual(sol_state, None)
+    
+    def test_pq(self):
+        explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
+        clauses = [(1, 2, 3), (-1, 2)]
+
+        starting_state = SATState(clauses)
+
+        sol_state = explorer.search(starting_state)
+        explorer.print_path(sol_state)
+        explorer.visualize_tree("tmp/test_pq")
+        self.assertTrue(sol_state.is_solution())
 
 
 # Comments

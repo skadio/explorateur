@@ -40,3 +40,18 @@ class BaseState(metaclass=abc.ABCMeta):
         """ Execute the given move on the state and returns a boolean on whether or not the execution on the previous state
         """
         pass
+    
+    @abc.abstractmethod
+    def objective_function(self) -> float:
+        """
+        If the user decides to implement a best first search that requires a priority queue which needs a way to "rank" the states
+        """
+        pass
+
+    @abc.abstractmethod
+    def __str__(self) -> str:
+        """
+        """
+        pass
+
+    

@@ -9,6 +9,12 @@ class BaseMove(metaclass=abc.ABCMeta):
         """
         pass
 
+    @abc.abstractmethod
+    def __str__(self) -> str:
+        """ Return a string representation of the move.
+        """
+        pass
+
     # @abc.abstractmethod
     # def execute(self, state: BaseState) -> bool:
     #     """ Execute the move on the given state.

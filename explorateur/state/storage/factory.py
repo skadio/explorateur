@@ -1,6 +1,7 @@
 from explorateur.search.storage_type import _StorageType
 from explorateur.state.storage.queue import Queue
 from explorateur.state.storage.stack import Stack
+from explorateur.state.storage.priority_queue import PriorityQueue
 from explorateur.state.storage.base_storage import BaseStorage
 
 
@@ -8,14 +9,15 @@ class StorageFactory:
 
     @staticmethod
     def create(storage_type: _StorageType) -> BaseStorage:
-        match storage_type:
-            case _StorageType.Queue(param=p):
-                return Queue()
-            case _StorageType.Stack(param=p):
-                return Stack()
-            case _StorageType.Hash(param=p):
-                raise ValueError
-            case _StorageType.PriorityQueue(param=p):
-                raise ValueError
-            case _:
-                raise ValueError
+        if storage_type is None:
+            raise ValueError
+        elif storage_type == _StorageType.Queue():
+            return Queue()
+        elif storage_type == _StorageType.Stack():
+            return Stack()
+        elif storage_type == _StorageType.PriorityQueue():
+                return PriorityQueue()
+        elif storage_type == _StorageType.Hash():
+            raise ValueError
+        else:
+            raise ValueError

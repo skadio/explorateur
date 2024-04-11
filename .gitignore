@@ -62,3 +62,6 @@ coverage.xml
 
 # Documentation
 docsrc/_build/
+
+
+tmp/*

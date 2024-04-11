@@ -30,7 +30,7 @@ class BaseStorage(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def contains(self, state: _BaseState) -> _BaseState:
+    def contains(self, state: _BaseState) -> _BaseState|None:
         """
         """
 

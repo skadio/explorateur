@@ -1,8 +1,8 @@
-# XXX
+# Explorateur
 
-XXX is a research library written in Python for ..
+Explorateur is a library written in Python to solve problems that require some sort of search
 
-XXX follows a scikit-learn style public interface, adheres to 
+Explorateur follows a scikit-learn style public interface, adheres to 
 [PEP-8 standards](https://www.python.org/dev/peps/pep-0008/), and is tested heavily. 
 
 Documentation is available at 

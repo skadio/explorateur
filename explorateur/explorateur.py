@@ -4,6 +4,8 @@
 from typing import NoReturn
 import copy as cp
 import numpy as np
+import graphviz
+import logging
 
 from explorateur.state.base_state import BaseState
 from explorateur.utils import check_true, Constants
@@ -29,27 +31,61 @@ class Explorateur:
 
         # Create the random number generator
         self._rng = np.random.RandomState(seed=self.seed)
+        
+        self.tree = graphviz.Digraph()
 
-    def search(self, initial_state: BaseState, goal_state: BaseState = None) -> BaseState:
-        _initial_state = _BaseState(initial_state)
+    def search(self, initial_state: BaseState, goal_state: BaseState|None = None) -> _BaseState:
+        counter = 0
+        if initial_state is None:
+            raise ValueError
+        _initial_state = _BaseState(initial_state, str(0))
+        self.tree.node(_initial_state.node_label)
         states: BaseStorage[_BaseState] = StorageFactory.create(
             self.exploration_type.storage_type)  # list of internal sta
         states.insert(_initial_state)
 
         while not states.is_empty():
             _current = states.remove()
+            logging.debug(f"Current State: {_current}")
+            transition = _current.get_transition()
+            if transition is not None:
+                successful_move = _current.execute(transition.move)
+                if not successful_move:
+                    self.tree.node(_current.node_label, style='filled', fillcolor='red')
+                    continue
             if _current.is_solution():
+                self.tree.node(_current.node_label, style='filled', fillcolor='green')
                 return _current
             moves = _current.get_moves()
-            # note -- this is not a binary search
+            self.tree.node(_current.node_label, style='filled', fillcolor='blue')
+            # TODO: DFS, reverse the moves so that when pushed to stack, move order preserved
+            # not sure if this is necessary
+            # if self.exploration_type == ExplorationType.DepthFirst:
+            #     moves.reverse()
             for move in moves:
+                counter += 1
                 _successor = cp.deepcopy(_current)
-                if not _successor.execute(move):
-                    continue
+                _successor.node_label = str(counter)
+                self.tree.node(_successor.node_label)
+                self.tree.edge(_current.node_label, _successor.node_label, label=str(move))
                 new_transition = Transition(_current, move)
                 _successor.set_transition(new_transition)
                 states.insert(_successor)
+                logging.debug(f"Added State: {_successor}")
         return None
+    
+    def print_path(self, path: _BaseState):
+        transition = path.get_transition()
+        if transition is None:
+            print("Begin Path")
+            print("State:", path)
+            return
+        self.print_path(transition.previous_state) 
+        print("State:", path)
+        print("Move:", transition.move)
+    
+    def visualize_tree(self, file_path):
+        self.tree.render(file_path, format='png')
 
     #   for (int m = 0; m < moves.size(); m++)
     #       {
