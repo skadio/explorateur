@@ -1,5 +1,6 @@
 import abc
 from explorateur.state._base_state import _BaseState
+from typing import Union
 
 
 class BaseStorage(metaclass=abc.ABCMeta):
@@ -30,7 +31,7 @@ class BaseStorage(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def contains(self, state: _BaseState) -> _BaseState|None:
+    def contains(self, state: _BaseState) -> Union[_BaseState,None]:
         """
         """
 

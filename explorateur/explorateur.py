@@ -15,6 +15,8 @@ from explorateur.state.storage.factory import StorageFactory
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.search.exploration_type import ExplorationType
 
+from typing import Union
+
 # USE: PEP-8
 
 
@@ -34,7 +36,7 @@ class Explorateur:
         
         self.tree = graphviz.Digraph()
 
-    def search(self, initial_state: BaseState, goal_state: BaseState|None = None) -> _BaseState:
+    def search(self, initial_state: BaseState, goal_state: Union[BaseState,None] = None) -> _BaseState:
         counter = 0
         if initial_state is None:
             raise ValueError

@@ -2,6 +2,7 @@ from collections import deque
 from typing import Deque
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state._base_state import _BaseState
+from typing import Union
 
 
 class Queue(BaseStorage):
@@ -22,7 +23,7 @@ class Queue(BaseStorage):
     def get_size(self) -> int:
         return len(self.storage)
 
-    def contains(self, state: _BaseState) -> _BaseState|None:
+    def contains(self, state: _BaseState) -> Union[_BaseState,None]:
         if state in self.storage:
             return state
         return None

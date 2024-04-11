@@ -3,6 +3,7 @@ from ast import List
 import heapq
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state._base_state import _BaseState
+from typing import Union
 
 
 # need to figure out what they key is to push + where is it going to be stored
@@ -34,7 +35,7 @@ class PriorityQueue(BaseStorage):
         """
         return len(self.storage)
 
-    def contains(self, state: _BaseState) -> _BaseState|None:
+    def contains(self, state: _BaseState) -> Union[_BaseState,None]:
         """
         """
         if state in self.storage:
