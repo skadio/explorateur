@@ -28,7 +28,7 @@ class SATState(BaseState):
 
         return moves_list
 
-    def is_solution(self) -> bool:
+    def is_terminate(self) -> bool:
         """
         """
         for clause in self.clauses:

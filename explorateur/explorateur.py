@@ -6,6 +6,7 @@ import copy as cp
 import numpy as np
 import graphviz
 import logging
+import time
 
 from explorateur.state.base_state import BaseState
 from explorateur.utils import check_true, Constants
@@ -36,7 +37,8 @@ class Explorateur:
         
         self.tree = graphviz.Digraph()
 
-    def search(self, initial_state: BaseState, goal_state: Union[BaseState,None] = None) -> _BaseState:
+    #stopping criteria
+    def search(self, initial_state: BaseState, goal_state: Union[BaseState,None] = None, max_runtime = None, max_iters = None) -> _BaseState:
         counter = 0
         if initial_state is None:
             raise ValueError
@@ -46,7 +48,13 @@ class Explorateur:
             self.exploration_type.storage_type)  # list of internal sta
         states.insert(_initial_state)
 
-        while not states.is_empty():
+        iterations = 0
+        start = time.time()
+        while not states.is_empty() and iterations < max_iters:
+            end = time.time()
+            if end - start > max_runtime:
+                return None
+            iterations += 1
             _current = states.remove()
             logging.debug(f"Current State: {_current}")
             transition = _current.get_transition()
@@ -55,9 +63,9 @@ class Explorateur:
                 if not successful_move:
                     self.tree.node(_current.node_label, style='filled', fillcolor='red')
                     continue
-            if _current.is_solution():
-                self.tree.node(_current.node_label, style='filled', fillcolor='green')
-                return _current
+                if _current.is_solution():
+                    self.tree.node(_current.node_label, style='filled', fillcolor='green')
+                    return _current
             moves = _current.get_moves()
             self.tree.node(_current.node_label, style='filled', fillcolor='blue')
             # TODO: DFS, reverse the moves so that when pushed to stack, move order preserved

@@ -47,7 +47,7 @@ class SATState(BaseState):
 
         return moves_list
 
-    def is_solution(self) -> bool:
+    def is_terminate(self) -> bool:
         """
         """
         for clause in self.clauses:
@@ -130,7 +130,7 @@ class SAT_Tests(BaseTest):
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
         explorer.visualize_tree("tmp/test_dfs_1")
-        self.assertTrue(sol_state.is_solution())
+        self.assertTrue(sol_state.is_terminate())
 
     def test_dfs_2(self):
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
@@ -149,7 +149,7 @@ class SAT_Tests(BaseTest):
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
         explorer.visualize_tree("tmp/test_bfs_1")
-        self.assertTrue(sol_state.is_solution())
+        self.assertTrue(sol_state.is_terminate())
 
     def test_bfs_2(self):
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
@@ -170,7 +170,7 @@ class SAT_Tests(BaseTest):
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
         explorer.visualize_tree("tmp/test_pq")
-        self.assertTrue(sol_state.is_solution())
+        self.assertTrue(sol_state.is_terminate())
 
 
 # Comments

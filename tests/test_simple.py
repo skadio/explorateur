@@ -44,7 +44,7 @@ class SimpleState(BaseState):
                 moves_list.append(SimpleMove(var, val))
         return moves_list
 
-    def is_solution(self) -> bool:
+    def is_terminate(self) -> bool:
         """
         """
         if len(self.unassigned_variables) > 0:
@@ -99,7 +99,7 @@ class Simple_Tests(BaseTest):
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
         explorer.visualize_tree("tmp/simple_dfs")
-        self.assertTrue(sol_state.is_solution())
+        self.assertTrue(sol_state.is_terminate())
 
     def test_bfs(self):
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
@@ -110,7 +110,7 @@ class Simple_Tests(BaseTest):
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
         explorer.visualize_tree("tmp/simple_dfs")
-        self.assertTrue(sol_state.is_solution())
+        self.assertTrue(sol_state.is_terminate())
 
     # def test_pq(self):
     #     explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
@@ -121,7 +121,7 @@ class Simple_Tests(BaseTest):
     #     sol_state = explorer.search(starting_state)
     #     explorer.print_path(sol_state)
     #     explorer.visualize_tree("tmp/test_pq")
-    #     self.assertTrue(sol_state.is_solution())
+    #     self.assertTrue(sol_state.is_terminate())
 
 
 # Comments

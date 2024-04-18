@@ -23,8 +23,8 @@ class _BaseState(BaseState):
     def set_data(self) -> NoReturn:
         return self.user_state.set_data()
 
-    def is_solution(self):
-        return self.user_state.is_solution()
+    def is_terminate(self):
+        return self.user_state.is_terminate()
 
     def objective_function(self):
         return self.user_state.objective_function()

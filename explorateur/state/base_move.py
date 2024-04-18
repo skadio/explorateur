@@ -8,7 +8,6 @@ class BaseMove(metaclass=abc.ABCMeta):
         """ Initializer, will likely conain variable and assignment
         """
         pass
-
     @abc.abstractmethod
     def __str__(self) -> str:
         """ Return a string representation of the move.

@@ -12,13 +12,13 @@ class BaseState(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_moves(self) -> List[BaseMove]:
+    def get_moves(self) -> List[BaseMove]:   #comment for the user about the order for bfs
         """
         """
         pass
 
     @abc.abstractmethod
-    def is_solution(self) -> bool:
+    def is_terminate(self) -> bool:
         """
         """
         pass
