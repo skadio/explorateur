@@ -4,7 +4,6 @@ import random
 from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
-# from tests.SAT_Class import SATState
 
 from typing import List, NoReturn
 from explorateur.state.base_move import BaseMove
@@ -50,6 +49,7 @@ class SimpleState(BaseState):
         if len(self.unassigned_variables) > 0:
             return False
         return True
+
 
     def get_data(self) -> dict:
         return self.var_to_val
@@ -110,6 +110,22 @@ class Simple_Tests(BaseTest):
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
         explorer.visualize_tree("tmp/simple_dfs")
+        self.assertTrue(sol_state.is_terminate())
+    
+    def test_graphsearch(self):
+        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
+        possible_vals = {1: [1,2], 2: [20,10], 3: [100,200]}
+
+        starting_state = SimpleState(possible_vals)
+        end_state = SimpleState({1: [1,2], 2: [20,10], 3: [100,200]})
+        end_state.var_to_val = {1: 1, 2: 20, 3: 200}
+        end_state.unassigned_variables = {}
+
+        SimpleState.is_terminate = lambda x: x.var_to_val == end_state.var_to_val
+
+        sol_state = explorer.search(starting_state)
+        explorer.print_path(sol_state)
+        explorer.visualize_tree("tmp/simple_graphsearch")
         self.assertTrue(sol_state.is_terminate())
 
     # def test_pq(self):

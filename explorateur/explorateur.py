@@ -4,7 +4,7 @@
 from typing import NoReturn
 import copy as cp
 import numpy as np
-import graphviz
+import pydot
 import logging
 import time
 
@@ -23,7 +23,7 @@ from typing import Union
 
 class Explorateur:
 
-    def __init__(self, exploration_type: ExplorationType, seed: int = Constants.default_seed):
+    def __init__(self, exploration_type: ExplorationType, seed: int = Constants.default_seed, build_tree = False):
         # Validate arguments
         # Explorateur._validate_args(seed)
 
@@ -34,54 +34,66 @@ class Explorateur:
 
         # Create the random number generator
         self._rng = np.random.RandomState(seed=self.seed)
-        
-        self.tree = graphviz.Digraph()
+
+        self.build_tree = build_tree
+        if self.build_tree: 
+            self.tree = pydot.Dot(graph_type="digraph")
 
     #stopping criteria
     def search(self, initial_state: BaseState, goal_state: Union[BaseState,None] = None, max_runtime = None, max_iters = None) -> _BaseState:
+
         counter = 0
         if initial_state is None:
             raise ValueError
         _initial_state = _BaseState(initial_state, str(0))
-        self.tree.node(_initial_state.node_label)
+        if self.build_tree:
+            _initial_state.node = pydot.Node(_initial_state.node_label)
+            self.tree.add_node(_initial_state.node)
         states: BaseStorage[_BaseState] = StorageFactory.create(
             self.exploration_type.storage_type)  # list of internal sta
         states.insert(_initial_state)
 
         iterations = 0
+        if max_iters is None:
+            max_iters = float('inf')
         start = time.time()
         while not states.is_empty() and iterations < max_iters:
             end = time.time()
-            if end - start > max_runtime:
-                return None
+            if max_runtime is not None:
+                if end - start > max_runtime:
+                    return None
             iterations += 1
             _current = states.remove()
-            logging.debug(f"Current State: {_current}")
+            # logging.debug(f"Current State: {_current}")
             transition = _current.get_transition()
             if transition is not None:
                 successful_move = _current.execute(transition.move)
                 if not successful_move:
-                    self.tree.node(_current.node_label, style='filled', fillcolor='red')
+                    if self.build_tree:
+                        _current.node = pydot.Node(_current.node_label, style='filled', fillcolor='red')
+                        self.tree.add_node(_current.node)
                     continue
-                if _current.is_solution():
-                    self.tree.node(_current.node_label, style='filled', fillcolor='green')
+                if _current.is_terminate():
+                    if self.build_tree:
+                        _current.node = pydot.Node(_current.node_label, style='filled', fillcolor='green')
+                        self.tree.add_node(_current.node)
                     return _current
             moves = _current.get_moves()
-            self.tree.node(_current.node_label, style='filled', fillcolor='blue')
-            # TODO: DFS, reverse the moves so that when pushed to stack, move order preserved
-            # not sure if this is necessary
-            # if self.exploration_type == ExplorationType.DepthFirst:
-            #     moves.reverse()
+            if self.build_tree:
+                _current.node = pydot.Node(_current.node_label, style='filled', fillcolor='blue')
+                self.tree.add_node(_current.node)
             for move in moves:
                 counter += 1
                 _successor = cp.deepcopy(_current)
-                _successor.node_label = str(counter)
-                self.tree.node(_successor.node_label)
-                self.tree.edge(_current.node_label, _successor.node_label, label=str(move))
+                if self.build_tree:
+                    _successor.node_label = str(counter)
+                    _successor.node = pydot.Node(_successor.node_label)
+                    self.tree.add_node(_successor.node)
+                    self.tree.add_edge(pydot.Edge(_current.node, _successor.node, label=str(move)))
                 new_transition = Transition(_current, move)
                 _successor.set_transition(new_transition)
                 states.insert(_successor)
-                logging.debug(f"Added State: {_successor}")
+                # logging.debug(f"Added State: {_successor}")
         return None
     
     def print_path(self, path: _BaseState):
@@ -95,7 +107,8 @@ class Explorateur:
         print("Move:", transition.move)
     
     def visualize_tree(self, file_path):
-        self.tree.render(file_path, format='png')
+        print("Visualizing Tree")
+        self.tree.write(file_path)
 
     #   for (int m = 0; m < moves.size(); m++)
     #       {

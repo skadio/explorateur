@@ -129,7 +129,7 @@ class SAT_Tests(BaseTest):
 
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
-        explorer.visualize_tree("tmp/test_dfs_1")
+        explorer.visualize_tree("tmp/test_dfs_1.dot")
         self.assertTrue(sol_state.is_terminate())
 
     def test_dfs_2(self):
@@ -138,7 +138,7 @@ class SAT_Tests(BaseTest):
 
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state)
-        explorer.visualize_tree("tmp/test_dfs_2")
+        explorer.visualize_tree("tmp/test_dfs_2.dot")
         self.assertEqual(sol_state, None)
 
     def test_bfs_1(self):
@@ -148,7 +148,7 @@ class SAT_Tests(BaseTest):
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
-        explorer.visualize_tree("tmp/test_bfs_1")
+        explorer.visualize_tree("tmp/test_bfs_1.dot")
         self.assertTrue(sol_state.is_terminate())
 
     def test_bfs_2(self):
@@ -158,7 +158,17 @@ class SAT_Tests(BaseTest):
         starting_state = SATState(clauses)
 
         sol_state = explorer.search(starting_state)
-        explorer.visualize_tree("tmp/test_bfs_2")
+        explorer.visualize_tree("tmp/test_bfs_2.dot")
+        self.assertEqual(sol_state, None)
+    
+    def test_interations(self):
+        #this one is supposed to have a solution but we are cutting it of early
+        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
+        clauses = [(1, 2, 3), (-1, 2)]
+
+        starting_state = SATState(clauses)
+
+        sol_state = explorer.search(starting_state, max_iters = 2)
         self.assertEqual(sol_state, None)
     
     def test_pq(self):
@@ -169,7 +179,7 @@ class SAT_Tests(BaseTest):
 
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
-        explorer.visualize_tree("tmp/test_pq")
+        explorer.visualize_tree("tmp/test_pq.dot")
         self.assertTrue(sol_state.is_terminate())
 
 

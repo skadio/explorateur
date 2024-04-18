@@ -10,6 +10,7 @@ class _BaseState(BaseState):
         self.user_state = user_state
         self.transition = None
         self.node_label = node_label
+        self.node = None
 
     def get_moves(self) -> List[BaseMove]:
         return self.user_state.get_moves()
