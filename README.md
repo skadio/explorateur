@@ -1,19 +1,32 @@
 # Explorateur
 
-Explorateur is a library written in Python to solve problems that require some sort of search
+Explorateur is a library written in Python to solve problems that require searching over a collection of states. 
 
 Explorateur follows a scikit-learn style public interface, adheres to 
 [PEP-8 standards](https://www.python.org/dev/peps/pep-0008/), and is tested heavily. 
 
-Documentation is available at 
-[github.io/XXX](https://github.io/XXX).
 
 The user provide at least an initial state (inherited from BaseState) and one of the following in the constructor:
 - Depth First Search: uses a stack to keep track of the states
 - Breadth-First Search:  uses a queue to keep track of the states to be explored. 
 - Best-First Search: this will utilize a Priority Queue but in order for this to work the ```objective_function()``` must be implemented in ```BaseState``` as a given state is inserted into the Priority Queue based on some objective evaluation of "goodness". 
 
-There is also the option to use a Graph Search: in order for this to work, the user must change the ```is_terminate()``` function to check for equality between the current state and some goal state. Note, a simple "==" wil not suffice btu rather the user must ensure that each of the relevant attributes that define a state are equal. For example, in the following case we would check that ```val_to_vars``` is the same.
+There is also the option to use a Graph Search: in order for this to work, the user must change the ```is_terminate()``` function to check for equality between the current state and some goal state. Note, a simple "==" wil not suffice but rather the user must ensure that each of the relevant attributes that define a state are equal. For example, in the following case we would check that ```val_to_vars``` is the same.
+
+The algorithm stops once a solution is found based on ```is_terminate()```, or all possible states have been explored and no solution has been found or in the case that ```max_runtime``` or ```max_iters``` is defined if one of them are reached.
+
+## Installation
+
+Explorateur can be installed from terminal by doing:
+bash
+```
+pip install explorateur
+```
+After which please install the requirements by doing
+bash
+```
+pip install -r requirements.txt
+```
 
 ## Quick Start:
 
@@ -97,41 +110,19 @@ class SimpleState(BaseState):
     starting_state = SimpleState(possible_vals)
     sol_state = explorer.search(starting_state)
 ```
-Other parameters into the search that can be set bu do not have to are not needed: 
 
+The above example just searches for some assignment of variables 1,2,3 where the assignments happen to be those indicated by ```possible_vars```. In ```get_moves()``` we return moves that are "legal" by what is established in ```possible_vars```.
 
-## Installation
-
-XXX can be installed from the wheel file or building from source by following the instructions in 
-our [documentation](https://github.io/XXX/installation.html).
 
 ## Support
 
-Please submit bug reports and feature requests as [Issues](https://github.com/XXX/issues).
+Please submit bug reports and feature requests as [Issues](https://github.com/explorateur/issues).
 
 ## License
 
-XXX is licensed under the [Apache License 2.0](LICENSE.md).
+Explorateur is licensed under the [Apache License 2.0](LICENSE.md).
 
-## Installation
-xxx requires Python 3.6+ and can be installed from the provided wheel file.  
-
-1) Clone the repository (you can discard folders other than fidtone)
-2) Go to the fidtone directory
-3) Install from the wheel file
-
-```
-$ git clone https://xxx   
-$ cd xxx
-$ pip install dist/xxx-X.X.X-py3-none-any.whl
-```
-
-The wheel file automatically installs `requirements.txt`, downloads and installs `en_core_web_lg` language model (~700 MB) from `spacy`, 
-and downloads `punkt` tokenizer (~50 MB) from `nltk`.
-
-
-## Running Unit Tests
-
+## Unit Tests
 ```
 $ cd fidtone
 $ python -m unittest discover tests
@@ -142,12 +133,12 @@ $ python -m unittest discover tests
 
 | Date | Notes |
 |--------|-------------|
-| Jan 1, 2021 | Initial release |
+| April 1, 2024 | Initial release |
 
 <br>
 
 ```
-xxx © Copyright, xxx
+Explorateur © Copyright, Explorateur
 ````
 
 <br>

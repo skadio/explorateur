@@ -122,7 +122,7 @@ class SAT_Tests(BaseTest):
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
     def test_dfs_1(self):
-        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
+        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed, True)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
@@ -133,7 +133,7 @@ class SAT_Tests(BaseTest):
         self.assertTrue(sol_state.is_terminate())
 
     def test_dfs_2(self):
-        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
+        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed, True)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
@@ -142,7 +142,7 @@ class SAT_Tests(BaseTest):
         self.assertEqual(sol_state, None)
 
     def test_bfs_1(self):
-        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
+        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed, True)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
@@ -152,7 +152,7 @@ class SAT_Tests(BaseTest):
         self.assertTrue(sol_state.is_terminate())
 
     def test_bfs_2(self):
-        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
+        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed, True)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
@@ -163,7 +163,7 @@ class SAT_Tests(BaseTest):
     
     def test_interations(self):
         #this one is supposed to have a solution but we are cutting it of early
-        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
+        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed, True)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
@@ -172,7 +172,7 @@ class SAT_Tests(BaseTest):
         self.assertEqual(sol_state, None)
     
     def test_pq(self):
-        explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
+        explorer = Explorateur(ExplorationType.BestFirst(), self.seed, True)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)

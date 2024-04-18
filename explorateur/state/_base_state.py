@@ -6,6 +6,10 @@ from explorateur.search.transition import Transition
 
 class _BaseState(BaseState):
 
+    """
+    This is used by our search() function in explorateur.py as a wrapper class around BaseState that allows us to include more information about the state. 
+    All the functions in this class just call the equivalent function in Base State. 
+    """
     def __init__(self, user_state: BaseState, node_label: str = ""):
         self.user_state = user_state
         self.transition = None
