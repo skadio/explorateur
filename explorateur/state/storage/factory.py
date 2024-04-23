@@ -11,13 +11,13 @@ class StorageFactory:
     def create(storage_type: _StorageType) -> BaseStorage:
         if storage_type is None:
             raise ValueError
-        elif storage_type == _StorageType.Queue():
-            return Queue()
-        elif storage_type == _StorageType.Stack():
+        elif isinstance(storage_type, _StorageType.Queue):
+            return Queue
+        elif isinstance(storage_type, _StorageType.Stack):
             return Stack()
-        elif storage_type == _StorageType.PriorityQueue():
+        elif isinstance(storage_type, _StorageType.PriorityQueue):
             return PriorityQueue()
-        elif storage_type == _StorageType.Hash():
+        elif isinstance(storage_type, _StorageType.Hash):
             raise ValueError
         else:
             raise ValueError

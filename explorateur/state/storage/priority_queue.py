@@ -20,10 +20,10 @@ class PriorityQueue(BaseStorage):
         """
         heapq.heappush(self.storage, (state.objective_function(), state))
 
-    def remove(self, state: _BaseState) -> _BaseState:
+    def remove(self) -> _BaseState:
         """
         """
-        return heapq.heappop(self.storage)
+        return heapq.heappop(self.storage)[1] #the first item is the key
 
     def is_empty(self) -> bool:
         """

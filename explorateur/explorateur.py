@@ -68,10 +68,13 @@ class Explorateur:
                     self.visualize_tree(file_path)
                     return None
             iterations += 1
+            logging.debug(states)
             _current = states.remove()
-            # logging.debug(f"Current State: {_current}")
+            logging.debug(f"Current State: {_current}")
             transition = _current.get_transition()
             if transition is not None:
+                logging.debug(_current.objective_function())
+                logging.debug(transition.move)
                 successful_move = _current.is_valid()
                 if not successful_move:
                     if self.build_tree:

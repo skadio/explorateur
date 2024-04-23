@@ -2,6 +2,7 @@
 
 import random
 import logging
+import numpy as np
 from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
@@ -29,6 +30,7 @@ class SATState(BaseState):
         self.var_to_val = {}
         self.clauses = clauses
         self.unassigned_variables = self.generate_vars(self.clauses)
+        self.flag = False
 
     def generate_vars(self, clauses):
         variables = set()
@@ -97,12 +99,12 @@ class SATState(BaseState):
         return True
 
     def objective_function(self) -> float:
+        res = np.random.uniform(2.0,10.0)
         if 2 in self.var_to_val.keys():
-            if self.var_to_val[2] is False:
+            if self.var_to_val[2] is False and self.flag == False:
+                self.flag = True
                 return 0.5
-            else:
-                return 2.0
-        return 3.0
+        return res
         
     
     def __str__(self) -> str:
@@ -118,14 +120,12 @@ class SAT_Tests(BaseTest):
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
     def test_dfs_1(self):
-        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed, True)
+        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
 
         sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_1.dot")
-        explorer.print_path(sol_state)
-        explorer.visualize_tree("tmp/test_dfs_1.dot")
         self.assertTrue(sol_state.is_terminate())
 
     def test_dfs_2(self):
