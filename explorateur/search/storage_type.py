@@ -1,7 +1,10 @@
+'''Storage type for search algorithms'''
 from typing import NamedTuple
 from explorateur.utils import check_true
 
+
 class _StorageType(NamedTuple):
+    '''Class representing storage type for search algorithms'''
     class Stack(NamedTuple):
         """Stack type"""
         param: float = 0.05

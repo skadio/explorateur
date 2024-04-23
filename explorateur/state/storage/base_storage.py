@@ -31,7 +31,7 @@ class BaseStorage(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def contains(self, state: _BaseState) -> Union[_BaseState,None]:
+    def contains(self, state: _BaseState) -> Union[_BaseState, None]:
         """
         """
 

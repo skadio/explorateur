@@ -16,7 +16,7 @@ class StorageFactory:
         elif storage_type == _StorageType.Stack():
             return Stack()
         elif storage_type == _StorageType.PriorityQueue():
-                return PriorityQueue()
+            return PriorityQueue()
         elif storage_type == _StorageType.Hash():
             raise ValueError
         else:

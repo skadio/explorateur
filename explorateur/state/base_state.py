@@ -13,14 +13,14 @@ class BaseState(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_moves(self) -> List[BaseMove]:   
+    def get_moves(self) -> List[BaseMove]:
         """
         Return a list of moves (what else could be explored from this state) 
         """
         pass
 
     @abc.abstractmethod
-    def is_terminate(self) -> bool:
+    def is_terminate(self, end_state: 'BaseState') -> bool:
         """
         If doing tree search, will check if the state is a solution state to the problem and in the case of graph search check if this state is equivalent to the goal state. 
         """
@@ -46,7 +46,7 @@ class BaseState(metaclass=abc.ABCMeta):
         Execute the given move on the state and returns a boolean on whether or not the execution was successful / valid. 
         """
         pass
-    
+
     @abc.abstractmethod
     def objective_function(self) -> float:
         """
@@ -61,4 +61,5 @@ class BaseState(metaclass=abc.ABCMeta):
         """
         pass
 
-    
+    def make_node_label(self, iterations : int) -> str:
+        pass

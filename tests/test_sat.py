@@ -47,7 +47,7 @@ class SATState(BaseState):
 
         return moves_list
 
-    def is_terminate(self) -> bool:
+    def is_terminate(self, end_state = None) -> bool:
         """
         """
         for clause in self.clauses:
@@ -94,26 +94,20 @@ class SATState(BaseState):
                 return False
         return True
 
-    # def objective_function(self) -> float:
-    #     # this is a trivial function, not necessarily helpful to solving the problem faster
-    #     total_trues = 0
-    #     for var in self.var_to_val:
-    #         if self.var_to_val[var] == True:
-    #             total_trues += 1
-    #     return float(total_trues)
-    
-    def objective_function(self):
-        return 0.0
-
-    # def objective_function(self) -> float:
-    #     total_falses = 0
-    #     for var in self.var_to_val:
-    #         if self.var_to_val[var] == False:
-    #             total_falses += 1
-    #     return total_falses
+    def objective_function(self) -> float:
+        if 2 in self.var_to_val.keys():
+            if self.var_to_val[2] is True:
+                return 1.0
+            else:
+                return 2.0
+        return 3.0
+        
     
     def __str__(self) -> str:
         return str(self.var_to_val)
+
+    def make_node_label(self, iterations):
+        return str(iterations)
     
 
 
@@ -127,43 +121,41 @@ class SAT_Tests(BaseTest):
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state)
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_1.dot")
         explorer.print_path(sol_state)
         explorer.visualize_tree("tmp/test_dfs_1.dot")
         self.assertTrue(sol_state.is_terminate())
 
     def test_dfs_2(self):
-        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed, True)
+        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state)
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_2.dot")
         explorer.visualize_tree("tmp/test_dfs_2.dot")
         self.assertEqual(sol_state, None)
 
     def test_bfs_1(self):
-        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed, True)
+        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state)
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_1.dot")
         explorer.print_path(sol_state)
-        explorer.visualize_tree("tmp/test_bfs_1.dot")
         self.assertTrue(sol_state.is_terminate())
 
     def test_bfs_2(self):
-        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed, True)
+        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state)
-        explorer.visualize_tree("tmp/test_bfs_2.dot")
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_2.dot")
         self.assertEqual(sol_state, None)
     
     def test_interations(self):
         #this one is supposed to have a solution but we are cutting it of early
-        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed, True)
+        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
@@ -172,14 +164,14 @@ class SAT_Tests(BaseTest):
         self.assertEqual(sol_state, None)
     
     def test_pq(self):
-        explorer = Explorateur(ExplorationType.BestFirst(), self.seed, True)
+        explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
-
+        
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state)
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_pq.dot")
         explorer.print_path(sol_state)
-        explorer.visualize_tree("tmp/test_pq.dot")
+        # explorer.visualize_tree("tmp/test_pq.dot")
         self.assertTrue(sol_state.is_terminate())
 
 

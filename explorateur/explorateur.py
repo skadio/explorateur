@@ -23,7 +23,8 @@ from typing import Union
 
 class Explorateur:
 
-    def __init__(self, exploration_type: ExplorationType, seed: int = Constants.default_seed, build_tree = False):
+    def __init__(self, exploration_type: ExplorationType, seed: int = Constants.default_seed):
+        # take in file name instead of boolean for build_tree
         # Validate arguments
         # Explorateur._validate_args(seed)
 
@@ -35,32 +36,36 @@ class Explorateur:
         # Create the random number generator
         self._rng = np.random.RandomState(seed=self.seed)
 
-        self.build_tree = build_tree
-        if self.build_tree: 
+        self.tree = None
+        self.build_tree = False
+
+    # should we specify max run_time in seconds
+    def search(self, start_state: BaseState, end_state: BaseState = None, max_runtime=None, max_iterations=None, file_path=None) -> _BaseState:
+        if file_path is not None:
             self.tree = pydot.Dot(graph_type="digraph")
-
-    #stopping criteria
-    def search(self, initial_state: BaseState, max_runtime = None, max_iters = None) -> _BaseState:
-
+            self.build_tree = True
         counter = 0
-        if initial_state is None:
+        if start_state is None:
             raise ValueError
-        _initial_state = _BaseState(initial_state, str(0))
+        _start_state = _BaseState(start_state, str(0))
         if self.build_tree:
-            _initial_state.node = pydot.Node(_initial_state.node_label)
-            self.tree.add_node(_initial_state.node)
+            _start_state.node = pydot.Node(_start_state.node_label)
+            self.tree.add_node(_start_state.node)
         states: BaseStorage[_BaseState] = StorageFactory.create(
             self.exploration_type.storage_type)  # list of internal sta
-        states.insert(_initial_state)
+        states.insert(_start_state)
 
         iterations = 0
-        if max_iters is None:
-            max_iters = float('inf')
+        if max_iterations is None:
+            max_iterations = float('inf')
         start = time.time()
-        while not states.is_empty() and iterations < max_iters:
+        while not states.is_empty() and iterations < max_iterations:
+            print(f"Iteration: {iterations}")
+            print(f"States Size: {states.get_size()}")
             end = time.time()
             if max_runtime is not None:
                 if end - start > max_runtime:
+                    self.visualize_tree(file_path)
                     return None
             iterations += 1
             _current = states.remove()
@@ -70,42 +75,54 @@ class Explorateur:
                 successful_move = _current.execute(transition.move)
                 if not successful_move:
                     if self.build_tree:
-                        _current.node = pydot.Node(_current.node_label, style='filled', fillcolor='red')
+                        _current.node = pydot.Node(
+                            _current.node_label, style='filled', fillcolor='red')
                         self.tree.add_node(_current.node)
                     continue
-                if _current.is_terminate():
+                if _current.is_terminate(end_state):
+                    # Include support for graph search
                     if self.build_tree:
-                        _current.node = pydot.Node(_current.node_label, style='filled', fillcolor='green')
+                        _current.node = pydot.Node(
+                            _current.node_label, style='filled', fillcolor='green')
                         self.tree.add_node(_current.node)
+                        self.visualize_tree(file_path)
                     return _current
             moves = _current.get_moves()
+            print(f"Current State: {_current}")
+            print(f"Moves: {moves}")
             if self.build_tree:
-                _current.node = pydot.Node(_current.node_label, style='filled', fillcolor='blue')
+                _current.node = pydot.Node(
+                    _current.node_label, style='filled', fillcolor='blue')
                 self.tree.add_node(_current.node)
             for move in moves:
                 counter += 1
                 _successor = cp.deepcopy(_current)
                 if self.build_tree:
-                    _successor.node_label = str(counter)
+                    _successor.node_label = _successor.make_node_label(counter)
                     _successor.node = pydot.Node(_successor.node_label)
                     self.tree.add_node(_successor.node)
-                    self.tree.add_edge(pydot.Edge(_current.node, _successor.node, label=str(move)))
+                    self.tree.add_edge(pydot.Edge(
+                        _current.node, _successor.node, label=str(move)))
                 new_transition = Transition(_current, move)
                 _successor.set_transition(new_transition)
                 states.insert(_successor)
                 # logging.debug(f"Added State: {_successor}")
+        if self.build_tree:
+            self.visualize_tree(file_path)
         return None
-    
+
     def print_path(self, path: _BaseState):
+        # get_transitions, just return list of transitions
+        # add parameter for reversing this list
         transition = path.get_transition()
         if transition is None:
             print("Begin Path")
             print("State:", path)
             return
-        self.print_path(transition.previous_state) 
+        self.print_path(transition.previous_state)
         print("State:", path)
         print("Move:", transition.move)
-    
+
     def visualize_tree(self, file_path):
         print("Visualizing Tree")
         self.tree.write(file_path)

@@ -1,3 +1,4 @@
+'''Module providing the ExplorationType class to be passed into explorateur.'''
 from typing import NamedTuple
 from explorateur.utils import check_true
 from explorateur.search.storage_type import _StorageType

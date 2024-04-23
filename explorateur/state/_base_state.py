@@ -10,6 +10,7 @@ class _BaseState(BaseState):
     This is used by our search() function in explorateur.py as a wrapper class around BaseState that allows us to include more information about the state. 
     All the functions in this class just call the equivalent function in Base State. 
     """
+
     def __init__(self, user_state: BaseState, node_label: str = ""):
         self.user_state = user_state
         self.transition = None
@@ -28,7 +29,7 @@ class _BaseState(BaseState):
     def set_data(self) -> NoReturn:
         return self.user_state.set_data()
 
-    def is_terminate(self):
+    def is_terminate(self, end_state=None):
         return self.user_state.is_terminate()
 
     def objective_function(self):
@@ -42,3 +43,6 @@ class _BaseState(BaseState):
 
     def __str__(self) -> str:
         return str(self.user_state)
+
+    def make_node_label(self, iterations : int) -> str:
+        return self.user_state.make_node_label(iterations)

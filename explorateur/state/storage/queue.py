@@ -23,7 +23,7 @@ class Queue(BaseStorage):
     def get_size(self) -> int:
         return len(self.storage)
 
-    def contains(self, state: _BaseState) -> Union[_BaseState,None]:
+    def contains(self, state: _BaseState) -> Union[_BaseState, None]:
         if state in self.storage:
             return state
         return None

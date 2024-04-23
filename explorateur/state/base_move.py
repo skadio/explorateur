@@ -9,6 +9,7 @@ class BaseMove(metaclass=abc.ABCMeta):
         Initializer, will likely conain variable and assignment
         """
         pass
+
     @abc.abstractmethod
     def __str__(self) -> str:
         """ 
@@ -21,4 +22,3 @@ class BaseMove(metaclass=abc.ABCMeta):
     #     """ Execute the move on the given state.
     #     """
     #     pass
-
