@@ -72,7 +72,7 @@ class Explorateur:
             # logging.debug(f"Current State: {_current}")
             transition = _current.get_transition()
             if transition is not None:
-                successful_move = _current.execute(transition.move)
+                successful_move = _current.is_valid()
                 if not successful_move:
                     if self.build_tree:
                         _current.node = pydot.Node(
@@ -86,7 +86,10 @@ class Explorateur:
                             _current.node_label, style='filled', fillcolor='green')
                         self.tree.add_node(_current.node)
                         self.visualize_tree(file_path)
-                    return _current
+                    if self.exploration_type == ExplorationType.BestFirst():
+                        continue
+                    else:
+                        return _current
             moves = _current.get_moves()
             print(f"Current State: {_current}")
             print(f"Moves: {moves}")
@@ -105,6 +108,7 @@ class Explorateur:
                         _current.node, _successor.node, label=str(move)))
                 new_transition = Transition(_current, move)
                 _successor.set_transition(new_transition)
+                _successor.execute(new_transition.move) #executing the move so that the states are actually in a different order
                 states.insert(_successor)
                 # logging.debug(f"Added State: {_successor}")
         if self.build_tree:

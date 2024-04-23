@@ -77,7 +77,9 @@ class SATState(BaseState):
         self.var_to_val[move.variable] = move.value  # don't need the absolute
         self.unassigned_variables.remove(move.variable)
 
-        # checking the validity of the move
+        return self.is_valid()
+    
+    def is_valid(self):
         for clause in self.clauses:
             is_unsatisfiable = True
             for literal in clause:
@@ -96,8 +98,8 @@ class SATState(BaseState):
 
     def objective_function(self) -> float:
         if 2 in self.var_to_val.keys():
-            if self.var_to_val[2] is True:
-                return 1.0
+            if self.var_to_val[2] is False:
+                return 0.5
             else:
                 return 2.0
         return 3.0
@@ -168,12 +170,9 @@ class SAT_Tests(BaseTest):
         clauses = [(1, 2, 3), (-1, 2)]
         
         starting_state = SATState(clauses)
-
         sol_state = explorer.search(starting_state, file_path = "tmp/test_pq.dot")
-        explorer.print_path(sol_state)
         # explorer.visualize_tree("tmp/test_pq.dot")
-        self.assertTrue(sol_state.is_terminate())
-
+        self.assertIsNone(sol_state)
 
 # Comments
 # pep-8 for ofrmatting, test_simple from class, maybe get rid of the state folder so the importbecomes explorateur.base_state

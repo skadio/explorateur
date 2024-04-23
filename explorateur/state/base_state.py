@@ -1,5 +1,5 @@
 import abc
-from typing import List, NoReturn
+from typing import List, NoReturn, Union
 from explorateur.state.base_move import BaseMove
 
 
@@ -20,7 +20,7 @@ class BaseState(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def is_terminate(self, end_state: 'BaseState') -> bool:
+    def is_terminate(self, end_state: Union['BaseState', None]) -> bool:
         """
         If doing tree search, will check if the state is a solution state to the problem and in the case of graph search check if this state is equivalent to the goal state. 
         """
@@ -51,6 +51,13 @@ class BaseState(metaclass=abc.ABCMeta):
     def objective_function(self) -> float:
         """
         If the user decides to implement a best first search that requires a priority queue which needs a way to "rank" the states
+        """
+        pass
+
+    @abc.abstractmethod
+    def is_valid(self) -> bool:
+        """
+        Check if the given state is vaid, strongly encourage to use in is execute.
         """
         pass
 
