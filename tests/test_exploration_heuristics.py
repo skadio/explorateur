@@ -12,6 +12,10 @@ from typing import List, NoReturn
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
+"""
+Uses a SAT problem to run and test the exploration heuristics. We implement the functions needed for BaseMove
+and BaseState to function. 
+"""
 
 class SATMove(BaseMove):
 
@@ -115,64 +119,33 @@ class SATState(BaseState):
     
 
 
-class SAT_Tests(BaseTest):
+class ExplorationHeuristicsTests(BaseTest):
     seed = random.randint(0, 100000)
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    def test_dfs_1(self):
+    def test_max_iterations(self):
+        """
+        This is a Depth-First search for a satisfiable / solveable instance and writes the tree to "temp/test_dfs_1"
+        However, because we terminate the search early the search() should just have returned None.
+        """
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_1.dot")
-        self.assertTrue(sol_state.is_terminate())
+        sol_state = explorer.search(starting_state, max_iterations = 2, file_path = "tmp/test_dfs_1")
+        self.assertEqual(None, sol_state)
 
-    def test_dfs_2(self):
+    def test_max_runtime(self):
+        """
+        This is a Depth-First Search search over an UNSAT problem, that is to say there should be no solution state. 
+        We set a max time of 1 seconds so as to make sure that not all nodes are explored through the dot file.
+        """
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_2.dot")
-        explorer.visualize_tree("tmp/test_dfs_2.dot")
+        sol_state = explorer.search(starting_state, max_runtime= 1, file_path = "tmp/test_dfs_2")
         self.assertEqual(sol_state, None)
 
-    def test_bfs_1(self):
-        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
-        clauses = [(1, 2, 3), (-1, 2)]
-
-        starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_1.dot")
-        # explorer.print_path(sol_state)
-        self.assertTrue(sol_state.is_terminate())
-
-    def test_bfs_2(self):
-        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
-        clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
-
-        starting_state = SATState(clauses)
-
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_2.dot")
-        self.assertEqual(sol_state, None)
     
-    def test_interations(self):
-        #this one is supposed to have a solution but we are cutting it of early
-        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
-        clauses = [(1, 2, 3), (-1, 2)]
-
-        starting_state = SATState(clauses)
-
-        sol_state = explorer.search(starting_state, max_iters = 2)
-        self.assertEqual(sol_state, None)
-    
-    def test_pq(self):
-        explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
-        clauses = [(1, 2, 3), (-1, 2)]
-        
-        starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_pq.dot")
-        # explorer.visualize_tree("tmp/test_pq.dot")
-        self.assertIsNone(sol_state)
-
-# Comments
-# pep-8 for ofrmatting, test_simple from class, maybe get rid of the state folder so the importbecomes explorateur.base_state

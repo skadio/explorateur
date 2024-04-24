@@ -12,6 +12,10 @@ from typing import List, NoReturn
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
+"""
+Uses a SAT problem to run and test breath-firt, depth-first and best-first search. We implement the functions needed for BaseMove
+and BaseState to function. 
+"""
 
 class SATMove(BaseMove):
 
@@ -115,64 +119,70 @@ class SATState(BaseState):
     
 
 
-class SAT_Tests(BaseTest):
+class ExplorationTypeTests(BaseTest):
     seed = random.randint(0, 100000)
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
     def test_dfs_1(self):
+        """
+        This is a Depth-First search for a satisfiable / solveable instance and writes the tree to "temp/test_dfs_1"
+        """
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_1.dot")
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_1")
         self.assertTrue(sol_state.is_terminate())
 
     def test_dfs_2(self):
+        """
+        This is a Depth-First Search search over an UNSAT problem, that is to say there should be no solution state. The tree
+        is written to "temp/test_dfs_2" and all the leaf nodes are red with no green nodes since there is no solution state.
+        """
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_2.dot")
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_2")
         explorer.visualize_tree("tmp/test_dfs_2.dot")
         self.assertEqual(sol_state, None)
 
     def test_bfs_1(self):
+        """
+        This is a Breadth-First search for a satisfiable / solveable instance same as the first one with the tree written to
+        "tmp/test_bfs_1".
+        """
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_1.dot")
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_1")
         # explorer.print_path(sol_state)
         self.assertTrue(sol_state.is_terminate())
 
     def test_bfs_2(self):
+        """
+        This is a Breadth-First search for a unsatisfiable instance and writes the tree to "tmp/test_bfs_2"
+        """
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_2.dot")
-        self.assertEqual(sol_state, None)
-    
-    def test_interations(self):
-        #this one is supposed to have a solution but we are cutting it of early
-        explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
-        clauses = [(1, 2, 3), (-1, 2)]
-
-        starting_state = SATState(clauses)
-
-        sol_state = explorer.search(starting_state, max_iters = 2)
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_2")
         self.assertEqual(sol_state, None)
     
     def test_pq(self):
+        """
+        This is a Best-First search done with the objective function defined above. Since we let the first instance of 2 being
+        false have the lowest value for the priority queue we expect this to be the first element explored (seen in "tmp/test_pq")
+        """
         explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
         
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_pq.dot")
+        sol_state = explorer.search(starting_state, file_path = "tmp/test_pq")
         # explorer.visualize_tree("tmp/test_pq.dot")
         self.assertIsNone(sol_state)
 
-# Comments
-# pep-8 for ofrmatting, test_simple from class, maybe get rid of the state folder so the importbecomes explorateur.base_state

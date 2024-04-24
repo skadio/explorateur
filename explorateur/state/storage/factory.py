@@ -12,7 +12,7 @@ class StorageFactory:
         if storage_type is None:
             raise ValueError
         elif isinstance(storage_type, _StorageType.Queue):
-            return Queue
+            return Queue()
         elif isinstance(storage_type, _StorageType.Stack):
             return Stack()
         elif isinstance(storage_type, _StorageType.PriorityQueue):
