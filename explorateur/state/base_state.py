@@ -1,72 +1,106 @@
+''' Module for the BaseState class, which is an abstract class for the states. '''
 import abc
-from typing import List, NoReturn, Union
+from typing import Any, List, NoReturn, Union
 from explorateur.state.base_move import BaseMove
 
 
 class BaseState(metaclass=abc.ABCMeta):
+    ''' Abstract class for the states, model your problem as a sequence of states. '''
 
     @abc.abstractmethod
     def __init__(self):
         """ 
         Initializer for state, will likely contain variable assignments and variables
         """
-        pass
 
     @abc.abstractmethod
     def get_moves(self) -> List[BaseMove]:
         """
         Return a list of moves (what else could be explored from this state) 
+
+        Returns:
+            List[BaseMove]: A list of moves that can be explored from this state.
         """
-        pass
 
     @abc.abstractmethod
     def is_terminate(self, end_state: Union['BaseState', None]) -> bool:
         """
-        If doing tree search, will check if the state is a solution state to the problem and in the case of graph search check if this state is equivalent to the goal state. 
+        Checks if the current state is a termination state.
+            If doing tree search, this function should check if the state is a solution state to the problem.
+            If doing graph search, this function should check if the state is equivalent to the end state.
+
+        Parameters:
+        - end_state: The end state to compare with (optional).
+
+        Returns:
+        - bool: True if the current state is a termination state, False otherwise.
         """
-        pass
 
     @abc.abstractmethod
-    def get_data(self):
+    def get_data(self) -> Any:
         """
-        Any data the user would like to see from the state. 
+        This function should return any data the user would like to see from the state. 
+
+        Returns:
+            The data requested by the user.
         """
-        pass
 
     @abc.abstractmethod
     def set_data(self) -> NoReturn:
         """
         Setting any data that the user would like get_data() to provide. 
+        This method should be implemented by subclasses to set the necessary data for the state.
         """
-        pass
 
     @abc.abstractmethod
     def execute(self, move: BaseMove) -> bool:
         """ 
         Execute the given move on the state and returns a boolean on whether or not the execution was successful / valid. 
-        """
-        pass
 
-    @abc.abstractmethod
+        Parameters:
+        - move (BaseMove): The move to be executed on the state.
+
+        Returns:
+        - bool: True if the execution was successful / valid, False otherwise.
+        """
+
     def objective_function(self) -> float:
         """
-        If the user decides to implement a best first search that requires a priority queue which needs a way to "rank" the states
+        [Optional]Calculates and returns the objective function value for the state.
+        
+        Used in best first search algorithms that require a priority queue to rank the states
+        
+        Returns:
+            float: The objective function value for the state.
         """
-        pass
+        raise NotImplementedError("Objective function not implemented")
 
     @abc.abstractmethod
     def is_valid(self) -> bool:
         """
-        Check if the given state is vaid, strongly encourage to use in is execute.
+        Check if the given state is valid. This method is strongly encouraged to be used within the execute method.
+        
+        Returns:
+            bool: True if the state is valid, False otherwise.
         """
-        pass
 
     @abc.abstractmethod
     def __str__(self) -> str:
         """
         Return a string rerpesentation of the state. 
-        """
-        pass
 
+        Returns:
+            str: A string representation of the state.
+        """
+
+    @abc.abstractmethod
     def make_node_label(self, iterations : int) -> str:
-        pass
+        """
+        Method to generate a label for a node, will be passed number of iterations.
+
+        Parameters:
+        - iterations (int): The number of iterations.
+
+        Returns:
+        - str: The generated label for the node (Can be dependent on iterations or not).
+        """

@@ -63,6 +63,16 @@ class SimpleState(BaseState):
         self.var_to_val[move.variable] = move.value  # don't need the absolute
         self.unassigned_variables.remove(move.variable)
         return True
+    
+    def is_valid(self) -> bool:
+        valid = True
+        for k, v in self.var_to_val.items():
+            if v not in self.possible_vals[k]:
+                valid = False
+        return valid
+
+    def make_node_label(self, iterations : int):
+        return str(iterations)
 
     # def objective_function(self) -> float:
     #     # this is a trivial function, not necessarily helpful to solving the problem faster

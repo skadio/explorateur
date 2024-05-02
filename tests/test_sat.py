@@ -110,7 +110,7 @@ class SATState(BaseState):
     def __str__(self) -> str:
         return str(self.var_to_val)
 
-    def make_node_label(self, iterations):
+    def make_node_label(self, iterations) -> str:
         return str(iterations)
     
 
@@ -162,7 +162,7 @@ class SAT_Tests(BaseTest):
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, max_iters = 2)
+        sol_state = explorer.search(starting_state, max_iterations=2)
         self.assertEqual(sol_state, None)
     
     def test_pq(self):

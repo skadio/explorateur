@@ -47,12 +47,14 @@ class SimpleState(BaseState):
                 moves_list.append(SimpleMove(var, val))
         return moves_list
 
-    def is_terminate(self) -> bool:
+    def is_terminate(self, end_state = None) -> bool:
         """
         """
-        if len(self.unassigned_variables) > 0:
-            return False
         return True
+        end_assignment = {1:1 , 2:20, 3:100}
+        if end_state.var_to_val == end_assignment:
+            return True
+        return False
 
 
     def get_data(self) -> dict:
@@ -75,6 +77,16 @@ class SimpleState(BaseState):
     def __str__(self) -> str:
         return str(self.var_to_val)
     
+    def is_valid(self):
+        valid = True
+        for k,v in self.var_to_val.items():
+            if v not in self.possible_vals[k]:
+                valid = False
+        return valid
+    
+    def make_node_label(self, iterations):
+        return str(iterations)
+    
 
 
 class GraphSearchTest(BaseTest):
@@ -83,17 +95,16 @@ class GraphSearchTest(BaseTest):
         Tests graph search by choosing an end_state where we want the search to terminate, in this case it is a specific assignment
         to the variable. 
         """
-        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
+        seed = random.randint(0, 100000)
+        explorer = Explorateur(ExplorationType.BreadthFirst(), seed)
         possible_vals = {1: [1,2], 2: [20,10], 3: [100,200]}
 
         starting_state = SimpleState(possible_vals)
-        #We only want to temrinate the search once this specific set of variable assignment has been reached
+        #We only want to terminate the search once this specific set of variable assignment has been reached
         end_state = SimpleState({1: [1,2], 2: [20,10], 3: [100,200]})
         end_state.var_to_val = {1: 1, 2: 20, 3: 200}
         end_state.unassigned_variables = {}
-
-        SimpleState.is_terminate = lambda x: x.var_to_val == end_state.var_to_val
-
+        
         sol_state = explorer.search(starting_state)
         # explorer.print_path(sol_state)
         # explorer.visualize_tree("tmp/simple_graphsearch")
