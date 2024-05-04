@@ -89,14 +89,6 @@ class SATState(BaseState):
                 return False
         return True
 
-    def objective_function(self) -> float:
-        res = np.random.uniform(2.0, 10.0)
-        if 2 in self.var_to_val.keys():
-            if self.var_to_val[2] is False and self.flag is False:
-                self.flag = True
-                return 0.5
-        return res
-
     def __str__(self) -> str:
         return str(self.var_to_val)
 

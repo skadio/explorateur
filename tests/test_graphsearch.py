@@ -61,9 +61,6 @@ class SimpleState(BaseState):
         self.unassigned_variables.remove(move.variable)
         return True
 
-    def objective_function(self):
-        return 0.0
-
     def __str__(self) -> str:
         return str(self.var_to_val)
 

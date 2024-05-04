@@ -64,9 +64,6 @@ class SimpleState(BaseState):
     def make_node_label(self, iterations: int):
         return str(iterations)
 
-    def objective_function(self):
-        return 0.0
-
     def __str__(self) -> str:
         return str(self.var_to_val)
 
