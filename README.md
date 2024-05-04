@@ -120,17 +120,24 @@ Please submit bug reports and feature requests as [Issues](https://github.com/ex
 Explorateur is licensed under the [Apache License 2.0](LICENSE.md).
 
 ## Unit Tests
+This command will run **all the tests**.
 ```
-$ cd fidtone
-$ python -m unittest discover tests
+$  python -m unittest discover
 ```
 
-
+If you wish to run a specific test from a given test file please run the following commandf.
+```
+$ python -m unittest -v tests.<file_name>.<class_name>.<function_name>
+```
+So for example, we could do:
+```
+$ python -m unittest -v tests.test_exploration_type.ExplorationTypeTests.test_bfs_1
+```
 ## Changelog
 
 | Date | Notes |
 |--------|-------------|
-| April 1, 2024 | Initial release |
+| l May, 2024 | Initial release |
 
 <br>
 
