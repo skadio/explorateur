@@ -12,20 +12,18 @@ from typing import List, NoReturn
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
-"""
-Uses a SAT problem to run and test breath-firt, depth-first and best-first search. We implement the functions needed for BaseMove
-and BaseState to function. 
-"""
+"""Uses a SAT problem to run and test breath-first, depth-first and best-first search. We implement the functions 
+needed for BaseMove and BaseState to function. """
+
 
 class SATMove(BaseMove):
 
     def __init__(self, variable, variable_assignment):
         self.variable = variable
         self.value = variable_assignment
-    
+
     def __str__(self) -> str:
         return f"Setting variable: {self.variable} to {self.value}"
-    
 
 
 class SATState(BaseState):
@@ -53,7 +51,7 @@ class SATState(BaseState):
 
         return moves_list
 
-    def is_terminate(self, end_state = None) -> bool:
+    def is_terminate(self, end_state=None) -> bool:
         """
         """
         for clause in self.clauses:
@@ -84,7 +82,7 @@ class SATState(BaseState):
         self.unassigned_variables.remove(move.variable)
 
         return self.is_valid()
-    
+
     def is_valid(self):
         for clause in self.clauses:
             is_unsatisfiable = True
@@ -103,20 +101,18 @@ class SATState(BaseState):
         return True
 
     def objective_function(self) -> float:
-        res = np.random.uniform(2.0,10.0)
+        res = np.random.uniform(2.0, 10.0)
         if 2 in self.var_to_val.keys():
-            if self.var_to_val[2] is False and self.flag == False:
+            if self.var_to_val[2] is False and self.flag is False:
                 self.flag = True
                 return 0.5
         return res
-        
-    
+
     def __str__(self) -> str:
         return str(self.var_to_val)
 
     def make_node_label(self, iterations):
         return str(iterations)
-    
 
 
 class ExplorationTypeTests(BaseTest):
@@ -132,32 +128,33 @@ class ExplorationTypeTests(BaseTest):
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_1")
+        sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_1")
         self.assertTrue(sol_state.is_terminate())
 
     def test_dfs_2(self):
         """
-        This is a Depth-First Search search over an UNSAT problem, that is to say there should be no solution state. The tree
-        is written to "temp/test_dfs_2" and all the leaf nodes are red with no green nodes since there is no solution state.
+        This is a Depth-First Search search over an UNSAT problem, that is to say there should be no solution state.
+        The tree is written to "temp/test_dfs_2" and all the leaf nodes are red with no green nodes since there is no
+        solution state.
         """
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_2")
+        sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_2")
         explorer.visualize_tree("tmp/test_dfs_2.dot")
         self.assertEqual(sol_state, None)
 
     def test_bfs_1(self):
         """
-        This is a Breadth-First search for a satisfiable / solveable instance same as the first one with the tree written to
-        "tmp/test_bfs_1".
+        This is a Breadth-First search for a satisfiable / solveable instance same as the first one with the tree
+        written to "tmp/test_bfs_1".
         """
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_1")
+        sol_state = explorer.search(starting_state, file_path="tmp/test_bfs_1")
         # explorer.print_path(sol_state)
         self.assertTrue(sol_state.is_terminate())
 
@@ -170,19 +167,19 @@ class ExplorationTypeTests(BaseTest):
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_2")
+        sol_state = explorer.search(starting_state, file_path="tmp/test_bfs_2")
         self.assertEqual(sol_state, None)
-    
-    def test_pq(self):
+
+    def test_best_first(self):
         """
-        This is a Best-First search done with the objective function defined above. Since we let the first instance of 2 being
-        false have the lowest value for the priority queue we expect this to be the first element explored (seen in "tmp/test_pq")
+        This is a Best-First search done with the objective function defined above. Since we let the first instance
+        of 2 being false have the lowest value for the priority queue we expect this to be the first element explored
+        (seen in "tmp/test_pq")
         """
         explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
-        
+
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_pq")
+        sol_state = explorer.search(starting_state, file_path="tmp/test_pq")
         # explorer.visualize_tree("tmp/test_pq.dot")
         self.assertIsNone(sol_state)
-

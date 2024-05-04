@@ -3,6 +3,7 @@ import heapq
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state._base_state import _BaseState
 
+
 class PriorityQueue(BaseStorage):
     ''' Class representing a priority queue.'''
 
@@ -16,7 +17,7 @@ class PriorityQueue(BaseStorage):
 
     def remove(self) -> _BaseState:
         """ Removes a state from the priority queue."""
-        return heapq.heappop(self.storage)[1] #the first item is the key
+        return heapq.heappop(self.storage)[1]  # the first item is the key
 
     def is_empty(self) -> bool:
         """ Returns True if the priority queue is empty, False otherwise."""

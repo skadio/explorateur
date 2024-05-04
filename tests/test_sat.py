@@ -18,10 +18,9 @@ class SATMove(BaseMove):
     def __init__(self, variable, variable_assignment):
         self.variable = variable
         self.value = variable_assignment
-    
+
     def __str__(self) -> str:
         return f"Setting variable: {self.variable} to {self.value}"
-    
 
 
 class SATState(BaseState):
@@ -49,7 +48,7 @@ class SATState(BaseState):
 
         return moves_list
 
-    def is_terminate(self, end_state = None) -> bool:
+    def is_terminate(self, end_state=None) -> bool:
         """
         """
         for clause in self.clauses:
@@ -67,20 +66,12 @@ class SATState(BaseState):
                 return False
         return True
 
-    def get_data(self) -> dict:
-        return self.var_to_val
-
-    def set_data(self) -> NoReturn:
-        """
-        """
-        pass
-
     def execute(self, move: SATMove) -> bool:
         self.var_to_val[move.variable] = move.value  # don't need the absolute
         self.unassigned_variables.remove(move.variable)
 
         return self.is_valid()
-    
+
     def is_valid(self):
         for clause in self.clauses:
             is_unsatisfiable = True
@@ -99,20 +90,18 @@ class SATState(BaseState):
         return True
 
     def objective_function(self) -> float:
-        res = np.random.uniform(2.0,10.0)
+        res = np.random.uniform(2.0, 10.0)
         if 2 in self.var_to_val.keys():
-            if self.var_to_val[2] is False and self.flag == False:
+            if self.var_to_val[2] is False and self.flag is False:
                 self.flag = True
                 return 0.5
         return res
-        
-    
+
     def __str__(self) -> str:
         return str(self.var_to_val)
 
     def make_node_label(self, iterations) -> str:
         return str(iterations)
-    
 
 
 class SAT_Tests(BaseTest):
@@ -125,7 +114,7 @@ class SAT_Tests(BaseTest):
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_1.dot")
+        sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_1.dot")
         self.assertTrue(sol_state.is_terminate())
 
     def test_dfs_2(self):
@@ -133,7 +122,7 @@ class SAT_Tests(BaseTest):
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_dfs_2.dot")
+        sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_2.dot")
         explorer.visualize_tree("tmp/test_dfs_2.dot")
         self.assertEqual(sol_state, None)
 
@@ -142,8 +131,7 @@ class SAT_Tests(BaseTest):
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_1.dot")
-        # explorer.print_path(sol_state)
+        sol_state = explorer.search(starting_state, file_path="tmp/test_bfs_1.dot")
         self.assertTrue(sol_state.is_terminate())
 
     def test_bfs_2(self):
@@ -152,11 +140,11 @@ class SAT_Tests(BaseTest):
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_bfs_2.dot")
+        sol_state = explorer.search(starting_state, file_path="tmp/test_bfs_2.dot")
         self.assertEqual(sol_state, None)
-    
-    def test_interations(self):
-        #this one is supposed to have a solution but we are cutting it of early
+
+    def test_iterations(self):
+        # this one is supposed to have a solution but we are cutting it of early
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
@@ -164,15 +152,11 @@ class SAT_Tests(BaseTest):
 
         sol_state = explorer.search(starting_state, max_iterations=2)
         self.assertEqual(sol_state, None)
-    
+
     def test_pq(self):
         explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
-        
-        starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path = "tmp/test_pq.dot")
-        # explorer.visualize_tree("tmp/test_pq.dot")
-        self.assertIsNone(sol_state)
 
-# Comments
-# pep-8 for ofrmatting, test_simple from class, maybe get rid of the state folder so the importbecomes explorateur.base_state
+        starting_state = SATState(clauses)
+        sol_state = explorer.search(starting_state, file_path="tmp/test_pq.dot")
+        self.assertIsNone(sol_state)

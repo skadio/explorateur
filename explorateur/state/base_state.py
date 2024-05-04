@@ -1,6 +1,6 @@
 ''' Module for the BaseState class, which is an abstract class for the states. '''
 import abc
-from typing import Any, List, NoReturn, Union
+from typing import List, Union
 from explorateur.state.base_move import BaseMove
 
 
@@ -37,25 +37,10 @@ class BaseState(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def get_data(self) -> Any:
-        """
-        This function should return any data the user would like to see from the state. 
-
-        Returns:
-            The data requested by the user.
-        """
-
-    @abc.abstractmethod
-    def set_data(self) -> NoReturn:
-        """
-        Setting any data that the user would like get_data() to provide. 
-        This method should be implemented by subclasses to set the necessary data for the state.
-        """
-
-    @abc.abstractmethod
     def execute(self, move: BaseMove) -> bool:
-        """ 
-        Execute the given move on the state and returns a boolean on whether or not the execution was successful / valid. 
+        """
+        Execute the given move on the state and returns a boolean on whether or not the execution was successful /
+        valid.
 
         Parameters:
         - move (BaseMove): The move to be executed on the state.
@@ -68,7 +53,9 @@ class BaseState(metaclass=abc.ABCMeta):
         """
         [Optional]Calculates and returns the objective function value for the state.
         
-        Used in best first search algorithms that require a priority queue to rank the states
+        Used in best first search algorithms that require a priority queue to rank the states. Note, if this function
+        returns the same value for two states this prrogram will error because there is no comparator between Base
+        States.
         
         Returns:
             float: The objective function value for the state.
@@ -94,7 +81,7 @@ class BaseState(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def make_node_label(self, iterations : int) -> str:
+    def make_node_label(self, iterations: int) -> str:
         """
         Method to generate a label for a node, will be passed number of iterations.
 

@@ -1,5 +1,6 @@
-''' Contains the _BaseState class, a wrapper class around BaseState that allows us to include more information about the state. '''
-from typing import List, NoReturn, Optional, Union
+''' Contains the _BaseState class, a wrapper class around BaseState that allows us to include more information about
+the state. '''
+from typing import List, Optional, Union
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 from explorateur.search.transition import Transition
@@ -21,17 +22,9 @@ class _BaseState():
         """ Get the moves from the user state """
         return self.user_state.get_moves()
 
-    def is_terminate(self, end_state:Union[BaseState, None] = None):
+    def is_terminate(self, end_state: Union[BaseState, None] = None):
         """ Check if the user state is a termination state, using the user state's is_terminate function """
         return self.user_state.is_terminate(end_state)
-
-    def get_data(self):
-        """ Return data, using the user state's get_data function """
-        return self.user_state.get_data()
-
-    def set_data(self) -> NoReturn:
-        """ Set data, using the user state's set_data function """
-        return self.user_state.set_data()
 
     def execute(self, move: BaseMove) -> bool:
         """ Execute a move, using the user state's execute function """
@@ -49,7 +42,7 @@ class _BaseState():
         """ Return the string representation of the user state """
         return str(self.user_state)
 
-    def make_node_label(self, iterations : int) -> str:
+    def make_node_label(self, iterations: int) -> str:
         """ Make a node label, using the user state's make_node_label function """
         return self.user_state.make_node_label(iterations)
 

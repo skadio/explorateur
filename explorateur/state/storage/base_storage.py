@@ -3,6 +3,7 @@ from typing import Union
 import abc
 from explorateur.state._base_state import _BaseState
 
+
 class BaseStorage(metaclass=abc.ABCMeta):
     """Abstract class for the storage classes."""
 

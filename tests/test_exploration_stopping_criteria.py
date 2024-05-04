@@ -6,7 +6,6 @@ import numpy as np
 from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
-# from tests.SAT_Class import SATState
 
 from typing import List, NoReturn
 from explorateur.state.base_move import BaseMove
@@ -17,15 +16,15 @@ Uses a SAT problem to run and test the exploration heuristics. We implement the 
 and BaseState to function. 
 """
 
+
 class SATMove(BaseMove):
 
     def __init__(self, variable, variable_assignment):
         self.variable = variable
         self.value = variable_assignment
-    
+
     def __str__(self) -> str:
         return f"Setting variable: {self.variable} to {self.value}"
-    
 
 
 class SATState(BaseState):
@@ -53,7 +52,7 @@ class SATState(BaseState):
 
         return moves_list
 
-    def is_terminate(self, end_state = None) -> bool:
+    def is_terminate(self, end_state=None) -> bool:
         """
         """
         for clause in self.clauses:
@@ -71,20 +70,12 @@ class SATState(BaseState):
                 return False
         return True
 
-    def get_data(self) -> dict:
-        return self.var_to_val
-
-    def set_data(self) -> NoReturn:
-        """
-        """
-        pass
-
     def execute(self, move: SATMove) -> bool:
         self.var_to_val[move.variable] = move.value  # don't need the absolute
         self.unassigned_variables.remove(move.variable)
 
         return self.is_valid()
-    
+
     def is_valid(self):
         for clause in self.clauses:
             is_unsatisfiable = True
@@ -103,23 +94,21 @@ class SATState(BaseState):
         return True
 
     def objective_function(self) -> float:
-        res = np.random.uniform(2.0,10.0)
+        res = np.random.uniform(2.0, 10.0)
         if 2 in self.var_to_val.keys():
-            if self.var_to_val[2] is False and self.flag == False:
+            if self.var_to_val[2] is False and self.flag is False:
                 self.flag = True
                 return 0.5
         return res
-        
-    
+
     def __str__(self) -> str:
         return str(self.var_to_val)
 
     def make_node_label(self, iterations):
         return str(iterations)
-    
 
 
-class ExplorationHeuristicsTests(BaseTest):
+class ExplorationStoppingCriteriaTests(BaseTest):
     seed = random.randint(0, 100000)
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -133,7 +122,7 @@ class ExplorationHeuristicsTests(BaseTest):
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, max_iterations = 2, file_path = "tmp/test_dfs_1")
+        sol_state = explorer.search(starting_state, max_iterations=2, file_path="tmp/test_dfs_1")
         self.assertEqual(None, sol_state)
 
     def test_max_runtime(self):
@@ -145,7 +134,5 @@ class ExplorationHeuristicsTests(BaseTest):
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, max_runtime= 1, file_path = "tmp/test_dfs_2")
+        sol_state = explorer.search(starting_state, max_runtime=1, file_path="tmp/test_dfs_2")
         self.assertEqual(sol_state, None)
-
-    

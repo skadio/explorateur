@@ -5,7 +5,7 @@ from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
 
-from typing import List, NoReturn
+from typing import List
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
@@ -15,10 +15,9 @@ class SimpleMove(BaseMove):
     def __init__(self, variable, variable_assignment):
         self.variable = variable
         self.value = variable_assignment
-    
+
     def __str__(self) -> str:
         return f"Setting variable: {self.variable} to {self.value}"
-    
 
 
 class SimpleState(BaseState):
@@ -50,20 +49,11 @@ class SimpleState(BaseState):
             return False
         return True
 
-
-    def get_data(self) -> dict:
-        return self.var_to_val
-
-    def set_data(self) -> NoReturn:
-        """
-        """
-        pass
-
     def execute(self, move: SimpleMove) -> bool:
         self.var_to_val[move.variable] = move.value  # don't need the absolute
         self.unassigned_variables.remove(move.variable)
         return True
-    
+
     def is_valid(self) -> bool:
         valid = True
         for k, v in self.var_to_val.items():
@@ -71,30 +61,14 @@ class SimpleState(BaseState):
                 valid = False
         return valid
 
-    def make_node_label(self, iterations : int):
+    def make_node_label(self, iterations: int):
         return str(iterations)
 
-    # def objective_function(self) -> float:
-    #     # this is a trivial function, not necessarily helpful to solving the problem faster
-    #     total_trues = 0
-    #     for var in self.var_to_val:
-    #         if self.var_to_val[var] == True:
-    #             total_trues += 1
-    #     return float(total_trues)
-    
     def objective_function(self):
         return 0.0
 
-    # def objective_function(self) -> float:
-    #     total_falses = 0
-    #     for var in self.var_to_val:
-    #         if self.var_to_val[var] == False:
-    #             total_falses += 1
-    #     return total_falses
-    
     def __str__(self) -> str:
         return str(self.var_to_val)
-    
 
 
 class Simple_Tests(BaseTest):
@@ -102,7 +76,7 @@ class Simple_Tests(BaseTest):
 
     def test_dfs(self):
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
-        possible_vals = {1: [1,2], 2: [20,10], 3: [100,200]}
+        possible_vals = {1: [1, 2], 2: [20, 10], 3: [100, 200]}
 
         starting_state = SimpleState(possible_vals)
 
@@ -113,7 +87,7 @@ class Simple_Tests(BaseTest):
 
     def test_bfs(self):
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
-        possible_vals = {1: [1,2], 2: [20,10], 3: [100,200]}
+        possible_vals = {1: [1, 2], 2: [20, 10], 3: [100, 200]}
 
         starting_state = SimpleState(possible_vals)
 
@@ -121,13 +95,13 @@ class Simple_Tests(BaseTest):
         # explorer.print_path(sol_state)
         explorer.visualize_tree("tmp/simple_dfs")
         self.assertTrue(sol_state.is_terminate())
-    
-    def test_graphsearch(self):
+
+    def test_graph_search(self):
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
-        possible_vals = {1: [1,2], 2: [20,10], 3: [100,200]}
+        possible_vals = {1: [1, 2], 2: [20, 10], 3: [100, 200]}
 
         starting_state = SimpleState(possible_vals)
-        end_state = SimpleState({1: [1,2], 2: [20,10], 3: [100,200]})
+        end_state = SimpleState({1: [1, 2], 2: [20, 10], 3: [100, 200]})
         end_state.var_to_val = {1: 1, 2: 20, 3: 200}
         end_state.unassigned_variables = {}
 
@@ -137,9 +111,3 @@ class Simple_Tests(BaseTest):
         # explorer.print_path(sol_state)
         explorer.visualize_tree("tmp/simple_graphsearch")
         self.assertTrue(sol_state.is_terminate())
-
-    # def test_pq(self):
-
-
-# Comments
-# pep-8 for ofrmatting, test_simple from class, maybe get rid of the state folder so the importbecomes explorateur.base_state

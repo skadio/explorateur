@@ -82,15 +82,6 @@ class SimpleState(BaseState):
             return False
         return True
 
-
-    def get_data(self) -> dict:
-        return self.var_to_val
-
-    def set_data(self) -> NoReturn:
-        """
-        """
-        pass
-
     def execute(self, move: SimpleMove) -> bool:
         self.var_to_val[move.variable] = move.value  # don't need the absolute
         self.unassigned_variables.remove(move.variable)

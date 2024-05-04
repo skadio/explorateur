@@ -16,15 +16,17 @@ from explorateur.state.storage.factory import StorageFactory
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.search.exploration_type import ExplorationType
 
+
 class Explorateur:
     """ Explorateur class, used to perform search. """
-    def __init__(self, exploration_type: ExplorationType, seed: int = Constants.default_seed):
+
+    def __init__(self, exploration_type: Union = [ExplorationType.BestFirst(), ExplorationType.DepthFirst(),
+                                                  ExplorationType.BreadthFirst()], seed: int = Constants.default_seed):
         """
         Initializes an Explorateur object.
 
-        Args:
-            exploration_type (ExplorationType): Specifies the type of search (ExplorationType.BreadthFirst(), ExplorationType.DepthFirst(), ExplorationType.BestFirst()).
-            seed (int): Seed for the randomness.
+        Args: exploration_type (ExplorationType): Specifies the type of search (ExplorationType.BreadthFirst(),
+        ExplorationType.DepthFirst(), ExplorationType.BestFirst()). seed (int): Seed for the randomness.
 
         Attributes:
             exploration_type (ExplorationType): The type of search being performed.
@@ -42,29 +44,32 @@ class Explorateur:
         # Create the random number generator
         self._rng = np.random.default_rng(seed=self.seed)
 
-        # Internal variables to be used later in determining whether or not the user wants to build a tree during the search
+        # Internal variables to be used later in determining whether or not the user wants to build a tree during the
+        # search
         self.tree = None
         self._solution_state = None
 
-    def search(self, start_state: BaseState, end_state: BaseState = None, max_runtime: int=None, max_iterations:int=sys.maxsize, file_path:str=None) -> BaseState:
+    def search(self, start_state: BaseState, end_state: BaseState = None, max_runtime: int = None,
+               max_iterations: int = sys.maxsize, file_path: str = None) -> BaseState:
         """
-        This function carries out the search starting at start_state until either a solution is found or it has to terminate.
+        This function carries out the search starting at start_state until either a solution is found or it has to
+        terminate.
 
-        Args:
-            start_state (BaseState): The initial state where the search will begin.
-            end_state (BaseState, None): Optional argument but needed for graph search to know where to terminate the search.
-            max_runtime (int): Optional argument for the number of seconds the search should go on for.
-            max_iterations (int): Optional argument for the maximum number of nodes that can be explored before terminating the search if no solution has been found yet.
-            file_path (str): Optional argument that can be None, but if it is a string, a tree will be written while doing the exploration and written to the file in the filepath provided.
+        Args: start_state (BaseState): The initial state where the search will begin. end_state (BaseState,
+        None): Optional argument but needed for graph search to know where to terminate the search. max_runtime (
+        int): Optional argument for the number of seconds the search should go on for. max_iterations (int): Optional
+        argument for the maximum number of nodes that can be explored before terminating the search if no solution
+        has been found yet. file_path (str): Optional argument that can be None, but if it is a string, a tree will
+        be written while doing the exploration and written to the file in the filepath provided.
 
         Returns:
             None if no solution state has been found or if it was a Best-First search; solution state otherwise.
         """
-        
+
         # validate start state
         if start_state is None:
             raise ValueError
-        
+
         # construct the start state as a _BaseState object
         _start_state = _BaseState(start_state, str(0))
 
@@ -73,7 +78,7 @@ class Explorateur:
             self.tree = pydot.Dot(graph_type="digraph")
             _start_state.node = pydot.Node(_start_state.node_label)
             self.tree.add_node(_start_state.node)
-        
+
         # initialize the states storage
         states: BaseStorage[_BaseState] = StorageFactory.create(self.exploration_type.storage_type)
         states.insert(_start_state)
@@ -93,7 +98,7 @@ class Explorateur:
                 if end - start > max_runtime:
                     self.visualize_tree(file_path)
                     return None
-            
+
             # pop the current state from the storage
             iterations += 1
             _current = states.remove()
@@ -177,12 +182,13 @@ class Explorateur:
 
         if reverse:
             return state_list.reverse()
-        
+
         return state_list
-    
+
     def get_path_helper(self, state: _BaseState, state_list: list):
         """
-        This helper function for get_path() traces back the states that were explored in reverse order (starting at the end).
+        This helper function for get_path() traces back the states that were explored in reverse order (starting at
+        the end).
 
         Parameters:
             state (_BaseState): The current state being explored.
@@ -204,7 +210,8 @@ class Explorateur:
         """
         Writes the constructed tree to a file.
 
-        This method writes the tree that has been constructed during the search to the file specified by the `file_path` parameter.
+        This method writes the tree that has been constructed during the search to the file specified by the
+        `file_path` parameter.
 
         Parameters:
         - file_path (str): The path of the file to write the tree to.

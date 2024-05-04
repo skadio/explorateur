@@ -9,13 +9,15 @@ from explorateur.state.storage.priority_queue import PriorityQueue
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
+
 class SimpleMove(BaseMove):
 
     def __init__(self):
         pass
-    
+
     def __str__(self) -> str:
-       pass
+        pass
+
 
 class SimpleState(BaseState):
 
@@ -31,34 +33,29 @@ class SimpleState(BaseState):
     def is_terminate(self) -> bool:
         pass
 
-    def get_data(self) -> dict:
-        pass
-
-    def set_data(self) -> NoReturn:
-        pass
-
     def execute(self, move: SimpleMove) -> bool:
         pass
-    
+
     def __str__(self) -> str:
         pass
 
     def is_valid(self) -> bool:
         pass
-    
-    def make_node_label(self, iterations : int) -> str:
+
+    def make_node_label(self, iterations: int) -> str:
         pass
-    
+
     def objective_function(self):
         if self.val == 2:
             return 1
         else:
             return 10
 
+
 class Storage_Tests(BaseTest):
     seed = random.randint(0, 100000)
 
-    #can't test for contains() because it takes in a _BaseState
+    # can't test for contains() because it takes in a _BaseState
     def test_queue(self):
         q = Queue()
         b1 = SimpleState(1)
@@ -83,7 +80,7 @@ class Storage_Tests(BaseTest):
         self.assertEqual(b2, res)
         self.assertEqual(s.get_size(), 1)
         self.assertFalse(s.is_empty())
-    
+
     def test_priority_queue(self):
         pq = PriorityQueue()
         b1 = SimpleState(1)

@@ -1,11 +1,13 @@
-''' Contains the Queue class, subclass of BaseStorage '''
+""" Contains the Queue class, subclass of BaseStorage """
 from collections import deque
 from typing import Deque
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state._base_state import _BaseState
 
+
 class Queue(BaseStorage):
     ''' Class representing a queue.'''
+
     def __init__(self):
         super().__init__()
         self.storage: Deque[_BaseState] = deque()

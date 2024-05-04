@@ -29,6 +29,6 @@ class Stack(BaseStorage):
         """ Returns the number of elements in the stack."""
         return len(self.storage)
 
-    def contains(self, state: _BaseState) -> Union[_BaseState, None]:
+    def contains(self, state: _BaseState) -> bool:
         """ Returns the state if it is in the stack, None otherwise."""
         return state in self.storage
