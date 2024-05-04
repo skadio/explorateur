@@ -55,12 +55,14 @@ class Explorateur:
         This function carries out the search starting at start_state until either a solution is found or it has to
         terminate.
 
-        Args: start_state (BaseState): The initial state where the search will begin. end_state (BaseState,
-        None): Optional argument but needed for graph search to know where to terminate the search. max_runtime (
-        int): Optional argument for the number of seconds the search should go on for. max_iterations (int): Optional
-        argument for the maximum number of nodes that can be explored before terminating the search if no solution
-        has been found yet. file_path (str): Optional argument that can be None, but if it is a string, a tree will
-        be written while doing the exploration and written to the file in the filepath provided.
+        - Args: start_state (BaseState): The initial state where the search will begin.
+        - end_state (BaseState,None): Optional argument but needed for graph search to know where to terminate the
+          search.
+        - max_runtime (int): Optional argument for the number of seconds the search should go on for.
+        - max_iterations (int): Optional argument for the maximum number of nodes that can be explored before
+          terminating the search if no solution has been found yet.
+        - file_path (str): Optional argument that can be None, but if it is a string, a tree will be written while
+          doing the exploration and written to the file in the filepath provided.
 
         Returns:
             None if no solution state has been found or if it was a Best-First search; solution state otherwise.

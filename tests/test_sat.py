@@ -123,7 +123,6 @@ class SAT_Tests(BaseTest):
 
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_2.dot")
-        explorer.visualize_tree("tmp/test_dfs_2.dot")
         self.assertEqual(sol_state, None)
 
     def test_bfs_1(self):

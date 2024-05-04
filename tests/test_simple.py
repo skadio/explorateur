@@ -82,7 +82,6 @@ class Simple_Tests(BaseTest):
 
         sol_state = explorer.search(starting_state)
         explorer.print_path(sol_state)
-        explorer.visualize_tree("tmp/simple_dfs")
         self.assertTrue(sol_state.is_terminate())
 
     def test_bfs(self):
@@ -93,7 +92,6 @@ class Simple_Tests(BaseTest):
 
         sol_state = explorer.search(starting_state)
         # explorer.print_path(sol_state)
-        explorer.visualize_tree("tmp/simple_dfs")
         self.assertTrue(sol_state.is_terminate())
 
     def test_graph_search(self):
@@ -108,6 +106,4 @@ class Simple_Tests(BaseTest):
         SimpleState.is_terminate = lambda x: x.var_to_val == end_state.var_to_val
 
         sol_state = explorer.search(starting_state)
-        # explorer.print_path(sol_state)
-        explorer.visualize_tree("tmp/simple_graphsearch")
         self.assertTrue(sol_state.is_terminate())

@@ -34,6 +34,7 @@ pip install -r requirements.txt
 # Example that will search for an assignment of values for a group of variables
 
 # Imports from Explorateur
+import random
 from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
@@ -95,8 +96,9 @@ class SimpleState(BaseState):
         return str(self.var_to_val)
 
 #setting up a simple search by Explorateur
+def main():
     seed = random.randint(0, 100000)
-    explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
+    explorer = Explorateur(ExplorationType.DepthFirst(), seed)
     possible_vals = {1: [1,2], 2: [20,10], 3: [100,200]}
     starting_state = SimpleState(possible_vals)
     sol_state = explorer.search(starting_state)

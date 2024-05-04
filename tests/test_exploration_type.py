@@ -35,6 +35,9 @@ class SATState(BaseState):
         self.flag = False
 
     def generate_vars(self, clauses):
+        '''
+        This function is not part of the ones the user has to implement for BaseState, it's a helper.
+        '''
         variables = set()
         for c in clauses:
             for v in c:
@@ -42,8 +45,6 @@ class SATState(BaseState):
         return variables
 
     def get_moves(self) -> List[SATMove]:
-        """
-        """
         moves_list = []
         for var in self.unassigned_variables:
             moves_list.append(SATMove(var, True))
@@ -52,8 +53,6 @@ class SATState(BaseState):
         return moves_list
 
     def is_terminate(self, end_state=None) -> bool:
-        """
-        """
         for clause in self.clauses:
             is_satisfied = False
             for literal in clause:
@@ -68,14 +67,6 @@ class SATState(BaseState):
             if not is_satisfied:
                 return False
         return True
-
-    def get_data(self) -> dict:
-        return self.var_to_val
-
-    def set_data(self) -> NoReturn:
-        """
-        """
-        pass
 
     def execute(self, move: SATMove) -> bool:
         self.var_to_val[move.variable] = move.value  # don't need the absolute
@@ -142,7 +133,6 @@ class ExplorationTypeTests(BaseTest):
 
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_2")
-        explorer.visualize_tree("tmp/test_dfs_2.dot")
         self.assertEqual(sol_state, None)
 
     def test_bfs_1(self):
