@@ -108,6 +108,7 @@ class SATState(BaseState):
 
 class ExplorationTypeTests(BaseTest):
     seed = random.randint(0, 100000)
+    # If you with to print out logging from the search please copy this line before calling search()
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
     def test_dfs_1(self):

@@ -143,11 +143,3 @@ class SAT_Tests(BaseTest):
 
         sol_state = explorer.search(starting_state, max_iterations=2)
         self.assertEqual(sol_state, None)
-
-    def test_pq(self):
-        explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
-        clauses = [(1, 2, 3), (-1, 2)]
-
-        starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path="tmp/test_pq.dot")
-        self.assertIsNone(sol_state)

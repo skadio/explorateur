@@ -100,7 +100,5 @@ class Simple_Tests(BaseTest):
         end_state.var_to_val = {1: 1, 2: 20, 3: 200}
         end_state.unassigned_variables = {}
 
-        SimpleState.is_terminate = lambda x: x.var_to_val == end_state.var_to_val
-
         sol_state = explorer.search(starting_state)
         self.assertTrue(sol_state.is_terminate())

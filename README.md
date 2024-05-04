@@ -5,11 +5,14 @@ Explorateur is a library written in Python to solve problems that require search
 Explorateur follows a scikit-learn style public interface, adheres to 
 [PEP-8 standards](https://www.python.org/dev/peps/pep-0008/), and is tested heavily. 
 
+This package allows a search to happen by implementing an instance of ```BaseMove``` and ```BaseState``` .
 
 The user provide at least an initial state (inherited from BaseState) and one of the following in the constructor:
 - Depth First Search: uses a stack to keep track of the states
 - Breadth-First Search:  uses a queue to keep track of the states to be explored. 
 - Best-First Search: this will utilize a Priority Queue but in order for this to work the ```objective_function()``` must be implemented in ```BaseState``` as a given state is inserted into the Priority Queue based on some objective evaluation of "goodness". 
+
+There is an example of each type of search in the file test_exploration_type. 
 
 There is also the option to use a Graph Search: in order for this to work, the user must change the ```is_terminate()``` function to check for equality between the current state and some goal state. Note, a simple "==" wil not suffice but rather the user must ensure that each of the relevant attributes that define a state are equal. For example, in the following case we would check that ```val_to_vars``` is the same.
 
@@ -61,6 +64,7 @@ class SimpleState(BaseState):
         self.possible_vals = possible_vals
         self.unassigned_variables = self.generate_vars(self.possible_vals)
 
+    # this function is not part of the ones that have to be implemented for BaseState, it is a helper
     def generate_vars(self, clauses):
         variables = set()
         for v in self.possible_vals.keys():
