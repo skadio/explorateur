@@ -1,12 +1,13 @@
-''' Contains the _BaseState class, a wrapper class around BaseState that allows us to include more information about
-the state. '''
+"""
+Contains the _BaseState class, a wrapper class around BaseState that allows us to include more information about
+the state. """
 from typing import List, Optional, Union
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 from explorateur.search.transition import Transition
 
 
-class _BaseState():
+class _BaseState:
     """
     This is used by our search() function in explorateur.py as a wrapper class around BaseState. 
     All the functions in this class just call the equivalent function in Base State. 

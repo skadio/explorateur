@@ -1,12 +1,11 @@
-''' Module for the BaseState class, which is an abstract class for the states. '''
+""" Module for the BaseState class, which is an abstract class for the states. """
 import abc
 from typing import List, Union
 from explorateur.state.base_move import BaseMove
 
 
 class BaseState(metaclass=abc.ABCMeta):
-    ''' Abstract class for the states, model your problem as a sequence of states. '''
-
+    """Abstract class for the states, model your problem as a sequence of states. """
     @abc.abstractmethod
     def __init__(self):
         """ 
@@ -54,7 +53,7 @@ class BaseState(metaclass=abc.ABCMeta):
         [Optional]Calculates and returns the objective function value for the state.
         
         Used in best first search algorithms that require a priority queue to rank the states. Note, if this function
-        returns the same value for two states this prrogram will error because there is no comparator between Base
+        returns the same value for two states this program will error because there is no comparator between Base
         States.
         
         Returns:
@@ -74,7 +73,7 @@ class BaseState(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __str__(self) -> str:
         """
-        Return a string rerpesentation of the state. 
+        Return a string representation of the state.
 
         Returns:
             str: A string representation of the state.

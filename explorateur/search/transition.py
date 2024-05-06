@@ -1,4 +1,5 @@
-'''Module for the Transition class.'''
+
+""" Module for the Transition class."""
 from explorateur.state.base_move import BaseMove
 
 

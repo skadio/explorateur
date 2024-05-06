@@ -35,7 +35,7 @@ from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
 
-from typing import List, NoReturn
+from typing import List
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
@@ -56,10 +56,10 @@ class SimpleState(BaseState):
     def __init__(self, possible_vals):
         self.var_to_val = {}
         self.possible_vals = possible_vals
-        self.unassigned_variables = self.generate_vars(self.possible_vals)
+        self.unassigned_variables = self.generate_vars()
 
 
-    def generate_vars(self, clauses):
+    def generate_vars(self):
         # this function is not necessary for a child of BaseState
         variables = set()
         for v in self.possible_vals.keys():

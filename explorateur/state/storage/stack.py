@@ -1,4 +1,4 @@
-''' Contains the Stack class which is a subclass of BaseStorage'''
+"""  Contains the Stack class which is a subclass of BaseStorage """
 from collections import deque
 from typing import Deque
 from explorateur.state.storage.base_storage import BaseStorage
@@ -7,7 +7,7 @@ from typing import Union
 
 
 class Stack(BaseStorage):
-    ''' Class representing a stack.'''
+    """  Class representing a stack."""
 
     def __init__(self):
         super().__init__()

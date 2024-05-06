@@ -1,10 +1,10 @@
-''' Module for the BaseMove class. '''
+""" Module for the BaseMove class. """
 import abc
 
 
 class BaseMove(metaclass=abc.ABCMeta):
-    ''' Abstract class for the moves, model your problem as a sequence of states,
-    with moves encoding information to transition from one state to another. '''
+    """  Abstract class for the moves, model your problem as a sequence of states,
+    with moves encoding information to transition from one state to another. """
 
     @abc.abstractmethod
     def __init__(self):

@@ -2,12 +2,11 @@
 
 import random
 import logging
-import numpy as np
 from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
 
-from typing import List, NoReturn
+from typing import List
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 

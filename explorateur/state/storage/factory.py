@@ -1,5 +1,5 @@
-''' This module contains the StorageFactory class which is responsible
-for creating different types of storage objects. '''
+"""  This module contains the StorageFactory class which is responsible
+for creating different types of storage objects. """
 from explorateur.search.storage_type import _StorageType
 from explorateur.state.storage.queue import Queue
 from explorateur.state.storage.stack import Stack

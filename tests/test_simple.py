@@ -25,9 +25,9 @@ class SimpleState(BaseState):
     def __init__(self, possible_vals):
         self.var_to_val = {}
         self.possible_vals = possible_vals
-        self.unassigned_variables = self.generate_vars(self.possible_vals)
+        self.unassigned_variables = self.generate_vars()
 
-    def generate_vars(self, clauses):
+    def generate_vars(self):
         variables = set()
         for v in self.possible_vals.keys():
             variables.add(v)
@@ -42,7 +42,7 @@ class SimpleState(BaseState):
                 moves_list.append(SimpleMove(var, val))
         return moves_list
 
-    def is_terminate(self) -> bool:
+    def is_terminate(self, end_state=None) -> bool:
         """
         """
         if len(self.unassigned_variables) > 0:
@@ -68,7 +68,7 @@ class SimpleState(BaseState):
         return str(self.var_to_val)
 
 
-class Simple_Tests(BaseTest):
+class SimpleTests(BaseTest):
     seed = random.randint(0, 100000)
 
     def test_dfs(self):
@@ -78,8 +78,8 @@ class Simple_Tests(BaseTest):
         starting_state = SimpleState(possible_vals)
 
         sol_state = explorer.search(starting_state)
-        explorer.print_path(sol_state)
-        self.assertTrue(sol_state.is_terminate())
+        path = explorer.get_path()
+        self.assertTrue(sol_state.is_terminate(end_state=None))
 
     def test_bfs(self):
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
@@ -89,7 +89,7 @@ class Simple_Tests(BaseTest):
 
         sol_state = explorer.search(starting_state)
         # explorer.print_path(sol_state)
-        self.assertTrue(sol_state.is_terminate())
+        self.assertTrue(sol_state.is_terminate(end_state=None))
 
     def test_graph_search(self):
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
@@ -101,4 +101,4 @@ class Simple_Tests(BaseTest):
         end_state.unassigned_variables = {}
 
         sol_state = explorer.search(starting_state)
-        self.assertTrue(sol_state.is_terminate())
+        self.assertTrue(sol_state.is_terminate(end_state=None))

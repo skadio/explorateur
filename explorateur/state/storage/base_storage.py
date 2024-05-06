@@ -1,4 +1,4 @@
-''' This module has the abstract class BaseStorage which is the base for all storage classes.'''
+""" This module has the abstract class BaseStorage which is the base for all storage classes. """
 from typing import Union
 import abc
 from explorateur.state._base_state import _BaseState

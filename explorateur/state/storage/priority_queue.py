@@ -1,11 +1,11 @@
-''' Contains the PriorityQueue class, which is a subclass of BaseStorage.'''
+""" Contains the PriorityQueue class, which is a subclass of BaseStorage. """
 import heapq
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state._base_state import _BaseState
 
 
 class PriorityQueue(BaseStorage):
-    ''' Class representing a priority queue.'''
+    """  Class representing a priority queue. """
 
     def __init__(self):
         super().__init__()

@@ -6,7 +6,7 @@ from explorateur.state._base_state import _BaseState
 
 
 class Queue(BaseStorage):
-    ''' Class representing a queue.'''
+    """ Class representing a queue. """
 
     def __init__(self):
         super().__init__()

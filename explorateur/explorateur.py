@@ -1,4 +1,4 @@
-''' Module for the Explorateur class, used to perform search. '''
+""" Module for the Explorateur class, used to perform search. """
 
 import time
 import logging
@@ -20,14 +20,16 @@ from explorateur.search.exploration_type import ExplorationType
 class Explorateur:
     """ Explorateur class, used to perform search. """
 
-    def __init__(self, exploration_type: Union = [ExplorationType.BestFirst(), ExplorationType.DepthFirst(),
-                                                  ExplorationType.BreadthFirst()], seed: int = Constants.default_seed):
+    def __init__(self, exploration_type: Union[ExplorationType.BestFirst, ExplorationType.DepthFirst,
+                                               ExplorationType.BreadthFirst], seed: int = Constants.default_seed):
         """
         Initializes an Explorateur object.
 
         Args: exploration_type (ExplorationType): Specifies the type of search (ExplorationType.BreadthFirst(),
         ExplorationType.DepthFirst(), ExplorationType.BestFirst()). seed (int): Seed for the randomness.
+        """
 
+        """ 
         Attributes:
             exploration_type (ExplorationType): The type of search being performed.
             seed (int): The seed used for randomness.
@@ -50,7 +52,7 @@ class Explorateur:
         self._solution_state = None
 
     def search(self, start_state: BaseState, end_state: BaseState = None, max_runtime: int = None,
-               max_iterations: int = sys.maxsize, file_path: str = None) -> BaseState:
+               max_iterations: int = sys.maxsize, file_path: str = None) -> Union[BaseState, None]:
         """
         This function carries out the search starting at start_state until either a solution is found or it has to
         terminate.
@@ -82,7 +84,7 @@ class Explorateur:
             self.tree.add_node(_start_state.node)
 
         # initialize the states storage
-        states: BaseStorage[_BaseState] = StorageFactory.create(self.exploration_type.storage_type)
+        states: BaseStorage = StorageFactory.create(self.exploration_type.storage_type)
         states.insert(_start_state)
 
         # initialize the counter and iterations, start the timer
@@ -183,7 +185,8 @@ class Explorateur:
         self.get_path_helper(self._solution_state, state_list)
 
         if reverse:
-            return state_list.reverse()
+            state_list.reverse()
+            return state_list
 
         return state_list
 

@@ -2,13 +2,11 @@
 
 import random
 import logging
-import numpy as np
 from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
-# from tests.SAT_Class import SATState
 
-from typing import List, NoReturn
+from typing import List
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
@@ -96,7 +94,7 @@ class SATState(BaseState):
         return str(iterations)
 
 
-class SAT_Tests(BaseTest):
+class SATTests(BaseTest):
     seed = random.randint(0, 100000)
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -107,7 +105,7 @@ class SAT_Tests(BaseTest):
         starting_state = SATState(clauses)
 
         sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_1.dot")
-        self.assertTrue(sol_state.is_terminate())
+        self.assertTrue(sol_state.is_terminate(end_state=None))
 
     def test_dfs_2(self):
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
@@ -123,7 +121,7 @@ class SAT_Tests(BaseTest):
 
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state, file_path="tmp/test_bfs_1.dot")
-        self.assertTrue(sol_state.is_terminate())
+        self.assertTrue(sol_state.is_terminate(end_state=None))
 
     def test_bfs_2(self):
         explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)

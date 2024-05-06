@@ -8,7 +8,7 @@ from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
 # from tests.SAT_Class import SATState
 
-from typing import List, NoReturn
+from typing import List
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
@@ -35,9 +35,7 @@ class SATState(BaseState):
         self.flag = False
 
     def generate_vars(self, clauses):
-        '''
-        This function is not part of the ones the user has to implement for BaseState, it's a helper.
-        '''
+        # This function is not part of the ones the user has to implement for BaseState, it's a helper.
         variables = set()
         for c in clauses:
             for v in c:
@@ -121,7 +119,7 @@ class ExplorationTypeTests(BaseTest):
         starting_state = SATState(clauses)
 
         sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_1")
-        self.assertTrue(sol_state.is_terminate())
+        self.assertTrue(sol_state.is_terminate(end_state=None))
 
     def test_dfs_2(self):
         """
@@ -147,7 +145,7 @@ class ExplorationTypeTests(BaseTest):
         starting_state = SATState(clauses)
         sol_state = explorer.search(starting_state, file_path="tmp/test_bfs_1")
         # explorer.print_path(sol_state)
-        self.assertTrue(sol_state.is_terminate())
+        self.assertTrue(sol_state.is_terminate(end_state=None))
 
     def test_bfs_2(self):
         """
