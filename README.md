@@ -31,42 +31,38 @@ pip install explorateur
 
 # Imports from Explorateur
 import random
-from tests.test_base import BaseTest
+from typing import List
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
-
-from typing import List
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
-# Setting up Move class which implements BaseMove
+# SimpleMove and SimpleState are used to test the Explorateur class
+
+# SimpleMove is a subclass of BaseMove
 class SimpleMove(BaseMove):
 
     def __init__(self, variable, variable_assignment):
         self.variable = variable
         self.value = variable_assignment
-    
+
     def __str__(self) -> str:
         return f"Setting variable: {self.variable} to {self.value}"
 
-# Implementing the State class which implements BaseState
+# SimpleState is a subclass of BaseState
 class SimpleState(BaseState):
 
-    @override
     def __init__(self, possible_vals):
         self.var_to_val = {}
         self.possible_vals = possible_vals
         self.unassigned_variables = self.generate_vars()
 
-
     def generate_vars(self):
-        # this function is not necessary for a child of BaseState
         variables = set()
         for v in self.possible_vals.keys():
             variables.add(v)
         return variables
 
-    @override
     def get_moves(self) -> List[SimpleMove]:
         moves_list = []
         for var in self.unassigned_variables:
@@ -74,17 +70,25 @@ class SimpleState(BaseState):
                 moves_list.append(SimpleMove(var, val))
         return moves_list
 
-    @override
-    def is_terminate(self) -> bool:
+    def is_terminate(self, end_state=None) -> bool:
         if len(self.unassigned_variables) > 0:
             return False
         return True
 
-    @override
     def execute(self, move: SimpleMove) -> bool:
-        self.var_to_val[move.variable] = move.value  # don't need the absolute
+        self.var_to_val[move.variable] = move.value 
         self.unassigned_variables.remove(move.variable)
         return True
+
+    def is_valid(self) -> bool:
+        valid = True
+        for k, v in self.var_to_val.items():
+            if v not in self.possible_vals[k]:
+                valid = False
+        return valid
+
+    def make_node_label(self, iterations: int):
+        return str(iterations)
 
     def __str__(self) -> str:
         return str(self.var_to_val)
@@ -96,6 +100,10 @@ def main():
     possible_vals = {1: [1,2], 2: [20,10], 3: [100,200]}
     starting_state = SimpleState(possible_vals)
     sol_state = explorer.search(starting_state)
+    print(sol_state)
+
+if __name__ == "__main__":
+    main()
 ```
 
 The above example just searches for some assignment of variables 1,2,3 where the assignments happen to be those indicated by ```possible_vars```. In ```get_moves()``` we return moves that are "legal" by what is established in ```possible_vars```.
