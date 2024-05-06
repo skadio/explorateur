@@ -5,7 +5,7 @@ from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
 
-from typing import List, NoReturn
+from typing import List
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
@@ -30,17 +30,15 @@ class SimpleState(BaseState):
     def __init__(self, possible_vals):
         self.var_to_val = {}
         self.possible_vals = possible_vals
-        self.unassigned_variables = self.generate_vars(self.possible_vals)
+        self.unassigned_variables = self.generate_vars()
 
-    def generate_vars(self, clauses):
+    def generate_vars(self):
         variables = set()
         for v in self.possible_vals.keys():
             variables.add(v)
         return variables
 
     def get_moves(self) -> List[SimpleMove]:
-        """
-        """
         moves_list = []
         for var in self.unassigned_variables:
             for val in self.possible_vals[var]:
@@ -48,9 +46,6 @@ class SimpleState(BaseState):
         return moves_list
 
     def is_terminate(self, end_state=None) -> bool:
-        """
-        """
-        return True
         end_assignment = {1: 1, 2: 20, 3: 100}
         if end_state.var_to_val == end_assignment:
             return True
@@ -94,4 +89,4 @@ class GraphSearchTest(BaseTest):
         sol_state = explorer.search(starting_state)
         # explorer.print_path(sol_state)
         # explorer.visualize_tree("tmp/simple_graphsearch")
-        self.assertTrue(sol_state.is_terminate())
+        self.assertTrue(sol_state.is_terminate(end_state=None))

@@ -34,8 +34,6 @@ class SimpleState(BaseState):
         return variables
 
     def get_moves(self) -> List[SimpleMove]:
-        """
-        """
         moves_list = []
         for var in self.unassigned_variables:
             for val in self.possible_vals[var]:
@@ -43,8 +41,6 @@ class SimpleState(BaseState):
         return moves_list
 
     def is_terminate(self, end_state=None) -> bool:
-        """
-        """
         if len(self.unassigned_variables) > 0:
             return False
         return True

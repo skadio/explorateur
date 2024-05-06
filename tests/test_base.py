@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from typing import List, Union, Optional
+from typing import List, Union
 
 
 class BaseTest(unittest.TestCase):
@@ -13,7 +13,6 @@ class BaseTest(unittest.TestCase):
     def common_test_function(some_parameter) -> Union[List[float], List[List[float]]]:
         """Sets up a common test
 
-        Return 
         """
         return -1
 

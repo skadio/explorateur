@@ -37,8 +37,6 @@ class SATState(BaseState):
         return variables
 
     def get_moves(self) -> List[SATMove]:
-        """
-        """
         moves_list = []
         for var in self.unassigned_variables:
             moves_list.append(SATMove(var, True))
@@ -47,8 +45,6 @@ class SATState(BaseState):
         return moves_list
 
     def is_terminate(self, end_state=None) -> bool:
-        """
-        """
         for clause in self.clauses:
             is_satisfied = False
             for literal in clause:

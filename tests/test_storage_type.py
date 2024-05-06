@@ -2,7 +2,7 @@
 
 import random
 from tests.test_base import BaseTest
-from typing import List, NoReturn
+from typing import List
 from explorateur.state.storage.queue import Queue
 from explorateur.state.storage.stack import Stack
 from explorateur.state.storage.priority_queue import PriorityQueue
@@ -30,7 +30,7 @@ class SimpleState(BaseState):
     def get_moves(self) -> List[SimpleMove]:
         pass
 
-    def is_terminate(self) -> bool:
+    def is_terminate(self, end_state=None) -> bool:
         pass
 
     def execute(self, move: SimpleMove) -> bool:
@@ -52,7 +52,7 @@ class SimpleState(BaseState):
             return 10
 
 
-class Storage_Tests(BaseTest):
+class StorageTests(BaseTest):
     seed = random.randint(0, 100000)
 
     # can't test for contains() because it takes in a _BaseState
