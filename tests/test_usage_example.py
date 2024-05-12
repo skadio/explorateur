@@ -6,32 +6,30 @@ from typing import List
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
 from explorateur.search.search_type import SearchType
-from explorateur.state.base_dot_labeler import BaseDotLabeler
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 from tests.test_base import BaseTest
 
 
-class MyMove(BaseMove, BaseDotLabeler):
+class MyMove(BaseMove):
 
     def __init__(self, variable, constraint, value):
         self.variable = variable
         self.constraint = constraint
         self.value = value
 
-    def get_dot_label(self, num_decisions: int, depth: int) -> str:
-        label = "MOVE " + str(num_decisions) + "@" + str(depth) + "\n"
-        label += str(self.variable) + " " + self.constraint + " " + str(self.value)
-        return label
+    def get_dot_label(self) -> str:
+        return str(self.variable) + " " + self.constraint + " " + str(self.value)
 
     def __str__(self) -> str:
         return str(self.variable) + " " + self.constraint + " " + str(self.value)
 
 
-class MyState(BaseState, BaseDotLabeler):
+class MyState(BaseState):
 
-    def __init__(self, var_to_domain):
+    def __init__(self, var_to_domain, is_all_solutions):
         self.var_to_domain = var_to_domain
+        self.is_all_solutions = is_all_solutions
         self.var_to_val = {}
         self.unassigned_variables = list(self.var_to_domain.keys())
 
@@ -53,15 +51,18 @@ class MyState(BaseState, BaseDotLabeler):
 
     def is_terminate(self, end_state=None) -> bool:
         # Search finishes when all variables are assigned
+        if self.is_all_solutions: return False
         return len(self.unassigned_variables) == 0
-        # return False
 
     def execute(self, move: MyMove) -> bool:
         logging.info("USER Execute: %s", move)
         var, constraint, val = move.variable, move.constraint, move.value
 
-        # if var == "x" and constraint == "==" and val == 1:
-        #     return False
+        if var == "x" and constraint == "==" and val == 1:
+            return False
+
+        if var == "z" and constraint == "==" and val == 100:
+            return False
 
         # Propagation
         if constraint == "==":
@@ -84,13 +85,10 @@ class MyState(BaseState, BaseDotLabeler):
         logging.info("USER Execute: SUCCESS")
         return True
 
-    def get_dot_label(self, num_decisions: int, depth: int):
-        label = "STATE " + str(num_decisions) + "@" + str(depth) + "\n"
+    def get_dot_label(self):
+        label = "STATE\n"
         for var, val in self.var_to_val.items():
-            if val:
-                label += str(var) + " = " + str(val) + "\n"
-            else:
-                label += str(var) + "{..}\n"
+            label += str(var) + " = " + str(val) + "\n"
         return label
 
     def __str__(self) -> str:
@@ -111,11 +109,12 @@ class SimpleTests(BaseTest):
         # Initial state
         initial_state = MyState(OrderedDict([("x", [1, 2]),
                                              ("y", [10, 20]),
-                                             ("z", [100, 200])]))
+                                             ("z", [100, 200])]),
+                                is_all_solutions=False)
 
         # Solve via search
         solution_path = explorer.search(initial_state,
-                                        exploration_type=ExplorationType.BreadthFirst(),
+                                        exploration_type=ExplorationType.BestFirst(),
                                         search_type=SearchType.TreeSearch(),
                                         is_solution_path=True,
                                         dot_file_path="example.dot")

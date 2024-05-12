@@ -12,11 +12,10 @@ from explorateur.search.exploration_type import ExplorationType
 from explorateur.search.search_type import SearchType
 from explorateur.search.transition import Transition
 from explorateur.state.base_state import BaseState
-from explorateur.state.base_move import BaseMove
 from explorateur.state.state import _State
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state.storage.factory import StorageFactory
-from explorateur.utils import check_true, Constants, All_Exploration_Types, All_Search_Types
+from explorateur.utils import check_true, All_Exploration_Types, All_Search_Types
 
 __version__ = __version__
 
@@ -42,7 +41,6 @@ class Explorateur:
         """ Initialize an Explorateur object. """
 
         # TODO add logger
-        # TODO pass RNG to user
 
         # Validate arguments
         Explorateur._validate_args()
@@ -149,6 +147,7 @@ class Explorateur:
 
             # Transition of the current state (there is no transition for initial moves)
             transition = current_decision.state_.transition
+            next_depth = transition.depth + 1 if transition else 1
             logging.info("Current transition: %s", transition)
 
             # Mark the decision as visited, if graph search
@@ -162,17 +161,17 @@ class Explorateur:
                 logging.info("Move is successful.")
 
                 # Set next depth and attach next transition to successor so that we can trace solution path
-                next_depth = transition.depth + 1 if transition else 1
                 next_transition = Transition(previous_state_=current_decision.state_, move=current_decision.move, depth=next_depth)
                 logging.info("Create next transition %s ", next_transition)
                 successor_.transition = next_transition
 
-                # Add to the dot graph
-                # if self.dot_graph: self._add_dot(current_decision)
-
-                self._add_dot_node(current_decision.state_, self.num_decisions, next_depth)
-                self._add_dot_node(successor_, self.num_decisions, next_depth)
-                self._add_dot_edge(current_decision.state_, current_decision.move, successor_, self.num_decisions, next_depth)
+                if self.dot_graph:
+                    from_node = Node(name=current_decision.state_.get_dot_label())
+                    to_node = Node(name=successor_.get_dot_label())
+                    # self.dot_graph.add_node(from_node)
+                    # self.dot_graph.add_node(to_node)
+                    edge_label = current_decision.move.get_dot_label()
+                    self.dot_graph.add_edge(Edge(src=from_node, dst=to_node, label=edge_label))
 
                 # Check termination, else expand current state with possible moves as open decisions for execution within depth
                 is_terminate, is_solution = self._is_terminate_or_expand(successor_, goal_state, exploration_type, max_depth, dot_file_path)
@@ -184,6 +183,15 @@ class Explorateur:
                 self.num_failed_decisions += 1
                 # Skip failed move and infeasible successor
                 logging.info("Skip infeasible successor. Num fails: %s", str(self.num_failed_decisions))
+
+                if self.dot_graph:
+                    from_node = Node(name=current_decision.state_.get_dot_label())
+                    fail_node = Node(self.num_decisions,
+                                     label="Fail: " + str(self.num_failed_decisions), shape="triangle", style="filled", fillcolor="red")
+                    # self.dot_graph.add_node(from_node)
+                    self.dot_graph.add_node(fail_node)
+                    edge_label = current_decision.move.get_dot_label()
+                    self.dot_graph.add_edge(Edge(src=from_node, dst=fail_node, label=edge_label))
 
         # No more open decisions left, search finished, save the dot
         self.total_time = time.perf_counter() - self._start_time
@@ -200,13 +208,12 @@ class Explorateur:
             is_terminate, is_solution = True, True
             self._solution_state_ = state_
             self.solution_state = state_.base
-            end = time.perf_counter()
             self.total_time = time.perf_counter() - self._start_time
             logging.info("Successful termination for state: " + str(state_))
             self._log_stats("<<< FINISH SEARCH - SUCCESS - Solution Found!")
             if self.dot_graph:
                 # Recolor final node with green
-                self._add_dot_node(state_, self.num_decisions, state_.transition.depth, style="filled", fillcolor="green")
+                self.dot_graph.add_node(Node(state_.get_dot_label(), style="filled", fillcolor="green"))
                 self.dot_graph.write(dot_file_path)
             return is_terminate, is_solution
         else:
@@ -303,7 +310,7 @@ class Explorateur:
         self._solution_state_ = None
 
         # Dot graph representation of search, if dot file given
-        self.dot_graph = Dot(graph_type="digraph", rankdir="LR", splines="line") if dot_file_path else None
+        self.dot_graph = Dot(graph_type="digraph", splines="line") if dot_file_path else None
 
         # Initialize counters
         self._start_time = time.perf_counter()
@@ -329,35 +336,6 @@ class Explorateur:
             self._log_stats("<<< FINISH SEARCH - STOP - No solution! " + stop_cause)
             if self.dot_graph: self.dot_graph.write(dot_file_path)
             return None
-
-    def _add_dot(self, current_decision):
-        current = current_decision.state_
-        if current.transition:
-            previous = current_decision.state_.transition.previous_state_
-            move = current_decision.state_.transition.move
-            depth = current_decision.state_.transition.depth
-            self._add_dot_node(previous, self.num_decisions, depth)
-            self._add_dot_node(current, self.num_decisions, depth)
-            self._add_dot_edge(previous, move, current, self.num_decisions, depth)
-        else:
-            self._add_dot_node(current, self.num_decisions, depth=1)
-
-    def _add_dot_node(self, state_, num_decisions, depth, style: str = None, fillcolor: str = None):
-
-        # Add the dot node label to the _state. The node label comes from user defined base state.
-        state_.dot_node_label = state_.get_dot_label(num_decisions, depth)
-
-        # Add the dot node to the _state
-        state_.dot_node = Node(state_.dot_node_label, style=style, fillcolor=fillcolor) if style \
-            else Node(state_.dot_node_label)
-
-        # Add the dot note to the graph
-        self.dot_graph.add_node(state_.dot_node)
-
-    def _add_dot_edge(self, current_, move: BaseMove, successor_, num_decisions, depth):
-        edge_label = move.get_dot_label(num_decisions, depth)
-        edge = Edge(current_.dot_node, successor_.dot_node, label=edge_label)
-        self.dot_graph.add_edge(edge)
 
     def _log_stats(self, info):
         logging.info(info +

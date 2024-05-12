@@ -23,3 +23,11 @@ class BaseMove(metaclass=abc.ABCMeta):
         Returns:
             str: A string representation of the move.
         """
+
+    def get_dot_label(self) -> str:
+        """
+           Return a string label for dot graph edge.
+
+           Returns:
+               str: A string label to display in dot graph.
+        """

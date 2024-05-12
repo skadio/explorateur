@@ -60,3 +60,24 @@ class BaseState(metaclass=abc.ABCMeta):
         Returns:
             str: A string representation of the state.
         """
+
+    def get_dot_label(self) -> str:
+        """
+           Return a string label for dot graph node.
+
+           Returns:
+               str: A string label to display in dot graph.
+        """
+
+    def get_objective(self) -> float:
+        """
+            Return the objective value of the state.
+
+            Best-First Search requires an evaluation of states for ranking.
+
+            Note, if this function returns the same value for two states
+            there will be an error because there is no comparator between abstract Base States.
+
+            Returns:
+                float: The objective function value for the state.
+        """

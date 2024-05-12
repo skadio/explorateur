@@ -1,13 +1,11 @@
 from typing import List, Optional
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
-from explorateur.state.base_state_objective import BaseStateObjective
-from explorateur.state.base_dot_labeler import BaseDotLabeler
 from explorateur.search.transition import Transition
 from pydot import Node
 
 
-class _State(BaseState, BaseStateObjective, BaseDotLabeler):
+class _State(BaseState):
     """
     An internal class to wrap user BaseState.
     The wrapper extends BaseState with transition, get_transition() and set_transition().
@@ -28,6 +26,9 @@ class _State(BaseState, BaseStateObjective, BaseDotLabeler):
     def execute(self, move: BaseMove) -> bool:
         return self.base.execute(move)
 
+    def get_dot_label(self) -> str:
+        return self.base.get_dot_label()
+
     def get_moves(self) -> List[BaseMove]:
         return self.base.get_moves()
 
@@ -35,12 +36,8 @@ class _State(BaseState, BaseStateObjective, BaseDotLabeler):
         return self.base.is_terminate(end_state)
 
     # Implement BaseStateObjective
-    def get_objective(self, state: BaseState) -> float:
-        return self.base.get_objective(state)
-
-    # Implement BaseDotLabeler
-    def get_dot_label(self, num_decisions: int, depth: int) -> str:
-        return self.base.get_dot_label(num_decisions, depth)
+    def get_objective(self) -> float:
+        return self.base.get_objective()
 
     def __str__(self) -> str:
         return str(self.base)
