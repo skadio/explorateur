@@ -16,98 +16,114 @@ There is also the option to use a Graph Search: in order for this to work, the u
 
 The algorithm stops once a solution is found based on ```is_terminate()```, or all possible states have been explored and no solution has been found or in the case that ```max_runtime``` or ```max_iters``` is defined if one of them are reached.
 
-## Installation
-
-Explorateur can be installed from terminal by doing:
-bash
-```
-pip install explorateur
-```
-
 ## Quick Start:
 
 ```python
-# Example that will search for an assignment of values for a group of variables
-
-# Imports from Explorateur
-import random
 from typing import List
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
-# SimpleMove and SimpleState are used to test the Explorateur class
 
-# SimpleMove is a subclass of BaseMove
+# Create your custom move
 class SimpleMove(BaseMove):
 
-    def __init__(self, variable, variable_assignment):
+    def __init__(self, variable, value):
         self.variable = variable
-        self.value = variable_assignment
+        self.value = value
+
+    def get_dot_edge_label(self) -> str:
+        return str(self.variable) + "->" + str(self.value)
 
     def __str__(self) -> str:
         return f"Setting variable: {self.variable} to {self.value}"
 
-# SimpleState is a subclass of BaseState
+
+# Create your custom state representation
 class SimpleState(BaseState):
 
-    def __init__(self, possible_vals):
-        self.var_to_val = {}
-        self.possible_vals = possible_vals
-        self.unassigned_variables = self.generate_vars()
+    def __init__(self, var_to_domain):
+        self.var_to_domain = var_to_domain
 
-    def generate_vars(self):
-        variables = set()
-        for v in self.possible_vals.keys():
-            variables.add(v)
-        return variables
+        self.var_to_value = {}
+        self.unassigned_vars = set(var_to_domain.keys())
 
     def get_moves(self) -> List[SimpleMove]:
-        moves_list = []
-        for var in self.unassigned_variables:
-            for val in self.possible_vals[var]:
-                moves_list.append(SimpleMove(var, val))
-        return moves_list
+        moves = []
+        for var in self.unassigned_vars:
+            for val in self.var_to_domain[var]:
+                moves.append(SimpleMove(var, val))
+        return moves
 
     def is_terminate(self, end_state=None) -> bool:
-        if len(self.unassigned_variables) > 0:
+        if len(self.unassigned_vars) > 0:
             return False
         return True
 
     def execute(self, move: SimpleMove) -> bool:
-        self.var_to_val[move.variable] = move.value 
-        self.unassigned_variables.remove(move.variable)
+        self.var_to_value[move.variable] = move.value
+        self.unassigned_vars.remove(move.variable)
         return True
 
-    def is_valid(self) -> bool:
-        valid = True
-        for k, v in self.var_to_val.items():
-            if v not in self.possible_vals[k]:
-                valid = False
-        return valid
-
-    def make_node_label(self, iterations: int):
+    def get_state_label(self, iterations: int):
         return str(iterations)
 
     def __str__(self) -> str:
-        return str(self.var_to_val)
+        return str(self.var_to_value)
 
-#setting up a simple search by Explorateur
-def main():
-    seed = random.randint(0, 100000)
-    explorer = Explorateur(ExplorationType.DepthFirst(), seed)
-    possible_vals = {1: [1,2], 2: [20,10], 3: [100,200]}
-    starting_state = SimpleState(possible_vals)
-    sol_state = explorer.search(starting_state)
-    print(sol_state)
 
-if __name__ == "__main__":
-    main()
+# Explorateur with choice of exploration
+explorer = Explorateur(ExplorationType.DepthFirst())
+
+# Initial state with variables and their possible domains 
+initial_state = SimpleState({"x": [1, 2], "y": [20, 10], "z": [100, 200]})
+
+# Find a solution via search 
+solution = explorer.search(initial_state)
+print(solution)
 ```
 
 The above example just searches for some assignment of variables 1,2,3 where the assignments happen to be those indicated by ```possible_vars```. In ```get_moves()``` we return moves that are "legal" by what is established in ```possible_vars```.
 
+
+## Install from PyPI
+
+Explorateur can be installed from PyPI using `pip install explorateur`
+
+## Install from Source
+Alternatively, you can build a wheel package on your platform from scratch using the source code:
+
+```bash
+git clone https://github.com/skadio/explorateur.git
+cd explorateur
+pip install setuptools wheel # if wheel is not installed
+python setup.py sdist bdist_wheel
+pip install dist/explorateur-X.X.X-py3-none-any.whl
+```
+
+## Test your setup 
+This command will run **all the tests**.
+```
+$  cd explorateur
+$  python -m unittest discover tests
+```
+
+To run a specific test from a given test file:
+```
+$ python -m unittest -v tests.<file_name>.<class_name>.<function_name>
+```
+
+For example: 
+```
+$ python -m unittest -v tests.test_exploration_type.ExplorationTypeTests.test_bfs_1
+```
+
+## Changelog
+
+| Date         | Notes           |
+|--------------|-----------------|
+| 15 May, 2024 | Initial release |
 
 ## Support
 
@@ -116,31 +132,5 @@ Please submit bug reports and feature requests as [Issues](https://github.com/ex
 ## License
 
 Explorateur is licensed under the [Apache License 2.0](LICENSE.md).
-
-## Unit Tests
-This command will run **all the tests**.
-```
-$  python -m unittest discover
-```
-
-If you wish to run a specific test from a given test file please run the following commandf.
-```
-$ python -m unittest -v tests.<file_name>.<class_name>.<function_name>
-```
-So for example, we could do:
-```
-$ python -m unittest -v tests.test_exploration_type.ExplorationTypeTests.test_bfs_1
-```
-## Changelog
-
-| Date | Notes |
-|--------|-------------|
-| l May, 2024 | Initial release |
-
-<br>
-
-```
-Explorateur © Copyright, Explorateur
-````
 
 <br>

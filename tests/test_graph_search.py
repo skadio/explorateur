@@ -66,8 +66,8 @@ class SimpleState(BaseState):
                 valid = False
         return valid
 
-    def make_node_label(self, iterations):
-        return str(iterations)
+    def get_dot_node_label(self, curr_iter_count):
+        return str(curr_iter_count)
 
 
 class GraphSearchTest(BaseTest):
@@ -88,5 +88,5 @@ class GraphSearchTest(BaseTest):
 
         sol_state = explorer.search(starting_state)
         # explorer.print_path(sol_state)
-        # explorer.visualize_tree("tmp/simple_graphsearch")
+        # explorer.visualize_tree("tmp/simple_graph_search")
         self.assertTrue(sol_state.is_terminate(end_state=None))

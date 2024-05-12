@@ -17,6 +17,9 @@ class SATMove(BaseMove):
         self.variable = variable
         self.value = variable_assignment
 
+    def get_dot_edge_label(self) -> str:
+        return str(self.variable) + "->" + str(self.value)
+
     def __str__(self) -> str:
         return f"Setting variable: {self.variable} to {self.value}"
 
@@ -86,8 +89,8 @@ class SATState(BaseState):
     def __str__(self) -> str:
         return str(self.var_to_val)
 
-    def make_node_label(self, iterations) -> str:
-        return str(iterations)
+    def get_dot_node_label(self, curr_iter_count) -> str:
+        return str(curr_iter_count)
 
 
 class SATTests(BaseTest):
@@ -100,7 +103,7 @@ class SATTests(BaseTest):
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_1.dot")
+        sol_state = explorer.search(starting_state, dot_file_path="tmp/test_dfs_1.dot")
         self.assertTrue(sol_state.is_terminate(end_state=None))
 
     def test_dfs_2(self):
@@ -108,7 +111,7 @@ class SATTests(BaseTest):
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path="tmp/test_dfs_2.dot")
+        sol_state = explorer.search(starting_state, dot_file_path="tmp/test_dfs_2.dot")
         self.assertEqual(sol_state, None)
 
     def test_bfs_1(self):
@@ -116,7 +119,7 @@ class SATTests(BaseTest):
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, file_path="tmp/test_bfs_1.dot")
+        sol_state = explorer.search(starting_state, dot_file_path="tmp/test_bfs_1.dot")
         self.assertTrue(sol_state.is_terminate(end_state=None))
 
     def test_bfs_2(self):
@@ -125,15 +128,15 @@ class SATTests(BaseTest):
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, file_path="tmp/test_bfs_2.dot")
+        sol_state = explorer.search(starting_state, dot_file_path="tmp/test_bfs_2.dot")
         self.assertEqual(sol_state, None)
 
     def test_iterations(self):
-        # this one is supposed to have a solution but we are cutting it of early
+        # this one is supposed to have a solution, but we are cutting it of early
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, max_iterations=2)
+        sol_state = explorer.search(starting_state, max_moves=2)
         self.assertEqual(sol_state, None)

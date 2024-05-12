@@ -1,42 +1,34 @@
-"""  This module contains the StorageFactory class which is responsible
-for creating different types of storage objects. """
-from explorateur.search.storage_type import _StorageType
 from explorateur.state.storage.queue import Queue
 from explorateur.state.storage.stack import Stack
 from explorateur.state.storage.priority_queue import PriorityQueue
+from explorateur.state.storage.hash import HashSet
 from explorateur.state.storage.base_storage import BaseStorage
+from explorateur.search.exploration_type import ExplorationType
+from explorateur.search.search_type import SearchType
+from explorateur.utils import All_Exploration_Types
+from typing import Union, Optional
 
 
 class StorageFactory:
-    """
-    A factory class for creating different types of storage objects.
-    """
+    """ A factory class for creating different types of storage objects."""
+
+    factory = {ExplorationType.BestFirst: PriorityQueue,
+               ExplorationType.BreadthFirst: Queue,
+               ExplorationType.DepthFirst: Stack,
+               SearchType.GraphSearch: HashSet}
 
     @staticmethod
-    def create(storage_type: _StorageType) -> BaseStorage:
+    def create(storage_type: Union[All_Exploration_Types, SearchType.GraphSearch]) -> Optional[BaseStorage]:
         """
         Create a storage object based on the given storage type.
+        If storage type does not exist, returns None.
 
         Args:
-            storage_type (_StorageType): The type of storage to create.
+            storage_type (Union[All_Exploration_Types, SearchType.GraphSearch]): The type of storage to create.
 
         Returns:
-            BaseStorage: The created storage object.
-
-        Raises:
-            ValueError: If the storage type is None or not recognized.
+            Optional(BaseStorage): The created storage object or None if storage type does not exist.
 
         """
-        # Implementation code goes here
-        if storage_type is None:
-            raise ValueError
-        elif isinstance(storage_type, _StorageType.Queue):
-            return Queue()
-        elif isinstance(storage_type, _StorageType.Stack):
-            return Stack()
-        elif isinstance(storage_type, _StorageType.PriorityQueue):
-            return PriorityQueue()
-        elif isinstance(storage_type, _StorageType.Hash):
-            raise ValueError
-        else:
-            raise ValueError
+        storage = StorageFactory.factory.get(type(storage_type))
+        return storage() if storage else None

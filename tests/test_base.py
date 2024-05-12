@@ -1,20 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from typing import List, Union
 
 
 class BaseTest(unittest.TestCase):
-
-    # A list common to all tests
-    xx = []
-
-    @staticmethod
-    def common_test_function(some_parameter) -> Union[List[float], List[List[float]]]:
-        """Sets up a common test
-
-        """
-        return -1
 
     def assertListAlmostEqual(self, list1, list2):
         """

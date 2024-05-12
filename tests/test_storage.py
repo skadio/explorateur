@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import random
 from tests.test_base import BaseTest
 from typing import List
@@ -42,10 +40,10 @@ class SimpleState(BaseState):
     def is_valid(self) -> bool:
         pass
 
-    def make_node_label(self, iterations: int) -> str:
+    def get_dot_node_label(self, curr_iter_count: int) -> str:
         pass
 
-    def objective_function(self):
+    def get_objective(self):
         if self.val == 2:
             return 1
         else:
@@ -65,7 +63,7 @@ class StorageTests(BaseTest):
         q.insert(b2)
         res = q.remove()
         self.assertEqual(b1, res)
-        self.assertEqual(q.get_size(), 1)
+        self.assertEqual(q.size(), 1)
         q.remove()
         self.assertTrue(q.is_empty())
 
@@ -78,7 +76,7 @@ class StorageTests(BaseTest):
         s.insert(b2)
         res = s.remove()
         self.assertEqual(b2, res)
-        self.assertEqual(s.get_size(), 1)
+        self.assertEqual(s.size(), 1)
         self.assertFalse(s.is_empty())
 
     def test_priority_queue(self):
@@ -87,7 +85,7 @@ class StorageTests(BaseTest):
         b2 = SimpleState(2)
         pq.insert(b1)
         pq.insert(b2)
-        self.assertEqual(pq.get_size(), 2)
+        self.assertEqual(pq.size(), 2)
         res = pq.remove()
         self.assertEqual(res, b2)
         self.assertFalse(pq.is_empty())

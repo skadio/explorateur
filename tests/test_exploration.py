@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import random
 import logging
+import numpy as np
 from tests.test_base import BaseTest
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
@@ -10,10 +9,8 @@ from typing import List
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
 
-"""
-Uses a SAT problem to run and test the exploration heuristics. We implement the functions needed for BaseMove
-and BaseState to function. 
-"""
+"""Uses a SAT problem to run and test breath-first, depth-first and best-first search. We implement the functions 
+needed for BaseMove and BaseState to function. """
 
 
 class SATMove(BaseMove):
@@ -35,6 +32,7 @@ class SATState(BaseState):
         self.flag = False
 
     def generate_vars(self, clauses):
+        # This function is not part of the ones the user has to implement for BaseState, it's a helper.
         variables = set()
         for c in clauses:
             for v in c:
@@ -88,38 +86,86 @@ class SATState(BaseState):
                 return False
         return True
 
+    def get_objective(self) -> float:
+        res = np.random.uniform(2.0, 10.0)
+        if 2 in self.var_to_val.keys():
+            if self.var_to_val[2] is False and self.flag is False:
+                self.flag = True
+                return 0.5
+        return res
+
     def __str__(self) -> str:
         return str(self.var_to_val)
 
-    def make_node_label(self, iterations):
-        return str(iterations)
+    def get_dot_node_label(self, curr_iter_count):
+        return str(curr_iter_count)
 
 
-class ExplorationStoppingCriteriaTests(BaseTest):
+class ExplorationTypeTests(BaseTest):
     seed = random.randint(0, 100000)
+    # If you with to print out logging from the search please copy this line before calling search()
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    def test_max_iterations(self):
+    def test_dfs_1(self):
         """
         This is a Depth-First search for a satisfiable / solveable instance and writes the tree to "temp/test_dfs_1"
-        However, because we terminate the search early the search() should just have returned None.
         """
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, 2, 3), (-1, 2)]
 
         starting_state = SATState(clauses)
 
-        sol_state = explorer.search(starting_state, max_iterations=2, file_path="tmp/test_dfs_1")
-        self.assertEqual(None, sol_state)
+        sol_state = explorer.search(starting_state, dot_file_path="tmp/test_dfs_1")
+        self.assertTrue(sol_state.is_terminate(end_state=None))
 
-    def test_max_runtime(self):
+    def test_dfs_2(self):
         """
-        This is a Depth-First Search search over an UNSAT problem, that is to say there should be no solution state. 
-        We set a max time of 1 seconds so as to make sure that not all nodes are explored through the dot file.
+        This is a Depth-First Search over an UNSAT problem, that is to say there should be no solution state.
+        The tree is written to "temp/test_dfs_2" and all the leaf nodes are red with no green nodes since there is no
+        solution state.
         """
         explorer = Explorateur(ExplorationType.DepthFirst(), self.seed)
         clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
 
         starting_state = SATState(clauses)
-        sol_state = explorer.search(starting_state, max_runtime=1, file_path="tmp/test_dfs_2")
+        sol_state = explorer.search(starting_state, dot_file_path="tmp/test_dfs_2")
         self.assertEqual(sol_state, None)
+
+    def test_bfs_1(self):
+        """
+        This is a Breadth-First search for a satisfiable / solveable instance same as the first one with the tree
+        written to "tmp/test_bfs_1".
+        """
+        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
+        clauses = [(1, 2, 3), (-1, 2)]
+
+        starting_state = SATState(clauses)
+        sol_state = explorer.search(starting_state, dot_file_path="tmp/test_bfs_1")
+        # explorer.print_path(sol_state)
+        self.assertTrue(sol_state.is_terminate(end_state=None))
+
+    def test_bfs_2(self):
+        """
+        This is a Breadth-First search for an unsatisfiable instance and writes the tree to "tmp/test_bfs_2"
+        """
+        explorer = Explorateur(ExplorationType.BreadthFirst(), self.seed)
+        clauses = [(1, -2), (-1, -2), (2, 3), (-3, 2), (1, 4)]
+
+        starting_state = SATState(clauses)
+
+        sol_state = explorer.search(starting_state, dot_file_path="tmp/test_bfs_2")
+        self.assertEqual(sol_state, None)
+
+    def test_best_first(self):
+        """
+        This is a Best-First search done with the objective function defined above. Since we let the first instance
+        of 2 being false have the lowest value for the priority queue we expect this to be the first element explored
+        (seen in "tmp/test_pq")
+        """
+        explorer = Explorateur(ExplorationType.BestFirst(), self.seed)
+        clauses = [(1, 2, 3), (-1, 2)]
+
+        starting_state = SATState(clauses)
+        sol_state = explorer.search(starting_state, dot_file_path="tmp/test_pq")
+        # explorer.visualize_tree("tmp/test_pq.dot")
+        self.assertIsNone(sol_state)

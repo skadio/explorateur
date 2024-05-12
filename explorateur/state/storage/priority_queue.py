@@ -1,32 +1,34 @@
-""" Contains the PriorityQueue class, which is a subclass of BaseStorage. """
 import heapq
+from typing import List, Optional
+
+from explorateur.search.decision import Decision
+from explorateur.state.state import _State
 from explorateur.state.storage.base_storage import BaseStorage
-from explorateur.state._base_state import _BaseState
 
 
 class PriorityQueue(BaseStorage):
-    """  Class representing a priority queue. """
+    """  Class representing a priority queue. Root is the smallest element. """
 
     def __init__(self):
         super().__init__()
-        self.storage = []
+        self.storage: List[Decision] = list()
 
-    def insert(self, state: _BaseState):
-        """ Inserts a state into the priority queue."""
-        heapq.heappush(self.storage, (state.objective_function(), state))
+    def insert(self, decision: Decision):
+        heapq.heappush(self.storage, (decision.state_.get_objective(), decision.state_))
 
-    def remove(self) -> _BaseState:
+    def remove(self) -> _State:
         """ Removes a state from the priority queue."""
         return heapq.heappop(self.storage)[1]  # the first item is the key
 
     def is_empty(self) -> bool:
-        """ Returns True if the priority queue is empty, False otherwise."""
         return len(self.storage) == 0
 
-    def get_size(self) -> int:
-        """ Returns the number of elements in the priority queue."""
+    def size(self) -> int:
         return len(self.storage)
 
-    def contains(self, state: _BaseState) -> bool:
+    def contains(self, decision: Decision) -> Optional[Decision]:
         """ Returns the state if it is in the priority queue, None otherwise."""
-        return state in self.storage
+        try:
+            return self.storage[self.storage.index(decision)]
+        except ValueError:
+            return None

@@ -1,234 +1,397 @@
-""" Module for the Explorateur class, used to perform search. """
-
-import time
+import copy as cp
 import logging
 import sys
-import copy as cp
-from typing import NoReturn, Union, List
-import numpy as np
-import pydot
+import time
+from typing import Optional, List
 
-from explorateur.state.base_state import BaseState
-from explorateur.utils import check_true, Constants
-from explorateur.state._base_state import _BaseState
-from explorateur.search.transition import Transition
-from explorateur.state.storage.factory import StorageFactory
-from explorateur.state.storage.base_storage import BaseStorage
+import numpy as np
+from pydot import Dot, Node, Edge
+
+from explorateur._version import __version__
+from explorateur.search.decision import Decision
 from explorateur.search.exploration_type import ExplorationType
+from explorateur.search.search_type import SearchType
+from explorateur.search.transition import Transition
+from explorateur.state.base_state import BaseState
+from explorateur.state.state import _State
+from explorateur.state.storage.base_storage import BaseStorage
+from explorateur.state.storage.factory import StorageFactory
+from explorateur.utils import check_true, Constants, All_Exploration_Types, All_Search_Types
+
+__version__ = __version__
 
 
 class Explorateur:
-    """ Explorateur class, used to perform search. """
+    """
+    The Explorateur library is designed to search for solutions.
 
-    def __init__(self, exploration_type: Union[ExplorationType.BestFirst, ExplorationType.DepthFirst,
-                                               ExplorationType.BreadthFirst], seed: int = Constants.default_seed):
+    The search starts from a given initial state (as in Tree Search),
+    and optionally, toward a given goal state (as in Graph Search).
+
+    The exploration strategy is controlled by the exploration type parameter.
+    The exploration types include best-first, breadth-first, and depth-first search.
+
+    Explorateur implements a generic search functionality that operates on custom defined state and move.
+    The custom state inherits from BaseState and custom move inherits from BaseMove.
+
+    NB: Best-first search requires the custom state to also implement an objective function
+        to evaluate the quality of the state.
+    """
+
+    def __init__(self, seed: int = Constants.default_seed):
         """
-        Initializes an Explorateur object.
+        Initialize an Explorateur object.
 
-        Args: exploration_type (ExplorationType): Specifies the type of search (ExplorationType.BreadthFirst(),
-        ExplorationType.DepthFirst(), ExplorationType.BestFirst()). seed (int): Seed for the randomness.
-        """
+        Arguments:
+            - exploration_type (ExplorationType): Specifies the type of search such as
+            ExplorationType.BestFirst(), ExplorationType.BreadthFirst(), ExplorationType.DepthFirst()
+            - seed (int): Seed to control randomness.
 
-        """ 
         Attributes:
-            exploration_type (ExplorationType): The type of search being performed.
-            seed (int): The seed used for randomness.
-            _rng (numpy.random.RandomState): Random number generator.
-            tree (None or Tree): The tree structure used during the search.
-            _solution_state (None or State): The solution state found during the search.
+            - seed (int): The seed used for randomness.
+            - _rng (numpy.random.RandomState): Random number generator.
+            - tree (Tree or None): The tree structure used during the search.
+            - _solution_state (State or None): The solution state found during the search.
         """
 
+        # TODO add logger
+
+        # Validate arguments
         Explorateur._validate_args(seed)
 
-        self.exploration_type = exploration_type
-        self.seed = seed
+        # Set seed
+        self.seed: int = seed
 
-        # Create the random number generator
+        # Create the random number generator with given seed
         self._rng = np.random.default_rng(seed=self.seed)
 
-        # Internal variables to be used later in determining whether or not the user wants to build a tree during the
-        # search
-        self.tree = None
-        self._solution_state = None
+        # State collections open and closed (for graph search only)
+        self.open_decisions: BaseStorage
+        self.closed_decisions: Optional[BaseStorage] = None
 
-    def search(self, start_state: BaseState, end_state: BaseState = None, max_runtime: int = None,
-               max_iterations: int = sys.maxsize, file_path: str = None) -> Union[BaseState, None]:
+        # Solution state
+        self._solution_state: Optional[_State] = None
+
+        # Dot graph representation of search
+        self.dot_graph: Optional[Dot] = None
+        self.dot_file_path: Optional[str] = None
+
+        # Statistics
+        self.start_time: float = 0
+        self.total_time: float = 0
+        self.num_decisions: int = 0
+        self.num_failed_decisions: int = 0
+
+    def search(self,
+               initial_state: BaseState,
+               goal_state: Optional[BaseState] = None,
+               exploration_type: All_Exploration_Types = ExplorationType.DepthFirst(),
+               search_type: All_Search_Types = SearchType.TreeSearch(),
+               max_depth: int = sys.maxsize,
+               max_moves: int = sys.maxsize,
+               max_runtime: int = None,
+               dot_file_path: str = None) -> Optional[BaseState]:
         """
-        This function carries out the search starting at start_state until either a solution is found or it has to
-        terminate.
+        This function performs search from the initial_state until:
+            - a solution found, or
+            - goal_state reached if given, or
+            - termination criteria, in terms of number of seconds or iterations, is reached.
 
-        - Args: start_state (BaseState): The initial state where the search will begin.
-        - end_state (BaseState,None): Optional argument but needed for graph search to know where to terminate the
-          search.
-        - max_runtime (int): Optional argument for the number of seconds the search should go on for.
-        - max_iterations (int): Optional argument for the maximum number of nodes that can be explored before
-          terminating the search if no solution has been found yet.
-        - file_path (str): Optional argument that can be None, but if it is a string, a tree will be written while
-          doing the exploration and written to the file in the filepath provided.
-
+        Arguments:
+            - initial_state (BaseState): The initial state where the search will begin.
+            - goal_state Optional(BaseState): Optional argument used for graph search to reach termination state.
+                                              By default, none.
+            - max_runtime Optional(int): Optional argument for the number of seconds the search should go on for.
+                                         By default, none (no limit).
+            - max_moves Optional(int): Optional argument for the maximum number of moves to stop search.
+                                       By default, maxsize (no limit).
+            - max_depth Optional(int): Optional argument for the maximum depth to stop search.
+                                       By default, maxsize (no limit).
+            - search_type Optional(SearchType): The search method to decide whether to store visited states.
+                                                By default, SearchType.TreeSearch().
+            - exploration_type Optional(ExplorationType): The exploration method.
+                                                          By default, ExplorationType.DepthFirst().
+            - dot_file_path (str): Optional argument to write a graph dot representation of search iterations.
+                                   By default, none (no dot file saved).
         Returns:
-            None if no solution state has been found or if it was a Best-First search; solution state otherwise.
+            Solution state if a solution found, None if no solution exists or hit stopping criteria.
         """
 
-        # validate start state
-        if start_state is None:
-            raise ValueError
+        logging.info(">>> START SEARCH ")
 
-        # construct the start state as a _BaseState object
-        _start_state = _BaseState(start_state, str(0))
+        # Check arguments
+        Explorateur._validate_search_args(initial_state, goal_state,
+                                          exploration_type, search_type,
+                                          max_depth, max_moves, max_runtime, dot_file_path)
 
-        # if the user wants to build a tree, we initialize the tree
-        if file_path is not None:
-            self.tree = pydot.Dot(graph_type="digraph")
-            _start_state.node = pydot.Node(_start_state.node_label)
-            self.tree.add_node(_start_state.node)
+        # Reset rng, _solution_state, dot graph, counters, time
+        self._reset_search(dot_file_path)
 
-        # initialize the states storage
-        states: BaseStorage = StorageFactory.create(self.exploration_type.storage_type)
-        states.insert(_start_state)
+        # Create storage for open states, and optionally, for closed states in graph search to avoid duplicate visits
+        self.open_decisions = StorageFactory.create(exploration_type)
+        self.closed_decisions = StorageFactory.create(search_type)
 
-        # initialize the counter and iterations, start the timer
-        counter = 0
-        iterations = 0
-        start = time.time()
+        # Convert initial BaseState to internal _BaseState so that we can attach transitions
+        initial_state_ = _State(initial_state)
+        current_decision = cp.deepcopy(Decision(initial_state_, move=None))
 
-        while not states.is_empty() and iterations < max_iterations:
-            logging.debug("Iteration: %s", iterations)
-            logging.debug("States Size: %s", states.get_size())
+        # Check termination, else expand current state with possible moves as open decisions for execution within depth
+        self._terminate_or_expand(current_decision, goal_state, exploration_type, max_depth, dot_file_path)
 
-            # check if the search has been running for too long
-            end = time.time()
-            if max_runtime is not None:
-                if end - start > max_runtime:
-                    self.visualize_tree(file_path)
-                    return None
+        # START SEARCH
+        while not self.open_decisions.is_empty():
+            self.num_decisions += 1
+            logging.info("\nDecision %s", self.num_decisions)
+            logging.info("\nOpen states size: %s", self.open_decisions.size())
 
-            # pop the current state from the storage
-            iterations += 1
-            _current = states.remove()
-            transition = _current.get_transition()
-            logging.debug("Current State: %s", _current)
+            # Check stopping conditions
+            self._check_stopping_criteria(self.start_time, self.num_decisions, max_runtime, max_moves, dot_file_path)
 
-            # if not a start state, check if the move is valid
-            if transition is not None:
-                successful_move = _current.is_valid()
-                logging.debug("State: %s, Move: %s, Valid: %s", _current, transition.move, successful_move)
-                # if the move is not valid, we do not want to explore the state further, color it red
-                if not successful_move:
-                    if self.tree:
-                        _current.node = pydot.Node(
-                            _current.node_label, style='filled', fillcolor='red')
-                        self.tree.add_node(_current.node)
-                    continue
-                # if the move is valid, we need to check if the state is a termination state
-                if _current.is_terminate(end_state):
-                    if self.tree:
-                        _current.node = pydot.Node(
-                            _current.node_label, style='filled', fillcolor='green')
-                        self.tree.add_node(_current.node)
-                        self.visualize_tree(file_path)
-                    if isinstance(self.exploration_type, ExplorationType.BestFirst):
-                        # if a best-first search, we want to keep exploring
-                        continue
-                    # if not a best-first search, we have found the solution state
-                    self._solution_state = _current
-                    return _current.user_state
+            # Pop the current decision from open decisions for execution
+            current_decision = self.open_decisions.remove()
+            logging.info("Current decision: %s", current_decision)
 
-            # if not a termination state, we need to explore the move from this state
-            moves = _current.get_moves()
+            # Add to the dot graph
+            if self.dot_graph: self._add_dot(current_decision)
 
-            if self.tree:
-                # if the state has moves
-                _current.node = pydot.Node(_current.node_label, style='filled', fillcolor='blue')
-                self.tree.add_node(_current.node)
-            for move in moves:
-                counter += 1
-                logging.debug("Move: %s, Counter: %d", move, counter)
+            # Transition of the current state (there is no transition for initial moves)
+            transition = current_decision.state_.transition
+            logging.info("Current transition: %s", transition)
 
-                # create a new state to execute the move on
-                _successor = cp.deepcopy(_current)
+            # Mark the decision as visited, if graph search
+            if self.closed_decisions:
+                logging.info("Mark current decision as visited in closed decisions %s#", self.closed_decisions.size())
+                self.closed_decisions.insert(current_decision)
 
-                if self.tree:
-                    # add the successor to the tree
-                    _successor.node_label = _successor.make_node_label(counter)
-                    _successor.node = pydot.Node(_successor.node_label)
-                    self.tree.add_node(_successor.node)
-                    self.tree.add_edge(pydot.Edge(_current.node, _successor.node, label=str(move)))
+            # Execute the move (important: current decision is already a copy version when added as search move)
+            if current_decision.state_.execute(current_decision.move):
+                logging.info("Move is successful.")
 
-                # create a new transition (to track path) and execute the move
-                new_transition = Transition(_current, move)
-                _successor.set_transition(new_transition)
-                _successor.execute(new_transition.move)
+                # Set next depth and attach next transition to successor so that we can trace solution path
+                next_depth = transition.depth + 1 if transition else 1
+                next_transition = Transition(previous_state_=current_decision.state_, move=current_decision.move, depth=next_depth)
+                logging.info("Create next transition %s ", next_transition)
+                current_decision.state_.transition = next_transition
 
-                # insert the new state into the storage
-                states.insert(_successor)
-        if self.tree:
-            # if the search has terminated, we want to visualize the tree
-            self.visualize_tree(file_path)
+                # Check termination, else expand current state with possible moves as open decisions for execution within depth
+                self._terminate_or_expand(current_decision, goal_state, exploration_type, max_depth, dot_file_path)
+            else:
+                # Skip failed move and infeasible successor
+                logging.info("Skip infeasible successor.")
+
+        # No more open decisions left, search finished, save the dot
+        self.total_time = time.perf_counter() - self.start_time
+        self._log_stats("<<< FINISH SEARCH - FAILURE - No solution! ")
+        if self.dot_graph: self.dot_graph.write(dot_file_path)
         return None
+
+    def _terminate_or_expand(self, current_decision, goal_state, exploration_type, max_depth, dot_file_path):
+
+        # Check termination condition -- decided by the user state!
+        if current_decision.state_.is_terminate(goal_state):
+            self.total_time = time.perf_counter() - self.start_time
+            logging.info("Successful termination for state: " + str(current_decision))
+            self._log_stats("<<< FINISH SEARCH - SUCCESS - Solution Found!")
+            if self.dot_graph:
+                # Remark this node with green color to indicate solution state
+                self.dot_graph.add_node(Node(str(current_decision), fillcolor="green"))
+                self.dot_graph.write(dot_file_path)
+
+            # Return user state on termination
+            return current_decision.state_.base
+        else:
+            logging.info("Continue with alternate moves, not a termination state")
+
+        # If still within max depth bound, insert the successor into open states for exploration
+        if current_decision.state_.transition.depth > max_depth:
+            logging.info("Max depth reached, not inserting new open node.")
+            return
+
+        # If not a termination state, add alternative moves to search -- decided by the user state!
+        moves = current_decision.state_.get_moves()
+
+        # Reverse moves for depth first search, so the exploration follows user move order
+        if isinstance(exploration_type, ExplorationType.DepthFirst):
+            moves.reverse()
+
+        # Search for alternatives
+        for move in moves:
+            logging.info("Adding move ", move)
+
+            # Create a copy state_ with this move
+            successor_ = cp.deepcopy(current_decision)
+            successor_.move = move
+
+            # Skip already visited successor, if graph search
+            if self.closed_decisions and self.closed_decisions.contains(successor_):
+                logging.info("Skip adding already visited successor.")
+                continue
+
+            # Push successor to open storage for execution
+            logging.info("Add successor for execution")
+            self.open_decisions.insert(successor_)
 
     def get_path(self, reverse=False) -> List[BaseState]:
         """
         Returns a list of states representing the order in which the search was performed.
 
         Args:
-            reverse (bool): Indicates whether or not the user wants the list to be reversed.
-                By default, the list will have the end state at the beginning and go backwards.
+            - reverse (bool): Indicates whether to reverse the path (list of states).
+            By default, the list will have the end state at the beginning and trace backwards.
 
         Returns:
             List[BaseState]: A list of BaseState objects representing the search path.
 
         """
         state_list = []
-        # We pass in self._solution_state as the starting point for our search.
-        # We can only trace a path if a solution has been set.
-        self.get_path_helper(self._solution_state, state_list)
 
-        if reverse:
-            state_list.reverse()
-            return state_list
+        # We can only trace a path if a solution state is found
+        if self._solution_state:
+            # Start the path from the solution state, and walk backwards
+            self._get_path_helper(self._solution_state, state_list)
 
-        return state_list
+        return state_list.reverse() if reverse else state_list
 
-    def get_path_helper(self, state: _BaseState, state_list: list):
+    def _get_path_helper(self, _state: _State, state_list: list):
         """
-        This helper function for get_path() traces back the states that were explored in reverse order (starting at
-        the end).
+        This helper recursion traces back explored states explored in reverse order.
 
         Parameters:
-            state (_BaseState): The current state being explored.
+            _state (_State): The current state being explored.
             state_list (list): The list to store the explored states.
 
         Returns:
             list: The list of explored states in reverse order.
         """
-        if state is None:
-            raise ValueError
-        transition = state.get_transition()
+        transition = _state.get_transition()
+
+        # We reached the initial state, return the collected list
         if transition is None:
-            # We are at the beginning state
             return state_list
-        state_list.append(state.user_state)
-        self.get_path_helper(transition.previous_state, state_list)
 
-    def visualize_tree(self, file_path) -> NoReturn:
-        """
-        Writes the constructed tree to a file.
+        # Otherwise, append the base user state to the state list
+        state_list.append(_state.base)
 
-        This method writes the tree that has been constructed during the search to the file specified by the
-        `file_path` parameter.
+        # Continue recursion from the previous internal state
+        self._get_path_helper(transition.previous_state_, state_list)
 
-        Parameters:
-        - file_path (str): The path of the file to write the tree to.
-        """
-        self.tree.write(file_path)
+    def _reset_search(self, dot_file_path):
+        # Create the random number generator with given seed
+        self._rng = np.random.default_rng(seed=self.seed)
+
+        # Solution state
+        self._solution_state = None
+
+        # Clean state collections
+        self.open_decisions = None
+        self.closed_decisions = None
+
+        # Dot graph representation of search, if dot file given
+        self.dot_graph = Dot(graph_type="digraph", rankdir="LR", splines="line") if dot_file_path else None
+
+        # Initialize counters
+        self.num_decisions = 0
+        self.num_failed_decisions = 0
+        self.start_time: time.perf_counter()
+
+    def _check_stopping_criteria(self, start, num_moves, max_runtime, max_moves, dot_file_path):
+        stop_cause = ""
+
+        # Check stopping criteria: max_runtime
+        current_time = time.perf_counter()
+        if max_runtime is not None and current_time - start > max_runtime:
+            stop_cause = "Max runtime reached"
+
+        # Check stopping criteria: max_moves
+        if num_moves > max_moves:
+            stop_cause = "Max number of moves reached"
+
+        # If stopped, log, save dot, and return None solution
+        if stop_cause:
+            self.total_time = current_time - start
+            self._log_stats("<<< FINISH SEARCH - STOP - No solution! " + stop_cause)
+            if self.dot_graph: self.dot_graph.write(dot_file_path)
+            return None
+
+    def _add_dot(self, current_decision):
+        previous = current_decision.state_.transition.previous_state_
+        current = current_decision.state_
+        move = current_decision.state_.transition.move
+        depth = current_decision.state_.transition.depth
+        self._add_dot_node(previous, self.num_decisions, depth)
+        self._add_dot_node(current, self.num_decisions, depth)
+        self._add_dot_edge(previous, move, current, self.num_decisions, depth)
+
+    def _add_dot_node(self, _state, num_moves, depth, style: str = None, fillcolor: str = None):
+
+        # Add the dot node label to the _state. The node label comes from user defined base state.
+        _state.dot_node_label = _state.get_dot_label(num_moves, depth)
+
+        # Add the dot node to the _state
+        _state.dot_node = Node(_state.dot_node_label)
+        if style:
+            _state.dot_node = Node(_state.dot_node_label, style=style, fillcolor=fillcolor)
+
+        # Add the dot note to the graph
+        self.dot_graph.add_node(_state.dot_node)
+
+    def _add_dot_edge(self, current_, move, successor_, num_moves, depth):
+        edge_label = move.get_dot_label(num_moves, depth)
+        edge = Edge(current_.dot_node, successor_.dot_node, label=edge_label)
+        self.dot_graph.add_edge(edge)
+
+    def _log_stats(self, info):
+        logging.info(info +
+                     "\nTotal Decisions: " + str(self.num_decisions) +
+                     "\nTotal Failures: " + str(self.num_failed_decisions) +
+                     "\nTotal Time: " + str(self.total_time))
 
     @staticmethod
-    def _validate_args(seed) -> NoReturn:
+    def _validate_args(seed: int) -> None:
         """
         Validates arguments for the constructor.
         """
 
-        # Seed
-        check_true(isinstance(seed, int), TypeError(
-            "The seed must be an integer."))
+        # Check integer seed
+        check_true(isinstance(seed, int), TypeError("The seed must be an integer."))
+
+    @staticmethod
+    def _validate_search_args(initial_state, goal_state,
+                              exploration_type, search_type,
+                              max_depth, max_iterations, max_runtime, dot_file_path) -> None:
+
+        check_true(initial_state is not None, TypeError("Initial state cannot be none."))
+        check_true(isinstance(initial_state, BaseState),
+                   TypeError("Initial state must be BaseState type. Incorrect type: " + str(type(goal_state))))
+
+        if goal_state is not None:
+            check_true(isinstance(goal_state, BaseState),
+                       TypeError("Goal state must be BaseState type. Incorrect type: " + str(type(goal_state))))
+
+        check_true(isinstance(exploration_type, All_Exploration_Types),
+                   TypeError("Exploration type is not allowed " + str(exploration_type)))
+
+        check_true(isinstance(search_type, All_Search_Types),
+                   TypeError("Search type is not allowed " + str(search_type)))
+
+        check_true(isinstance(max_depth, int),
+                   TypeError("Max iterations must be integer number of seconds. Incorrect: " + str(max_iterations)))
+
+        check_true(max_iterations > 0,
+                   TypeError("Max iterations must be positive. Incorrect: " + str(max_iterations)))
+
+        check_true(isinstance(max_iterations, int),
+                   TypeError("Max iterations must be integer number of seconds. Incorrect: " + str(max_iterations)))
+
+        check_true(max_iterations > 0,
+                   TypeError("Max iterations must be positive. Incorrect: " + str(max_iterations)))
+
+        if max_runtime is not None:
+            check_true(isinstance(max_runtime, int),
+                       TypeError("Max runtime must be integer number of seconds. Incorrect: " + str(max_runtime)))
+            check_true(max_runtime > 0,
+                       TypeError("Max runtime must be positive. Incorrect: " + str(max_runtime)))
+
+        if dot_file_path is not None:
+            check_true(isinstance(dot_file_path, str),
+                       TypeError("dot_file_path must be a string. Incorrect type: " + str(type(dot_file_path))))
