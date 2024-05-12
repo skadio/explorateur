@@ -4,7 +4,6 @@ import sys
 import time
 from typing import Optional, List, Tuple, Union
 
-import numpy as np
 from pydot import Dot, Node, Edge
 
 from explorateur._version import __version__
@@ -13,6 +12,7 @@ from explorateur.search.exploration_type import ExplorationType
 from explorateur.search.search_type import SearchType
 from explorateur.search.transition import Transition
 from explorateur.state.base_state import BaseState
+from explorateur.state.base_move import BaseMove
 from explorateur.state.state import _State
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state.storage.factory import StorageFactory
@@ -38,25 +38,14 @@ class Explorateur:
         to evaluate the quality of the state.
     """
 
-    def __init__(self, seed: int = Constants.default_seed):
-        """
-        Initialize an Explorateur object.
-
-        Arguments:
-            - seed (int): Seed to control randomness. Default = Constants.default_seed.
-        """
+    def __init__(self):
+        """ Initialize an Explorateur object. """
 
         # TODO add logger
         # TODO pass RNG to user
 
         # Validate arguments
-        Explorateur._validate_args(seed)
-
-        # Set seed
-        self.seed: int = seed
-
-        # Create the random number generator with given seed
-        self._rng = np.random.default_rng(seed=self.seed)
+        Explorateur._validate_args()
 
         # State collections open and closed (for graph search only)
         self._open_decisions: BaseStorage
@@ -64,7 +53,7 @@ class Explorateur:
 
         # Solution state and internal version with transition
         self.solution_state: Optional[BaseState] = None
-        self._solution_state: Optional[_State] = None
+        self._solution_state_: Optional[_State] = None
 
         # Dot graph representation of search
         self.dot_graph: Optional[Dot] = None
@@ -110,6 +99,7 @@ class Explorateur:
                                          Default, None (no limit).
             - dot_file_path (str): Optional argument to write a graph dot representation of search iterations.
                                    Default, None (no dot file saved).
+                                   Example dot graph visualizer: https://dreampuf.github.io/GraphvizOnline/
         Returns:
             - If no solution found or the search hits one of the stopping criteria,
             returns None.
@@ -119,6 +109,7 @@ class Explorateur:
             returns a list of solution states, denoting the path starting from the solution state back to the initial_state.
         """
 
+        self.start = time.perf_counter()
         logging.info(">>> START SEARCH ")
 
         # Check arguments
@@ -156,9 +147,6 @@ class Explorateur:
             current_decision = self._open_decisions.remove()
             logging.info("Current decision: %s", current_decision)
 
-            # Add to the dot graph
-            # if self.dot_graph: self._add_dot(current_decision)
-
             # Transition of the current state (there is no transition for initial moves)
             transition = current_decision.state_.transition
             logging.info("Current transition: %s", transition)
@@ -179,6 +167,13 @@ class Explorateur:
                 logging.info("Create next transition %s ", next_transition)
                 successor_.transition = next_transition
 
+                # Add to the dot graph
+                # if self.dot_graph: self._add_dot(current_decision)
+
+                self._add_dot_node(current_decision.state_, self.num_decisions, next_depth)
+                self._add_dot_node(successor_, self.num_decisions, next_depth)
+                self._add_dot_edge(current_decision.state_, current_decision.move, successor_, self.num_decisions, next_depth)
+
                 # Check termination, else expand current state with possible moves as open decisions for execution within depth
                 is_terminate, is_solution = self._is_terminate_or_expand(successor_, goal_state, exploration_type, max_depth, dot_file_path)
                 if is_solution:
@@ -186,8 +181,9 @@ class Explorateur:
                 if is_terminate:
                     return None
             else:
+                self.num_failed_decisions += 1
                 # Skip failed move and infeasible successor
-                logging.info("Skip infeasible successor.")
+                logging.info("Skip infeasible successor. Num fails: %s", str(self.num_failed_decisions))
 
         # No more open decisions left, search finished, save the dot
         self.total_time = time.perf_counter() - self._start_time
@@ -202,14 +198,15 @@ class Explorateur:
         # Check termination condition -- decided by the user state!
         if state_.is_terminate(goal_state):
             is_terminate, is_solution = True, True
-            self._solution_state = state_
+            self._solution_state_ = state_
             self.solution_state = state_.base
+            end = time.perf_counter()
             self.total_time = time.perf_counter() - self._start_time
             logging.info("Successful termination for state: " + str(state_))
             self._log_stats("<<< FINISH SEARCH - SUCCESS - Solution Found!")
             if self.dot_graph:
-                # Remark this node with green color to indicate solution state
-                self.dot_graph.add_node(Node(str(state_), fillcolor="green"))
+                # Recolor final node with green
+                self._add_dot_node(state_, self.num_decisions, state_.transition.depth, style="filled", fillcolor="green")
                 self.dot_graph.write(dot_file_path)
             return is_terminate, is_solution
         else:
@@ -266,9 +263,9 @@ class Explorateur:
         state_list = []
 
         # We can only trace a path if a solution state is found
-        if self._solution_state:
+        if self._solution_state_:
             # Start the path from the solution state, and walk backwards
-            self._get_path_helper(self._solution_state, state_list)
+            self._get_path_helper(self._solution_state_, state_list)
 
         return state_list.reverse() if is_initial_first else state_list
 
@@ -285,8 +282,9 @@ class Explorateur:
         """
         transition = state_.transition
 
-        # We reached the initial state, return the collected list
+        # We reached the initial state, add it and return the path
         if transition is None:
+            state_list.append(state_.base)
             return state_list
 
         # Otherwise, append the base user state to the state list
@@ -296,22 +294,19 @@ class Explorateur:
         self._get_path_helper(transition.previous_state_, state_list)
 
     def _reset_search(self, dot_file_path):
-        # Create the random number generator with given seed
-        self._rng = np.random.default_rng(seed=self.seed)
-
         # Clean state collections
         self._open_decisions = None
         self._closed_decisions = None
 
         # Clean solution states
         self.solution_state = None
-        self._solution_state = None
+        self._solution_state_ = None
 
         # Dot graph representation of search, if dot file given
         self.dot_graph = Dot(graph_type="digraph", rankdir="LR", splines="line") if dot_file_path else None
 
         # Initialize counters
-        self._start_time: time.perf_counter()
+        self._start_time = time.perf_counter()
         self.total_time = 0
         self.num_decisions = 0
         self.num_failed_decisions = 0
@@ -336,29 +331,31 @@ class Explorateur:
             return None
 
     def _add_dot(self, current_decision):
-        previous = current_decision.state_.transition.previous_state_
         current = current_decision.state_
-        move = current_decision.state_.transition.move
-        depth = current_decision.state_.transition.depth
-        self._add_dot_node(previous, self.num_decisions, depth)
-        self._add_dot_node(current, self.num_decisions, depth)
-        self._add_dot_edge(previous, move, current, self.num_decisions, depth)
+        if current.transition:
+            previous = current_decision.state_.transition.previous_state_
+            move = current_decision.state_.transition.move
+            depth = current_decision.state_.transition.depth
+            self._add_dot_node(previous, self.num_decisions, depth)
+            self._add_dot_node(current, self.num_decisions, depth)
+            self._add_dot_edge(previous, move, current, self.num_decisions, depth)
+        else:
+            self._add_dot_node(current, self.num_decisions, depth=1)
 
-    def _add_dot_node(self, _state, num_moves, depth, style: str = None, fillcolor: str = None):
+    def _add_dot_node(self, state_, num_decisions, depth, style: str = None, fillcolor: str = None):
 
         # Add the dot node label to the _state. The node label comes from user defined base state.
-        _state.dot_node_label = _state.get_dot_label(num_moves, depth)
+        state_.dot_node_label = state_.get_dot_label(num_decisions, depth)
 
         # Add the dot node to the _state
-        _state.dot_node = Node(_state.dot_node_label)
-        if style:
-            _state.dot_node = Node(_state.dot_node_label, style=style, fillcolor=fillcolor)
+        state_.dot_node = Node(state_.dot_node_label, style=style, fillcolor=fillcolor) if style \
+            else Node(state_.dot_node_label)
 
         # Add the dot note to the graph
-        self.dot_graph.add_node(_state.dot_node)
+        self.dot_graph.add_node(state_.dot_node)
 
-    def _add_dot_edge(self, current_, move, successor_, num_moves, depth):
-        edge_label = move.get_dot_label(num_moves, depth)
+    def _add_dot_edge(self, current_, move: BaseMove, successor_, num_decisions, depth):
+        edge_label = move.get_dot_label(num_decisions, depth)
         edge = Edge(current_.dot_node, successor_.dot_node, label=edge_label)
         self.dot_graph.add_edge(edge)
 
@@ -366,16 +363,11 @@ class Explorateur:
         logging.info(info +
                      "\nTotal Decisions: " + str(self.num_decisions) +
                      "\nTotal Failures: " + str(self.num_failed_decisions) +
-                     "\nTotal Time: " + str(self.total_time))
+                     "\nTotal Time: " + str(round(self.total_time,3)))
 
     @staticmethod
-    def _validate_args(seed: int) -> None:
-        """
-        Validates arguments for the constructor.
-        """
-
-        # Check integer seed
-        check_true(isinstance(seed, int), TypeError("The seed must be an integer."))
+    def _validate_args() -> None:
+        pass
 
     @staticmethod
     def _validate_search_args(initial_state, goal_state,

@@ -10,9 +10,9 @@ class Decision:
     Executing the move on this state will generate a _State, if successful.
     If executing the move fails, there will be no successor state from this decision.
     """
-    def __init__(self, state_: _State, move: Optional[BaseMove] = None) -> None:
-        self.state_ = state_
-        self.move = move
+    def __init__(self, state_: _State, move: BaseMove = None) -> None:
+        self.state_: _State = state_
+        self.move: BaseMove = move
 
     def __str__(self):
         if self.move:

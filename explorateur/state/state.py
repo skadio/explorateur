@@ -39,8 +39,8 @@ class _State(BaseState, BaseStateObjective, BaseDotLabeler):
         return self.base.get_objective(state)
 
     # Implement BaseDotLabeler
-    def get_dot_label(self, num_moves: int, depth: int) -> str:
-        return self.base.get_dot_label(num_moves, depth)
+    def get_dot_label(self, num_decisions: int, depth: int) -> str:
+        return self.base.get_dot_label(num_decisions, depth)
 
     def __str__(self) -> str:
         return str(self.base)

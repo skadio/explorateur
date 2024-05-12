@@ -1,3 +1,4 @@
+import time
 import logging
 from collections import OrderedDict
 from typing import List
@@ -18,8 +19,10 @@ class MyMove(BaseMove, BaseDotLabeler):
         self.constraint = constraint
         self.value = value
 
-    def get_dot_label(self, num_moves: int, depth: int) -> str:
-        return "[M" + str(num_moves) + "-D" + str(depth) + "]\n" + str(self)
+    def get_dot_label(self, num_decisions: int, depth: int) -> str:
+        label = "MOVE " + str(num_decisions) + "@" + str(depth) + "\n"
+        label += str(self.variable) + " " + self.constraint + " " + str(self.value)
+        return label
 
     def __str__(self) -> str:
         return str(self.variable) + " " + self.constraint + " " + str(self.value)
@@ -55,7 +58,10 @@ class MyState(BaseState, BaseDotLabeler):
 
     def execute(self, move: MyMove) -> bool:
         logging.info("USER Execute: %s", move)
-        var, val, constraint = move.variable, move.value, move.constraint
+        var, constraint, val = move.variable, move.constraint, move.value
+
+        # if var == "x" and constraint == "==" and val == 1:
+        #     return False
 
         # Propagation
         if constraint == "==":
@@ -78,9 +84,14 @@ class MyState(BaseState, BaseDotLabeler):
         logging.info("USER Execute: SUCCESS")
         return True
 
-    def get_dot_label(self, num_moves: int, depth: int):
-
-        return "[M" + str(num_moves) + "-D" + str(depth) + "]\n" + " ".join(self.var_to_val)
+    def get_dot_label(self, num_decisions: int, depth: int):
+        label = "STATE " + str(num_decisions) + "@" + str(depth) + "\n"
+        for var, val in self.var_to_val.items():
+            if val:
+                label += str(var) + " = " + str(val) + "\n"
+            else:
+                label += str(var) + "{..}\n"
+        return label
 
     def __str__(self) -> str:
         return "Assignment: " + str(self.var_to_val) + "\n" + \
@@ -104,14 +115,14 @@ class SimpleTests(BaseTest):
 
         # Solve via search
         solution_path = explorer.search(initial_state,
-                                        exploration_type=ExplorationType.DepthFirst(),
+                                        exploration_type=ExplorationType.BreadthFirst(),
                                         search_type=SearchType.TreeSearch(),
                                         is_solution_path=True,
                                         dot_file_path="example.dot")
-
+        # end = time.perf_counter()
         # Solution
-        solution_state = solution_path[0]
-        print("Solution:\n", solution_state)
-        print("Solution Path:", *solution_path, sep="\n")
-
+        if solution_path:
+            solution_state = solution_path[0]
+            print("Solution:\n", solution_state)
+            print("Solution Path:", *solution_path, sep="\n")
         # self.assertTrue(sol_state.is_terminate(end_state=None))

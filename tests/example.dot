@@ -1,5 +1,26 @@
 digraph G {
 rankdir=LR;
 splines=line;
-Assignment [fillcolor=green];
+"STATE 1@1\n";
+"STATE 1@1\nx = 1\n";
+"STATE 1@1\n" -> "STATE 1@1\nx = 1\n"  [label="MOVE 1@1\nx == 1"];
+"STATE 2@1\n";
+"STATE 2@1\nx = 2\n";
+"STATE 2@1\n" -> "STATE 2@1\nx = 2\n"  [label="MOVE 2@1\nx != 1"];
+"STATE 3@2\nx = 1\n";
+"STATE 3@2\nx = 1\ny = 10\n";
+"STATE 3@2\nx = 1\n" -> "STATE 3@2\nx = 1\ny = 10\n"  [label="MOVE 3@2\ny == 10"];
+"STATE 4@2\nx = 1\n";
+"STATE 4@2\nx = 1\ny = 20\n";
+"STATE 4@2\nx = 1\n" -> "STATE 4@2\nx = 1\ny = 20\n"  [label="MOVE 4@2\ny != 10"];
+"STATE 5@2\nx = 2\n";
+"STATE 5@2\nx = 2\ny = 10\n";
+"STATE 5@2\nx = 2\n" -> "STATE 5@2\nx = 2\ny = 10\n"  [label="MOVE 5@2\ny == 10"];
+"STATE 6@2\nx = 2\n";
+"STATE 6@2\nx = 2\ny = 20\n";
+"STATE 6@2\nx = 2\n" -> "STATE 6@2\nx = 2\ny = 20\n"  [label="MOVE 6@2\ny != 10"];
+"STATE 7@3\nx = 1\ny = 10\n";
+"STATE 7@3\nx = 1\ny = 10\nz = 100\n";
+"STATE 7@3\nx = 1\ny = 10\n" -> "STATE 7@3\nx = 1\ny = 10\nz = 100\n"  [label="MOVE 7@3\nz == 100"];
+"STATE 7@3\nx = 1\ny = 10\nz = 100\n" [fillcolor=green, style=filled];
 }
