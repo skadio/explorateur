@@ -4,6 +4,7 @@ from typing import List
 
 from explorateur.explorateur import Explorateur
 from explorateur.search.exploration_type import ExplorationType
+from explorateur.search.search_type import SearchType
 from explorateur.state.base_dot_labeler import BaseDotLabeler
 from explorateur.state.base_move import BaseMove
 from explorateur.state.base_state import BaseState
@@ -49,8 +50,8 @@ class MyState(BaseState, BaseDotLabeler):
 
     def is_terminate(self, end_state=None) -> bool:
         # Search finishes when all variables are assigned
-        # return len(self.unassigned_variables) == 0
-        return False
+        return len(self.unassigned_variables) == 0
+        # return False
 
     def execute(self, move: MyMove) -> bool:
         logging.info("USER Execute: %s", move)
@@ -93,19 +94,24 @@ class SimpleTests(BaseTest):
 
         logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
+        # Explorateur
         explorer = Explorateur()
 
-        # Initial state with variables and possible domain values
+        # Initial state
         initial_state = MyState(OrderedDict([("x", [1, 2]),
                                              ("y", [10, 20]),
                                              ("z", [100, 200])]))
 
-        # Find a solution via search
-        solution_state = explorer.search(initial_state, exploration_type=ExplorationType.BreadthFirst(),
-                                         dot_file_path="example.dot")
-        print("Solution: ", solution_state)
+        # Solve via search
+        solution_path = explorer.search(initial_state,
+                                        exploration_type=ExplorationType.DepthFirst(),
+                                        search_type=SearchType.TreeSearch(),
+                                        is_solution_path=True,
+                                        dot_file_path="example.dot")
 
-        solution_path = explorer.get_path()
-        print("Path: ", solution_path)
+        # Solution
+        solution_state = solution_path[0]
+        print("Solution:\n", solution_state)
+        print("Solution Path:", *solution_path, sep="\n")
 
         # self.assertTrue(sol_state.is_terminate(end_state=None))

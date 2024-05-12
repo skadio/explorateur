@@ -72,7 +72,7 @@ class SimpleTests(BaseTest):
         starting_state = SimpleState(possible_vals)
 
         sol_state = explorer.search(starting_state)
-        path = explorer.get_path()
+        path = explorer._get_solution_path()
         self.assertTrue(sol_state.is_terminate(end_state=None))
 
     def test_bfs(self):
