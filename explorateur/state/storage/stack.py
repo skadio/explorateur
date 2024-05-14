@@ -1,52 +1,31 @@
-import abc
-from explorateur.state.storage.base_storage import BaseStorage
-from explorateur.state.base_state import BaseState
-
 from collections import deque
+from typing import Deque, Optional
+from explorateur.state.storage.base_storage import BaseStorage
+from explorateur.search.decision import Decision
 
 
 class Stack(BaseStorage):
+    """ Class representing a stack."""
 
-    @abc.abstractmethod
     def __init__(self):
-        """Abstract method.
-        """
         super().__init__()
-        self.storage: deque = deque()
+        self.storage: Deque[Decision] = deque()
 
-    @abc.abstractmethod
-    def insert(self, state: BaseState):
-        """
-        """
-        self.storage.append(state)
+    def insert(self, decision: Decision):
+        self.storage.append(decision)
 
-    @abc.abstractmethod
-    def remove(self, state: BaseState) -> BaseState:
-        """
-        """
-        return self.storage.remove(state)
+    def remove(self) -> Decision:
+        return self.storage.pop()
 
-    @abc.abstractmethod
     def is_empty(self) -> bool:
-        """
-        """
-        pass
+        return len(self.storage) == 0
 
-    @abc.abstractmethod
-    def get_size(self) -> int:
-        """
-        """
-        pass
+    def size(self) -> int:
+        return len(self.storage)
 
-    @abc.abstractmethod
-    def contains(self, state: BaseState) -> BaseState:
-        """
-        """
-
-    @abc.abstractmethod
-    def __iter__(self):
-        pass
-
-    @abc.abstractmethod
-    def __next__(self):
-        pass
+    def contains(self, decision: Decision) -> Optional[Decision]:
+        """ Returns the state if it is in the stack, None otherwise."""
+        try:
+            return self.storage[self.storage.index(decision)]
+        except ValueError:
+            return None

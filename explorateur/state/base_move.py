@@ -1,29 +1,34 @@
 import abc
-from explorateur.state.base_state import BaseState
 
 
 class BaseMove(metaclass=abc.ABCMeta):
+    """
+    Abstract class for the moves.
+    Model your problem as a sequence of states with moves
+    encoding information to transition from one state to another.
+    """
 
     @abc.abstractmethod
     def __init__(self):
-        """Abstract method.
         """
-        pass
+        Initializes the BaseMove object
+        This can contain variable assignments etc.
+        """
 
     @abc.abstractmethod
-    def execute(self, state: BaseState) -> bool:
-        """ Execute the move on the given state.
+    def __str__(self) -> str:
         """
-        pass
+        Return a string representation of the move.
 
-    @abc.abstractmethod
-    def undo(self, state: BaseState) -> bool:
-        """ Undo the move on the given state.
+        Returns:
+            str: A string representation of the move.
         """
-        pass
 
-    @abc.abstractmethod
-    def is_valid(self, state: BaseState) -> bool:
-        """ Determine if move is valid in the given state.
+    def get_dot_label(self) -> str:
         """
-        pass
+           Return a string label for dot graph edge.
+
+           Returns:
+               str: A string label to display in dot graph.
+        """
+        return str(self)

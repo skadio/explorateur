@@ -1,0 +1,7 @@
+digraph G {
+spline=line;
+"{}" -> "{1: True}" [label="Setting variable: 1 to True"];
+"{}" -> "{1: False}" [label="Setting variable: 1 to False"];
+"{}" -> "{2: True}" [label="Setting variable: 2 to True"];
+"{2: True}" [style=filled fillcolor=green];
+}

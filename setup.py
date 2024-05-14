@@ -20,7 +20,8 @@ setuptools.setup(
     version=__version__,
     author="xxx",
     url="https://github.com/skadio/explorateur",
-    packages=setuptools.find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "notebooks"]),
+    packages=setuptools.find_packages(
+        exclude=["*.tests", "*.tests.*", "tests.*", "tests", "notebooks"]),
     install_requires=required,
     include_package_data=True,
     classifiers=[

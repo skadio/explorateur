@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
-# SPDX-License-Identifier: Apache-2.0
+from typing import Dict, Union, NamedTuple
+from explorateur.search.exploration_type import ExplorationType
+from explorateur.search.search_type import SearchType
 
-"""
-:Author:
-
-This module provides a number of constants and helper functions.
-"""
-
-from typing import Dict, Union, NamedTuple, NewType, NoReturn
 
 Num = Union[int, float]
 """Num type is defined as integer or float."""
+
+All_Exploration_Types = Union[ExplorationType.BestFirst, ExplorationType.BreadthFirst, ExplorationType.DepthFirst]
+"""All possible exploration types"""
+
+All_Search_Types = Union[SearchType.GraphSearch, SearchType.TreeSearch]
+"""All possible search types"""
 
 
 class Constants(NamedTuple):
@@ -21,7 +21,6 @@ class Constants(NamedTuple):
     default_seed = 123456
     """The default random seed."""
 
-
 def argmax(dictionary: Dict[Num, Num]) -> Num:
     """
     Returns the first key with the maximum value.
@@ -29,7 +28,7 @@ def argmax(dictionary: Dict[Num, Num]) -> Num:
     return max(dictionary, key=dictionary.get)
 
 
-def check_false(expression: bool, exception: Exception) -> NoReturn:
+def check_false(expression: bool, exception: Exception) -> None:
     """
     Checks that given expression is false, otherwise raises the given exception.
     """
@@ -37,7 +36,7 @@ def check_false(expression: bool, exception: Exception) -> NoReturn:
         raise exception
 
 
-def check_true(expression: bool, exception: Exception) -> NoReturn:
+def check_true(expression: bool, exception: Exception) -> None:
     """
     Checks that given expression is true, otherwise raises the given exception.
     """
@@ -45,9 +44,8 @@ def check_true(expression: bool, exception: Exception) -> NoReturn:
         raise exception
 
 
-def reset(dictionary: Dict, value) -> NoReturn:
+def reset(dictionary: Dict, value) -> None:
     """
     Maps every key to the given value.
     """
     dictionary.update({}.fromkeys(dictionary, value))
-
