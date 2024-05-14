@@ -4,7 +4,7 @@ Explorateur is a library written in Python to solve problems that require search
 
 Explorateur provides a generic state space search based on problem-specific `BaseMove` and `BaseState` representations. The search strategy can be `TreeSearch` or `GraphSearch`. The exploration strategy can be `BestFirst`, `BreadthFirst`, or `DepthFirst`. 
 
-## Quick Start:
+## Quick Start
 
 Here is the template `BaseMove` and `BaseState` example, ready for problem specific implementations. When the search is complete, the solution and the solution path can be retrieved as well as the dot graph for visualization of the search.
 
