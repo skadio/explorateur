@@ -156,7 +156,7 @@ class Explorateur:
                 self._log("Mark current decision as visited in closed decisions: " + str(self._closed_decisions.size()))
                 self._closed_decisions.insert(current_decision)
 
-            # Execute the move (important: current decision is already a copy version when added as search move)
+            # Execute the move on a copy state
             successor_state = cp.deepcopy(current_decision.state)
             if successor_state.execute(current_decision.move):
                 self._log("Move is successful.")

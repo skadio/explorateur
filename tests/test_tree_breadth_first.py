@@ -110,12 +110,6 @@ class SimpleTests(BaseTest):
                                              ("z", [100, 200])]),
                                 is_all_solutions=False)
 
-        # Solve via search
-        solution_path = explorer.search(initial_state,
-                                        exploration_type=ExplorationType.DepthFirst(),
-                                        search_type=SearchType.TreeSearch(),
-                                        is_solution_path=True,
-                                        dot_file_path="example.dot")
         # Search for solutions
         if explorer.search(initial_state,
                            goal_state=None,  # Optional goal state
