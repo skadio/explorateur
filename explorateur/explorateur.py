@@ -1,3 +1,4 @@
+import logging
 import copy as cp
 import logging
 import sys
@@ -37,13 +38,22 @@ class Explorateur:
         to evaluate the quality of the state.
     """
 
-    def __init__(self):
+    def __init__(self, is_verbose=False):
         """ Initialize an Explorateur object. """
-
-        # TODO add logger
 
         # Validate arguments
         Explorateur._validate_args()
+
+        # Logger object
+        self.logger = logging.getLogger()
+        self._log_formatter = logging.Formatter("%(message)s")
+
+        if is_verbose:
+            # Create console handler and set level to debug for printing
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(logging.DEBUG)
+            console_handler.setFormatter(self._log_formatter)
+            self.logger.addHandler(console_handler)
 
         # State collections open and closed (for graph search only)
         self._open_decisions: BaseStorage
@@ -96,6 +106,7 @@ class Explorateur:
             - max_runtime Optional(int): Optional argument for the number of seconds the search should go on for.
                                          Default, None (no limit).
             - dot_file_path (str): Optional argument to write a graph dot representation of search iterations.
+                                   It uses logging CRITICAL level to log the dot output
                                    Default, None (no dot file saved).
                                    Example dot graph visualizer: https://dreampuf.github.io/GraphvizOnline/
         Returns:
@@ -108,12 +119,18 @@ class Explorateur:
         """
 
         self.start = time.perf_counter()
-        logging.info(">>> START SEARCH ")
+        self.logger.debug("Explorateur " + __version__)
+        self.logger.debug(">>> START SEARCH ")
 
         # Check arguments
         Explorateur._validate_search_args(initial_state, goal_state,
                                           exploration_type, search_type, is_solution_path,
                                           max_depth, max_moves, max_runtime, dot_file_path)
+        
+        if dot_file_path:
+            file_handler = logging.FileHandler(dot_file_path)
+            file_handler.setFormatter(self._log_formatter)
+            self.logger.addHandler(file_handler)
 
         # Reset rng, solution_states, collections, dot graph, start time, stats
         self._reset_search(dot_file_path)
@@ -135,34 +152,34 @@ class Explorateur:
         # START SEARCH
         while not self._open_decisions.is_empty():
             self.num_decisions += 1
-            logging.info("\nDecision %s", self.num_decisions)
-            logging.info("Open decisions: %s", self._open_decisions.size())
+            self.logger.debug("\nDecision %s", self.num_decisions)
+            self.logger.debug("Open decisions: %s", self._open_decisions.size())
 
             # Check stopping conditions
             self._check_stopping_criteria(self._start_time, self.num_decisions, max_runtime, max_moves, dot_file_path)
 
             # Pop the current decision from open decisions for execution
             current_decision = self._open_decisions.remove()
-            logging.info("Current decision: %s", current_decision)
+            self.logger.debug("Current decision: %s", current_decision)
 
             # Transition of the current state (there is no transition for initial moves)
             transition = current_decision.state_.transition
             next_depth = transition.depth + 1 if transition else 1
-            logging.info("Current transition: %s", transition)
+            self.logger.debug("Current transition: %s", transition)
 
             # Mark the decision as visited, if graph search
             if self._closed_decisions:
-                logging.info("Mark current decision as visited in closed decisions %s#", self._closed_decisions.size())
+                self.logger.debug("Mark current decision as visited in closed decisions %s#", self._closed_decisions.size())
                 self._closed_decisions.insert(current_decision)
 
             # Execute the move (important: current decision is already a copy version when added as search move)
             successor_ = cp.deepcopy(current_decision.state_)
             if successor_.execute(current_decision.move):
-                logging.info("Move is successful.")
+                self.logger.debug("Move is successful.")
 
                 # Set next depth and attach next transition to successor so that we can trace solution path
                 next_transition = Transition(previous_state_=current_decision.state_, move=current_decision.move, depth=next_depth)
-                logging.info("Create next transition %s ", next_transition)
+                self.logger.debug("Create next transition %s ", next_transition)
                 successor_.transition = next_transition
 
                 if self.dot_graph:
@@ -182,7 +199,7 @@ class Explorateur:
             else:
                 self.num_failed_decisions += 1
                 # Skip failed move and infeasible successor
-                logging.info("Skip infeasible successor. Num fails: %s", str(self.num_failed_decisions))
+                self.logger.debug("Skip infeasible successor. Num fails: %s", str(self.num_failed_decisions))
 
                 if self.dot_graph:
                     from_node = Node(name=current_decision.state_.get_dot_label())
@@ -196,7 +213,7 @@ class Explorateur:
         # No more open decisions left, search finished, save the dot
         self.total_time = time.perf_counter() - self._start_time
         self._log_stats("<<< FINISH SEARCH - FAILURE - No solution! ")
-        if self.dot_graph: self.dot_graph.write(dot_file_path)
+        # if self.dot_graph: self.dot_graph.write(dot_file_path)
         return None
 
     def _is_terminate_or_expand(self, state_, goal_state, exploration_type, max_depth, dot_file_path) -> Tuple[bool, bool]:
@@ -209,22 +226,22 @@ class Explorateur:
             self._solution_state_ = state_
             self.solution_state = state_.base
             self.total_time = time.perf_counter() - self._start_time
-            logging.info("Successful termination for state: " + str(state_))
+            self.logger.debug("Successful termination for state: " + str(state_))
             self._log_stats("<<< FINISH SEARCH - SUCCESS - Solution Found!")
             if self.dot_graph:
                 # Recolor final node with green
                 self.dot_graph.add_node(Node(state_.get_dot_label(), style="filled", fillcolor="green"))
-                self.dot_graph.write(dot_file_path)
+                # self.dot_graph.write(dot_file_path)
             return is_terminate, is_solution
         else:
-            logging.info("No termination, continue with alternative moves")
+            self.logger.debug("No termination, continue with alternative moves")
 
         # If still within max depth bound, insert the successor into open states for exploration
         # Initial state does not have transition, so skip max depth for initial state
         if state_.transition:
             if state_.transition.depth > max_depth:
                 # Don't terminate the whole search, but don't generate new open nodes
-                logging.info("Max depth reached, not inserting new open node.")
+                self.logger.debug("Max depth reached, not inserting new open node.")
                 return is_terminate, is_solution
 
         # If no termination, add alternative moves to search -- decided by the user state!
@@ -236,18 +253,18 @@ class Explorateur:
 
         # Search for alternatives
         for move in moves:
-            logging.info("Decision from move: %s", move)
+            self.logger.debug("Decision from move: %s", move)
 
             # Create new decision
             decision = Decision(state_, move)
 
             # Skip already visited successor, if graph search
             if self._closed_decisions and self._closed_decisions.contains(decision):
-                logging.info("Skip adding already visited successor.")
+                self.logger.debug("Skip adding already visited successor.")
                 continue
 
             # Push successor to open storage for execution
-            logging.info("Add open decision for execution %s", decision)
+            self.logger.debug("Add open decision for execution %s", decision)
             self._open_decisions.insert(decision)
 
         return is_terminate, is_solution
@@ -334,11 +351,11 @@ class Explorateur:
         if stop_cause:
             self.total_time = current_time - start
             self._log_stats("<<< FINISH SEARCH - STOP - No solution! " + stop_cause)
-            if self.dot_graph: self.dot_graph.write(dot_file_path)
+            # if self.dot_graph: self.dot_graph.write(dot_file_path)
             return None
 
     def _log_stats(self, info):
-        logging.info(info +
+        self.logger.debug(info +
                      "\nTotal Decisions: " + str(self.num_decisions) +
                      "\nTotal Failures: " + str(self.num_failed_decisions) +
                      "\nTotal Time: " + str(round(self.total_time,3)))

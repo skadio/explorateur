@@ -1,4 +1,3 @@
-import time
 import logging
 from collections import OrderedDict
 from typing import List
@@ -27,11 +26,12 @@ class MyMove(BaseMove):
 
 class MyState(BaseState):
 
-    def __init__(self, var_to_domain, is_all_solutions):
+    def __init__(self, var_to_domain, is_all_solutions, logger):
         self.var_to_domain = var_to_domain
         self.is_all_solutions = is_all_solutions
         self.var_to_val = {}
         self.unassigned_variables = list(self.var_to_domain.keys())
+        self.logger = logger
 
     def get_moves(self) -> List[MyMove]:
 
@@ -45,7 +45,7 @@ class MyState(BaseState):
         val = self.var_to_domain[var][0]
         moves.append(MyMove(var, "==", val))
         moves.append(MyMove(var, "!=", val))
-        logging.info("USER moves [%s, %s]", moves[0], moves[1])
+        self.logger.info("USER moves [%s, %s]", moves[0], moves[1])
 
         return moves
 
@@ -55,7 +55,7 @@ class MyState(BaseState):
         return len(self.unassigned_variables) == 0
 
     def execute(self, move: MyMove) -> bool:
-        logging.info("USER Execute: %s", move)
+        self.logger.info("USER Execute: %s", move)
         var, constraint, val = move.variable, move.constraint, move.value
 
         if var == "x" and constraint == "==" and val == 1:
@@ -66,23 +66,23 @@ class MyState(BaseState):
 
         # Propagation
         if constraint == "==":
-            logging.info("\tEQ assigns var-val: %s-%s", var, val)
+            self.logger.info("\tEQ assigns var-val: %s-%s", var, val)
             self.var_to_val[var] = val
             self.var_to_domain[var] = [val]
             self.unassigned_variables.remove(var)
         elif constraint == "!=":
-            logging.info("\tNEQ removes var-val: %s-%s", var, val)
+            self.logger.info("\tNEQ removes var-val: %s-%s", var, val)
             self.var_to_domain[var].remove(val)
             if len(self.var_to_domain[var]) == 0:
-                logging.info("USER Execute: FAILS, empty domain var: %s", var)
+                self.logger.info("USER Execute: FAILS, empty domain var: %s", var)
                 return False
             elif len(self.var_to_domain[var]) == 1:
                 self.var_to_val[var] = self.var_to_domain[var][0]
                 self.unassigned_variables.remove(var)
-                logging.info("\tNEQ fixed var-val: %s-%s", var, self.var_to_val[var])
+                self.logger.info("\tNEQ fixed var-val: %s-%s", var, self.var_to_val[var])
 
         # Successful execution
-        logging.info("USER Execute: SUCCESS")
+        self.logger.info("USER Execute: SUCCESS")
         return True
 
     def get_dot_label(self):
@@ -101,20 +101,21 @@ class SimpleTests(BaseTest):
 
     def test_usage_example(self):
 
-        logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+        # logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
         # Explorateur
-        explorer = Explorateur()
+        explorer = Explorateur(logging.DEBUG)
 
         # Initial state
         initial_state = MyState(OrderedDict([("x", [1, 2]),
                                              ("y", [10, 20]),
                                              ("z", [100, 200])]),
-                                is_all_solutions=False)
+                                is_all_solutions=False,
+                                logger=explorer.logger)
 
         # Solve via search
         solution_path = explorer.search(initial_state,
-                                        exploration_type=ExplorationType.BestFirst(),
+                                        exploration_type=ExplorationType.DepthFirst(),
                                         search_type=SearchType.TreeSearch(),
                                         is_solution_path=True,
                                         dot_file_path="example.dot")

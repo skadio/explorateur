@@ -1,14 +1,93 @@
-digraph G {
-splines=line;
-1 [fillcolor=red, label="Fail: 1", shape=triangle, style=filled];
-STATE
- -> 1  [label="x == 1"];
-STATE
- -> "STATE\nx = 2\n"  [label="x != 1"];
-"STATE\nx = 2\n" -> "STATE\nx = 2\ny = 10\n"  [label="y == 10"];
-"STATE\nx = 2\n" -> "STATE\nx = 2\ny = 20\n"  [label="y != 10"];
-5 [fillcolor=red, label="Fail: 2", shape=triangle, style=filled];
-"STATE\nx = 2\ny = 10\n" -> 5  [label="z == 100"];
-"STATE\nx = 2\ny = 10\n" -> "STATE\nx = 2\ny = 10\nz = 200\n"  [label="z != 100"];
-"STATE\nx = 2\ny = 10\nz = 200\n" [fillcolor=green, style=filled];
-}
+No termination, continue with alternative moves
+USER moves [x == 1, x != 1]
+Decision from move: x != 1
+Add open decision for execution Assignment: {}
+Unassigned: ['x', 'y', 'z']
+Variables: OrderedDict([('x', [1, 2]), ('y', [10, 20]), ('z', [100, 200])]) x != 1
+Decision from move: x == 1
+Add open decision for execution Assignment: {}
+Unassigned: ['x', 'y', 'z']
+Variables: OrderedDict([('x', [1, 2]), ('y', [10, 20]), ('z', [100, 200])]) x == 1
+
+Decision 1
+Open decisions: 2
+Current decision: Assignment: {}
+Unassigned: ['x', 'y', 'z']
+Variables: OrderedDict([('x', [1, 2]), ('y', [10, 20]), ('z', [100, 200])]) x == 1
+Current transition: None
+USER Execute: x == 1
+Skip infeasible successor. Num fails: 1
+
+Decision 2
+Open decisions: 1
+Current decision: Assignment: {}
+Unassigned: ['x', 'y', 'z']
+Variables: OrderedDict([('x', [1, 2]), ('y', [10, 20]), ('z', [100, 200])]) x != 1
+Current transition: None
+USER Execute: x != 1
+	NEQ removes var-val: x-1
+	NEQ fixed var-val: x-2
+USER Execute: SUCCESS
+Move is successful.
+Create next transition x != 1 depth: 1 
+No termination, continue with alternative moves
+USER moves [y == 10, y != 10]
+Decision from move: y != 10
+Add open decision for execution Assignment: {'x': 2}
+Unassigned: ['y', 'z']
+Variables: OrderedDict([('x', [2]), ('y', [10, 20]), ('z', [100, 200])]) y != 10
+Decision from move: y == 10
+Add open decision for execution Assignment: {'x': 2}
+Unassigned: ['y', 'z']
+Variables: OrderedDict([('x', [2]), ('y', [10, 20]), ('z', [100, 200])]) y == 10
+
+Decision 3
+Open decisions: 2
+Current decision: Assignment: {'x': 2}
+Unassigned: ['y', 'z']
+Variables: OrderedDict([('x', [2]), ('y', [10, 20]), ('z', [100, 200])]) y == 10
+Current transition: x != 1 depth: 1
+USER Execute: y == 10
+	EQ assigns var-val: y-10
+USER Execute: SUCCESS
+Move is successful.
+Create next transition y == 10 depth: 2 
+No termination, continue with alternative moves
+USER moves [z == 100, z != 100]
+Decision from move: z != 100
+Add open decision for execution Assignment: {'x': 2, 'y': 10}
+Unassigned: ['z']
+Variables: OrderedDict([('x', [2]), ('y', [10]), ('z', [100, 200])]) z != 100
+Decision from move: z == 100
+Add open decision for execution Assignment: {'x': 2, 'y': 10}
+Unassigned: ['z']
+Variables: OrderedDict([('x', [2]), ('y', [10]), ('z', [100, 200])]) z == 100
+
+Decision 4
+Open decisions: 3
+Current decision: Assignment: {'x': 2, 'y': 10}
+Unassigned: ['z']
+Variables: OrderedDict([('x', [2]), ('y', [10]), ('z', [100, 200])]) z == 100
+Current transition: y == 10 depth: 2
+USER Execute: z == 100
+Skip infeasible successor. Num fails: 2
+
+Decision 5
+Open decisions: 2
+Current decision: Assignment: {'x': 2, 'y': 10}
+Unassigned: ['z']
+Variables: OrderedDict([('x', [2]), ('y', [10]), ('z', [100, 200])]) z != 100
+Current transition: y == 10 depth: 2
+USER Execute: z != 100
+	NEQ removes var-val: z-100
+	NEQ fixed var-val: z-200
+USER Execute: SUCCESS
+Move is successful.
+Create next transition z != 100 depth: 3 
+Successful termination for state: Assignment: {'x': 2, 'y': 10, 'z': 200}
+Unassigned: []
+Variables: OrderedDict([('x', [2]), ('y', [10]), ('z', [200])])
+<<< FINISH SEARCH - SUCCESS - Solution Found!
+Total Decisions: 5
+Total Failures: 2
+Total Time: 0.021
