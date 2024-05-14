@@ -1,90 +1,79 @@
 # Explorateur
 
-Explorateur is a library written in Python to solve problems that require searching over a collection of states. The algorithm begins with an initial state then makes 'moves' until a stopping criteria is met (number of iterations, runtime, user-defined termination). Explorateur follows a scikit-learn style public interface, adheres to 
-[PEP-8 standards](https://www.python.org/dev/peps/pep-0008/), and is tested heavily. 
+Explorateur is a library written in Python to solve problems that require searching over a collection of states. The main search loop begins with an initial state, and then, performs search moves until a termination state is found, search space is exhausted, or a stopping criteria, such as the number of iterations, runtime limit, or maximum depth, has been reached. Optionally, a goal state can also be provided as input.
 
-This package allows a search to happen by implementing an instance of ```BaseMove``` and ```BaseState``` .
-
-The user needs to provide at least an initial state (inherited from BaseState) and one of the following in the constructor:
-- Depth First Search: uses a stack to keep track of the states
-- Breadth-First Search: uses a queue to keep track of the states to be explored. 
-- Best-First Search: uses a Priority Queue, which requires ```objective_function()``` to be implemented in ```BaseState``` as a given state is inserted into the Priority Queue based on the result of this function call. 
-
-There is an example of each type of search in the file test_exploration_type. 
-
-There is also the option to use a Graph Search: in order for this to work, the user must design the ```is_terminate()``` function to check for equality between the current state and some goal state. Note, a simple "==" wil not suffice but rather the user must ensure that each of the relevant attributes that define a state are equal. For example, in the following case we would check that ```val_to_vars``` is the same.
-
-The algorithm stops once a solution is found based on ```is_terminate()```, or all possible states have been explored and no solution has been found or in the case that ```max_runtime``` or ```max_iters``` is defined if one of them are reached.
+Explorateur provides a generic state space search based on problem-specific `BaseMove` and `BaseState` representations. The search strategy can be `TreeSearch` or `GraphSearch`. The exploration strategy can be `BestFirst`, `BreadthFirst`, or `DepthFirst`. 
 
 ## Quick Start:
 
+Here is the template `BaseMove` and `BaseState` example, ready for problem specific implementations. When the search is complete, the solution and the solution path can be retrieved as well as the dot graph for visualization of the search.
+
 ```python
-from typing import List
-from explorateur.explorateur import Explorateur
-from explorateur.search.exploration_type import ExplorationType
-from explorateur.state.base_move import BaseMove
-from explorateur.state.base_state import BaseState
+from explorateur import Explorateur, BaseMove, BaseState, ExplorationType, SearchType
 
 
-# Create your custom move
-class SimpleMove(BaseMove):
+# TODO Implement your own search moves
+class MyMove(BaseMove):
 
-    def __init__(self, variable, value):
-        self.variable = variable
-        self.value = value
-
-    def get_dot_edge_label(self) -> str:
-        return str(self.variable) + "->" + str(self.value)
+    def __init__(self):
+        # TODO Your move object
+        pass
 
     def __str__(self) -> str:
-        return f"Setting variable: {self.variable} to {self.value}"
+        # TODO Your mvoe string, also used for node labels in DOT graph
+        pass
 
 
-# Create your custom state representation
-class SimpleState(BaseState):
+# TODO Implement your own search state 
+class MyState(BaseState):
 
-    def __init__(self, var_to_domain):
-        self.var_to_domain = var_to_domain
+    def __init__(self):
+        # TODO Your problem specific state representation
+        pass
 
-        self.var_to_value = {}
-        self.unassigned_vars = set(var_to_domain.keys())
+    def get_moves(self) -> List[MyMove]:
+        # TODO Your branching decisions as a list of moves
+        pass
 
-    def get_moves(self) -> List[SimpleMove]:
-        moves = []
-        for var in self.unassigned_vars:
-            for val in self.var_to_domain[var]:
-                moves.append(SimpleMove(var, val))
-        return moves
+    def is_terminate(self, goal_state=None) -> bool:
+        # TODO Is the current state a solution/termination?
+        pass
 
-    def is_terminate(self, end_state=None) -> bool:
-        if len(self.unassigned_vars) > 0:
-            return False
-        return True
-
-    def execute(self, move: SimpleMove) -> bool:
-        self.var_to_value[move.variable] = move.value
-        self.unassigned_vars.remove(move.variable)
-        return True
-
-    def get_state_label(self, iterations: int):
-        return str(iterations)
+    def execute(self, move: MyMove) -> bool:
+        # TODO Execute the move on the state and return success flag
+        pass
 
     def __str__(self) -> str:
-        return str(self.var_to_value)
+        # TODO Your state string, also used for node labels in DOT graph
+        pass
 
+# Explorateur
+explorer = Explorateur()
 
-# Explorateur with choice of exploration
-explorer = Explorateur(ExplorationType.DepthFirst())
+# Initial state
+initial_state = MyState()
 
-# Initial state with variables and their possible domains 
-initial_state = SimpleState({"x": [1, 2], "y": [20, 10], "z": [100, 200]})
+# Search for solutions
+if explorer.search(initial_state,
+                   goal_state=None,  # Optional goal state
+                   exploration_type=ExplorationType.DepthFirst(),
+                   search_type=SearchType.TreeSearch(),
+                   is_solution_path=True,
+                   dot_file_path="tree_search_dfs.dot"):
+    print("Solution:", explorer.solution_state)
+    print("Solution Path:", *explorer.solution_path, sep="\n<-")
+else:
+    print("No solution found!")
 
-# Find a solution via search 
-solution = explorer.search(initial_state)
-print(solution)
+# Search statistics
+print("Total Decisions:", explorer.num_decisions)
+print("Total Failures:", explorer.num_failed_decisions)
+print("Total Time:", explorer.total_time)
 ```
 
-The above example just searches for some assignment of variables 1,2,3 where the assignments happen to be those indicated by ```possible_vars```. In ```get_moves()``` we return moves that are "legal" by what is established in ```possible_vars```.
+## Concrete Example
+
+Here is a concrete implementation to solve a small [Constraint Satisfaction Problem](tests/test_tree_depth_first.py) with the corresponding [DOT Graph Visualization](https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0D%0Aspline%3Dline%3B%0D%0A%22State%20ID%3A%200%0D%0AAssignment%3A%20%7B%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%2C%202%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%201%0D%0AAssignment%3A%20%7B'x'%3A%201%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22x%20%3D%3D%201%22%5D%3B%0D%0A%22State%20ID%3A%201%0D%0AAssignment%3A%20%7B'x'%3A%201%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%202%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22y%20%3D%3D%2010%22%5D%3B%0D%0A%22State%20ID%3A%202%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%203%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%2C%20'z'%3A%20100%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%5D%7D%22%20%5Blabel%3D%22z%20%3D%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%202%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%204%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%2C%20'z'%3A%20200%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B200%5D%7D%22%20%5Blabel%3D%22z%20!%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%201%0D%0AAssignment%3A%20%7B'x'%3A%201%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%205%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22y%20!%3D%2010%22%5D%3B%0D%0A%22State%20ID%3A%205%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%206%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%2C%20'z'%3A%20100%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%5D%7D%22%20%5Blabel%3D%22z%20%3D%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%205%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%207%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%2C%20'z'%3A%20200%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B200%5D%7D%22%20%5Blabel%3D%22z%20!%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%200%0D%0AAssignment%3A%20%7B%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%2C%202%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%208%0D%0AAssignment%3A%20%7B'x'%3A%202%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22x%20!%3D%201%22%5D%3B%0D%0A%22State%20ID%3A%208%0D%0AAssignment%3A%20%7B'x'%3A%202%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%209%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22y%20%3D%3D%2010%22%5D%3B%0D%0A%22State%20ID%3A%209%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2010%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%2C%20'z'%3A%20100%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%5D%7D%22%20%5Blabel%3D%22z%20%3D%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%209%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2011%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%2C%20'z'%3A%20200%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B200%5D%7D%22%20%5Blabel%3D%22z%20!%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%208%0D%0AAssignment%3A%20%7B'x'%3A%202%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2012%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22y%20!%3D%2010%22%5D%3B%0D%0A%22State%20ID%3A%2012%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2013%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%2C%20'z'%3A%20100%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%5D%7D%22%20%5Blabel%3D%22z%20%3D%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%2012%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2014%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%2C%20'z'%3A%20200%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B200%5D%7D%22%20%5Blabel%3D%22z%20!%3D%20100%22%5D%3B%0D%0A%7D).
 
 
 ## Install from PyPI

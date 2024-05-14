@@ -21,7 +21,6 @@ class Constants(NamedTuple):
     default_seed = 123456
     """The default random seed."""
 
-
 def argmax(dictionary: Dict[Num, Num]) -> Num:
     """
     Returns the first key with the maximum value.

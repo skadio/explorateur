@@ -2,7 +2,6 @@ import heapq
 from typing import List, Optional
 
 from explorateur.search.decision import Decision
-from explorateur.state.state import _State
 from explorateur.state.storage.base_storage import BaseStorage
 
 
@@ -14,9 +13,9 @@ class PriorityQueue(BaseStorage):
         self.storage: List[Decision] = list()
 
     def insert(self, decision: Decision):
-        heapq.heappush(self.storage, (decision.state_.get_objective(), decision.state_))
+        heapq.heappush(self.storage, (decision.state.get_objective(), decision))
 
-    def remove(self) -> _State:
+    def remove(self) -> Decision:
         """ Removes a state from the priority queue."""
         return heapq.heappop(self.storage)[1]  # the first item is the key
 

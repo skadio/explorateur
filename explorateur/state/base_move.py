@@ -17,7 +17,7 @@ class BaseMove(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __str__(self) -> str:
-        """ 
+        """
         Return a string representation of the move.
 
         Returns:
@@ -31,3 +31,4 @@ class BaseMove(metaclass=abc.ABCMeta):
            Returns:
                str: A string label to display in dot graph.
         """
+        return str(self)

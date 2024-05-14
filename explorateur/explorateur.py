@@ -1,11 +1,7 @@
-import logging
 import copy as cp
-import logging
 import sys
 import time
-from typing import Optional, List, Tuple, Union
-
-from pydot import Dot, Node, Edge
+from typing import Optional, List, Tuple
 
 from explorateur._version import __version__
 from explorateur.search.decision import Decision
@@ -13,7 +9,6 @@ from explorateur.search.exploration_type import ExplorationType
 from explorateur.search.search_type import SearchType
 from explorateur.search.transition import Transition
 from explorateur.state.base_state import BaseState
-from explorateur.state.state import _State
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state.storage.factory import StorageFactory
 from explorateur.utils import check_true, All_Exploration_Types, All_Search_Types
@@ -42,35 +37,27 @@ class Explorateur:
         """ Initialize an Explorateur object. """
 
         # Validate arguments
-        Explorateur._validate_args()
+        Explorateur._validate_args(is_verbose)
 
-        # Logger object
-        self.logger = logging.getLogger()
-        self._log_formatter = logging.Formatter("%(message)s")
+        # Set verbosity
+        self.is_verbose: bool = is_verbose
 
-        if is_verbose:
-            # Create console handler and set level to debug for printing
-            console_handler = logging.StreamHandler()
-            console_handler.setLevel(logging.DEBUG)
-            console_handler.setFormatter(self._log_formatter)
-            self.logger.addHandler(console_handler)
+        # Solution state
+        self.solution_state: Optional[BaseState] = None
+        self.solution_path: Optional[List[BaseState]] = None
 
         # State collections open and closed (for graph search only)
-        self._open_decisions: BaseStorage
+        self._open_decisions: BaseStorage = None
         self._closed_decisions: Optional[BaseStorage] = None
-
-        # Solution state and internal version with transition
-        self.solution_state: Optional[BaseState] = None
-        self._solution_state_: Optional[_State] = None
-
-        # Dot graph representation of search
-        self.dot_graph: Optional[Dot] = None
 
         # Statistics
         self._start_time: float = 0
         self.total_time: float = 0
         self.num_decisions: int = 0
         self.num_failed_decisions: int = 0
+
+        # Dot graph text representation of search
+        self._dot_text: str = ""
 
     def search(self,
                initial_state: BaseState,
@@ -81,7 +68,7 @@ class Explorateur:
                max_depth: int = sys.maxsize,
                max_moves: int = sys.maxsize,
                max_runtime: int = None,
-               dot_file_path: str = None) -> Union[BaseState, List[BaseState], None]:
+               dot_file_path: str = None) -> bool:
         """
         This function performs search from the initial_state until:
             - a solution found, or
@@ -96,8 +83,8 @@ class Explorateur:
                                                           Default, ExplorationType.DepthFirst().
             - search_type Optional(SearchType): The search method to decide whether to store visited states.
                                                 Default, SearchType.TreeSearch().
-            - is_solution_path (bool): If True, the path starting from the solution state back to the initial_state is returned.
-                                       If False, the solution state is returned.
+            - is_solution_path (bool): If True, path starting from solution state back to initial_state is returned.
+                                       If False, solution state is returned.
                                        Default, True.
             - max_depth Optional(int): Optional argument for the maximum depth to stop search.
                                        Default, maxsize (no limit).
@@ -115,137 +102,147 @@ class Explorateur:
             - if a solution is found and is_solution_path is set to False,
             returns the solution state.
             - If a solution is found, and is_solution_path is set to True,
-            returns a list of solution states, denoting the path starting from the solution state back to the initial_state.
+            returns a list of solution states, denoting the path from solution state back to the initial_state.
         """
 
-        self.start = time.perf_counter()
-        self.logger.debug("Explorateur " + __version__)
-        self.logger.debug(">>> START SEARCH ")
-
         # Check arguments
+        self._log(">>> START Explorateur (v" + str(__version__)+")")
         Explorateur._validate_search_args(initial_state, goal_state,
                                           exploration_type, search_type, is_solution_path,
                                           max_depth, max_moves, max_runtime, dot_file_path)
         
-        if dot_file_path:
-            file_handler = logging.FileHandler(dot_file_path)
-            file_handler.setFormatter(self._log_formatter)
-            self.logger.addHandler(file_handler)
-
         # Reset rng, solution_states, collections, dot graph, start time, stats
-        self._reset_search(dot_file_path)
+        self._reset_search()
 
         # Create storage for open states, and optionally, for closed states in graph search to avoid duplicate visits
         self._open_decisions = StorageFactory.create(exploration_type)
         self._closed_decisions = StorageFactory.create(search_type)
 
-        # Convert initial BaseState to internal _BaseState so that we can attach transitions
-        initial_state = _State(initial_state)
+        # Root node root from the given initial state
+        root = cp.deepcopy(initial_state)
+        root._id = self.num_decisions
 
-        # Check termination, else expand current state with possible moves as open decisions for execution within depth
-        is_terminate, is_solution = self._is_terminate_or_expand(initial_state, goal_state, exploration_type, max_depth, dot_file_path)
+        # Check termination, else expand current state with possible moves
+        # as open decisions for execution within depth
+        is_terminate, is_solution = self._is_terminate_or_expand(root, goal_state,
+                                                                 exploration_type, max_depth, dot_file_path)
         if is_solution:
-            return self._get_solution_path() if is_solution_path else self.solution_state
+            if is_solution_path:
+                self.solution_path = self._get_solution_path()
+            return True
         if is_terminate:
-            return None
+            return False
 
         # START SEARCH
         while not self._open_decisions.is_empty():
             self.num_decisions += 1
-            self.logger.debug("\nDecision %s", self.num_decisions)
-            self.logger.debug("Open decisions: %s", self._open_decisions.size())
+            self._log("\nDecision " + str(self.num_decisions))
+            self._log("Open decisions: " + str(self._open_decisions.size()))
 
             # Check stopping conditions
             self._check_stopping_criteria(self._start_time, self.num_decisions, max_runtime, max_moves, dot_file_path)
 
             # Pop the current decision from open decisions for execution
             current_decision = self._open_decisions.remove()
-            self.logger.debug("Current decision: %s", current_decision)
+            self._log("Current decision: " + str(current_decision))
 
             # Transition of the current state (there is no transition for initial moves)
-            transition = current_decision.state_.transition
+            transition = current_decision.state._transition
             next_depth = transition.depth + 1 if transition else 1
-            self.logger.debug("Current transition: %s", transition)
+            self._log("Current transition: " + str(transition))
 
             # Mark the decision as visited, if graph search
             if self._closed_decisions:
-                self.logger.debug("Mark current decision as visited in closed decisions %s#", self._closed_decisions.size())
+                self._log("Mark current decision as visited in closed decisions: " + str(self._closed_decisions.size()))
                 self._closed_decisions.insert(current_decision)
 
             # Execute the move (important: current decision is already a copy version when added as search move)
-            successor_ = cp.deepcopy(current_decision.state_)
-            if successor_.execute(current_decision.move):
-                self.logger.debug("Move is successful.")
+            successor_state = cp.deepcopy(current_decision.state)
+            if successor_state.execute(current_decision.move):
+                self._log("Move is successful.")
 
                 # Set next depth and attach next transition to successor so that we can trace solution path
-                next_transition = Transition(previous_state_=current_decision.state_, move=current_decision.move, depth=next_depth)
-                self.logger.debug("Create next transition %s ", next_transition)
-                successor_.transition = next_transition
+                next_transition = Transition(previous_state=current_decision.state,
+                                             move=current_decision.move, depth=next_depth)
+                successor_state._transition = next_transition
+                successor_state._id = self.num_decisions - self.num_failed_decisions
+                self._log("Create next transition: " + str(next_transition) +
+                          " from ID: " + str(current_decision.state._id) + " to ID: " + str(successor_state._id))
 
-                if self.dot_graph:
-                    from_node = Node(name=current_decision.state_.get_dot_label())
-                    to_node = Node(name=successor_.get_dot_label())
-                    # self.dot_graph.add_node(from_node)
-                    # self.dot_graph.add_node(to_node)
-                    edge_label = current_decision.move.get_dot_label()
-                    self.dot_graph.add_edge(Edge(src=from_node, dst=to_node, label=edge_label))
+                # Create dot node transition
+                self._log_dot(current_decision, successor_state, dot_file_path)
 
-                # Check termination, else expand current state with possible moves as open decisions for execution within depth
-                is_terminate, is_solution = self._is_terminate_or_expand(successor_, goal_state, exploration_type, max_depth, dot_file_path)
+                # Check termination, else expand current state with possible moves
+                # as open decisions for execution within depth
+                is_terminate, is_solution = self._is_terminate_or_expand(successor_state, goal_state,
+                                                                         exploration_type, max_depth, dot_file_path)
                 if is_solution:
-                    return self._get_solution_path() if is_solution_path else self.solution_state
+                    if is_solution_path:
+                        self.solution_path = self._get_solution_path()
+                    return True
                 if is_terminate:
-                    return None
+                    return False
             else:
                 self.num_failed_decisions += 1
                 # Skip failed move and infeasible successor
-                self.logger.debug("Skip infeasible successor. Num fails: %s", str(self.num_failed_decisions))
+                self._log("Skip infeasible successor. Num fails: " + str(self.num_failed_decisions))
 
-                if self.dot_graph:
-                    from_node = Node(name=current_decision.state_.get_dot_label())
-                    fail_node = Node(self.num_decisions,
-                                     label="Fail: " + str(self.num_failed_decisions), shape="triangle", style="filled", fillcolor="red")
-                    # self.dot_graph.add_node(from_node)
-                    self.dot_graph.add_node(fail_node)
-                    edge_label = current_decision.move.get_dot_label()
-                    self.dot_graph.add_edge(Edge(src=from_node, dst=fail_node, label=edge_label))
+                # Create dot node transition to a failed node
+                self._log_dot(current_decision, None, dot_file_path)
 
         # No more open decisions left, search finished, save the dot
         self.total_time = time.perf_counter() - self._start_time
         self._log_stats("<<< FINISH SEARCH - FAILURE - No solution! ")
-        # if self.dot_graph: self.dot_graph.write(dot_file_path)
-        return None
+        self._log_dot_file(dot_file_path)
+        return False
 
-    def _is_terminate_or_expand(self, state_, goal_state, exploration_type, max_depth, dot_file_path) -> Tuple[bool, bool]:
+    def _check_stopping_criteria(self, start, num_moves, max_runtime, max_moves, dot_file_path):
+        stop_cause = ""
+
+        # Check stopping criteria: max_runtime
+        current_time = time.perf_counter()
+        if max_runtime is not None and current_time - start > max_runtime:
+            stop_cause = "Max runtime reached"
+
+        # Check stopping criteria: max_moves
+        if num_moves > max_moves:
+            stop_cause = "Max number of moves reached"
+
+        # If stopped, log, save dot, and return None solution
+        if stop_cause:
+            self.total_time = current_time - start
+            self._log_stats("<<< FINISH SEARCH - STOP - No solution! " + stop_cause)
+            self._log_dot_file(dot_file_path)
+            return None
+
+    def _is_terminate_or_expand(self, state, goal_state,
+                                exploration_type, max_depth, dot_file_path) -> Tuple[bool, bool]:
 
         is_terminate, is_solution = False, False
 
         # Check termination condition -- decided by the user state!
-        if state_.is_terminate(goal_state):
+        if state.is_terminate(goal_state):
             is_terminate, is_solution = True, True
-            self._solution_state_ = state_
-            self.solution_state = state_.base
+            self.solution_state = state
             self.total_time = time.perf_counter() - self._start_time
-            self.logger.debug("Successful termination for state: " + str(state_))
+            self._log("Successful termination for state: " + str(state))
             self._log_stats("<<< FINISH SEARCH - SUCCESS - Solution Found!")
-            if self.dot_graph:
-                # Recolor final node with green
-                self.dot_graph.add_node(Node(state_.get_dot_label(), style="filled", fillcolor="green"))
-                # self.dot_graph.write(dot_file_path)
+            self._log_dot(None, state, dot_file_path)  # mark it green
+            self._log_dot_file(dot_file_path)
             return is_terminate, is_solution
         else:
-            self.logger.debug("No termination, continue with alternative moves")
+            self._log("Successor is not termination, add alternative moves")
 
         # If still within max depth bound, insert the successor into open states for exploration
         # Initial state does not have transition, so skip max depth for initial state
-        if state_.transition:
-            if state_.transition.depth > max_depth:
+        if state._transition:
+            if state._transition.depth > max_depth:
                 # Don't terminate the whole search, but don't generate new open nodes
-                self.logger.debug("Max depth reached, not inserting new open node.")
+                self._log("Max depth reached, not inserting new open node.")
                 return is_terminate, is_solution
 
         # If no termination, add alternative moves to search -- decided by the user state!
-        moves = state_.get_moves()
+        moves = state.get_moves()
 
         # Reverse moves for depth first search, so the exploration follows user move order
         if isinstance(exploration_type, ExplorationType.DepthFirst):
@@ -253,18 +250,18 @@ class Explorateur:
 
         # Search for alternatives
         for move in moves:
-            self.logger.debug("Decision from move: %s", move)
+            self._log("Decision from move: " + str(move))
 
             # Create new decision
-            decision = Decision(state_, move)
+            decision = Decision(state, move)
 
             # Skip already visited successor, if graph search
             if self._closed_decisions and self._closed_decisions.contains(decision):
-                self.logger.debug("Skip adding already visited successor.")
+                self._log("Skip adding decision. It is already visited.")
                 continue
 
             # Push successor to open storage for execution
-            self.logger.debug("Add open decision for execution %s", decision)
+            self._log("Add open decision for executing " + str(decision.move) + " on state\n" + str(decision.state))
             self._open_decisions.insert(decision)
 
         return is_terminate, is_solution
@@ -287,47 +284,79 @@ class Explorateur:
         state_list = []
 
         # We can only trace a path if a solution state is found
-        if self._solution_state_:
+        if self.solution_state:
             # Start the path from the solution state, and walk backwards
-            self._get_path_helper(self._solution_state_, state_list)
+            self._get_path_helper(self.solution_state, state_list)
 
         return state_list.reverse() if is_initial_first else state_list
 
-    def _get_path_helper(self, state_: _State, state_list: list):
+    def _get_path_helper(self, state: BaseState, state_list: list):
         """
         This helper recursion traces back explored states explored in reverse order.
 
         Parameters:
-            _state (_State): The current state being explored.
+            state (_State): The current state being explored.
             state_list (list): The list to store the explored states.
 
         Returns:
             list: The list of explored states in reverse order.
         """
-        transition = state_.transition
+        transition = state._transition
 
         # We reached the initial state, add it and return the path
         if transition is None:
-            state_list.append(state_.base)
+            state_list.append(state)
             return state_list
 
         # Otherwise, append the base user state to the state list
-        state_list.append(state_.base)
+        state_list.append(state)
 
         # Continue recursion from the previous internal state
-        self._get_path_helper(transition.previous_state_, state_list)
+        self._get_path_helper(transition.previous_state, state_list)
 
-    def _reset_search(self, dot_file_path):
-        # Clean state collections
-        self._open_decisions = None
-        self._closed_decisions = None
+    def _log(self, text):
+        if self.is_verbose:
+            print(text)
+
+    def _log_dot(self, current_decision, successor_state, dot_file_path):
+        if not dot_file_path:
+            return
+
+        if current_decision:
+            # If there is no successor, first add a fail node in red so that we can add an edge to it
+            if not successor_state:
+                self._dot_text += (str(self.num_decisions) +
+                                   " [label=\"Fail: " + str(self.num_failed_decisions) + "\"" +
+                                   " shape=triangle style=filled fillcolor=red];\n")
+
+            self._dot_text += "\"" + current_decision.state.get_dot_label() + "\" -> "
+            self._dot_text += "\"" + successor_state.get_dot_label() + "\"" if successor_state else str(self.num_decisions)
+            self._dot_text += " [label=\"" + current_decision.move.get_dot_label() + "\"];\n"
+        else:
+            # decision is taken care of, mark successor as the green solution node
+            self._dot_text += "\"" + successor_state.get_dot_label() + "\" [style=filled fillcolor=green];\n"
+
+    def _log_dot_file(self, dot_file_path):
+        if dot_file_path:
+            self._dot_text += "}"
+            with open(dot_file_path, 'w') as dot_file:
+                dot_file.write(self._dot_text)
+
+    def _log_stats(self, info):
+        self._log(info +
+                  "\nTotal Decisions: " + str(self.num_decisions) +
+                  "\nTotal Failures: " + str(self.num_failed_decisions) +
+                  "\nTotal Time: " + str(round(self.total_time, 3)))
+
+    def _reset_search(self):
 
         # Clean solution states
         self.solution_state = None
-        self._solution_state_ = None
+        self.solution_path = None
 
-        # Dot graph representation of search, if dot file given
-        self.dot_graph = Dot(graph_type="digraph", splines="line") if dot_file_path else None
+        # Clean state collections
+        self._open_decisions = None
+        self._closed_decisions = None
 
         # Initialize counters
         self._start_time = time.perf_counter()
@@ -335,34 +364,13 @@ class Explorateur:
         self.num_decisions = 0
         self.num_failed_decisions = 0
 
-    def _check_stopping_criteria(self, start, num_moves, max_runtime, max_moves, dot_file_path):
-        stop_cause = ""
-
-        # Check stopping criteria: max_runtime
-        current_time = time.perf_counter()
-        if max_runtime is not None and current_time - start > max_runtime:
-            stop_cause = "Max runtime reached"
-
-        # Check stopping criteria: max_moves
-        if num_moves > max_moves:
-            stop_cause = "Max number of moves reached"
-
-        # If stopped, log, save dot, and return None solution
-        if stop_cause:
-            self.total_time = current_time - start
-            self._log_stats("<<< FINISH SEARCH - STOP - No solution! " + stop_cause)
-            # if self.dot_graph: self.dot_graph.write(dot_file_path)
-            return None
-
-    def _log_stats(self, info):
-        self.logger.debug(info +
-                     "\nTotal Decisions: " + str(self.num_decisions) +
-                     "\nTotal Failures: " + str(self.num_failed_decisions) +
-                     "\nTotal Time: " + str(round(self.total_time,3)))
+        # Dot graph text representation of search, used if dot file given
+        self._dot_text = "digraph G {\nspline=line;\n"
 
     @staticmethod
-    def _validate_args() -> None:
-        pass
+    def _validate_args(is_verbose) -> None:
+        check_true(isinstance(is_verbose, bool),
+                   TypeError("is_verbose must be boolean " + str(is_verbose)))
 
     @staticmethod
     def _validate_search_args(initial_state, goal_state,

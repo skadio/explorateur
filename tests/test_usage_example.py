@@ -1,128 +1,99 @@
-import logging
-from collections import OrderedDict
-from typing import List
+from typing import Dict, List
 
-from explorateur.explorateur import Explorateur
-from explorateur.search.exploration_type import ExplorationType
-from explorateur.search.search_type import SearchType
-from explorateur.state.base_move import BaseMove
-from explorateur.state.base_state import BaseState
 from tests.test_base import BaseTest
+from explorateur import Explorateur, BaseMove, BaseState, ExplorationType, SearchType
 
 
 class MyMove(BaseMove):
 
-    def __init__(self, variable, constraint, value):
-        self.variable = variable
-        self.constraint = constraint
-        self.value = value
+    # TODO Define move object
+    def __init__(self, var, constraint, val):
+        self.var: str = var
+        self.constraint: str = constraint
+        self.val: int = val
 
-    def get_dot_label(self) -> str:
-        return str(self.variable) + " " + self.constraint + " " + str(self.value)
-
+    # TODO String representation, also used for edge labels in DOT graph
     def __str__(self) -> str:
-        return str(self.variable) + " " + self.constraint + " " + str(self.value)
+        return str(self.var) + " " + self.constraint + " " + str(self.val)
 
 
 class MyState(BaseState):
 
-    def __init__(self, var_to_domain, is_all_solutions, logger):
-        self.var_to_domain = var_to_domain
-        self.is_all_solutions = is_all_solutions
-        self.var_to_val = {}
-        self.unassigned_variables = list(self.var_to_domain.keys())
-        self.logger = logger
+    # TODO Problem specific state representation
+    def __init__(self, var_to_domain):
+        # IMPORTANT: Make sure to initialize the base state
+        super().__init__()
 
+        self.var_to_domain: Dict[str, List[int]] = var_to_domain
+        self.var_to_val: Dict[str, int] = {}
+        self.unassigned: List[str] = list(self.var_to_domain.keys())
+
+    # TODO Design branching decisions
     def get_moves(self) -> List[MyMove]:
-
-        # No more moves if all variables are assigned
-        moves = list()
-        if len(self.unassigned_variables) == 0:
-            return moves
+        # If all vars are assigned, no more moves
+        if len(self.unassigned) == 0: return list()
 
         # Select first unassigned variable and first value in domain
-        var = self.unassigned_variables[0]
+        var = self.unassigned[0]
         val = self.var_to_domain[var][0]
-        moves.append(MyMove(var, "==", val))
-        moves.append(MyMove(var, "!=", val))
-        self.logger.info("USER moves [%s, %s]", moves[0], moves[1])
 
-        return moves
+        # Binary branching
+        return [MyMove(var, "==", val), MyMove(var, "!=", val)]
 
-    def is_terminate(self, end_state=None) -> bool:
-        # Search finishes when all variables are assigned
-        if self.is_all_solutions: return False
-        return len(self.unassigned_variables) == 0
+    # TODO Check whether a state is the solution/termination
+    def is_terminate(self, goal_state=None) -> bool:
+        # For demo purposes, no termination, search exhaustively
+        return False
 
+    # TODO Execute the move on the state, return success flag
     def execute(self, move: MyMove) -> bool:
-        self.logger.info("USER Execute: %s", move)
-        var, constraint, val = move.variable, move.constraint, move.value
+        var, constraint, val = move.var, move.constraint, move.val
 
-        if var == "x" and constraint == "==" and val == 1:
-            return False
-
-        if var == "z" and constraint == "==" and val == 100:
-            return False
-
-        # Propagation
+        # Propagate EQ and NEQ constraints
         if constraint == "==":
-            self.logger.info("\tEQ assigns var-val: %s-%s", var, val)
             self.var_to_val[var] = val
             self.var_to_domain[var] = [val]
-            self.unassigned_variables.remove(var)
+            self.unassigned.remove(var)
         elif constraint == "!=":
-            self.logger.info("\tNEQ removes var-val: %s-%s", var, val)
             self.var_to_domain[var].remove(val)
             if len(self.var_to_domain[var]) == 0:
-                self.logger.info("USER Execute: FAILS, empty domain var: %s", var)
                 return False
             elif len(self.var_to_domain[var]) == 1:
                 self.var_to_val[var] = self.var_to_domain[var][0]
-                self.unassigned_variables.remove(var)
-                self.logger.info("\tNEQ fixed var-val: %s-%s", var, self.var_to_val[var])
-
-        # Successful execution
-        self.logger.info("USER Execute: SUCCESS")
+                self.unassigned.remove(var)
         return True
 
-    def get_dot_label(self):
-        label = "STATE\n"
-        for var, val in self.var_to_val.items():
-            label += str(var) + " = " + str(val) + "\n"
-        return label
-
+    # TODO String representation, also used for node labels in DOT graph
     def __str__(self) -> str:
-        return "Assignment: " + str(self.var_to_val) + "\n" + \
-                "Unassigned: " + str(self.unassigned_variables) + "\n" +\
-                "Variables: " + str(self.var_to_domain)
+        text = "State ID: " + str(self._id) + "\n"
+        text += "Assignment: " + str(self.var_to_val) + "\n"
+        text += "Domains: " + str(self.var_to_domain)
+        return text
 
 
 class SimpleTests(BaseTest):
 
     def test_usage_example(self):
 
-        # logging.basicConfig(level=logging.DEBUG, format='%(message)s')
-
         # Explorateur
-        explorer = Explorateur(logging.DEBUG)
+        explorer = Explorateur()
 
         # Initial state
-        initial_state = MyState(OrderedDict([("x", [1, 2]),
-                                             ("y", [10, 20]),
-                                             ("z", [100, 200])]),
-                                is_all_solutions=False,
-                                logger=explorer.logger)
+        initial_state = MyState({"x":[1,2], "y":[10, 20], "z":[100, 200]})
 
-        # Solve via search
-        solution_path = explorer.search(initial_state,
-                                        exploration_type=ExplorationType.DepthFirst(),
-                                        search_type=SearchType.TreeSearch(),
-                                        is_solution_path=True,
-                                        dot_file_path="example.dot")
-        # end = time.perf_counter()
-        # Solution
-        if solution_path:
-            solution_state = solution_path[0]
-            print("Solution:\n", solution_state)
-            print("Solution Path:", *solution_path, sep="\n")
-        # self.assertTrue(sol_state.is_terminate(end_state=None))
+        # Search for solutions
+        if explorer.search(initial_state,
+                           goal_state=None,  # Optional goal state
+                           exploration_type=ExplorationType.DepthFirst(),
+                           search_type=SearchType.TreeSearch(),
+                           is_solution_path=True,
+                           dot_file_path="data/tree_search_dfs.dot"):
+            print("Solution:", explorer.solution_state)
+            print("Solution Path:", *explorer.solution_path, sep="\n<-")
+        else:
+            print("No solution found!")
+
+        # Search statistics
+        print("Total Decisions:", explorer.num_decisions)
+        print("Total Failures:", explorer.num_failed_decisions)
+        print("Total Time:", explorer.total_time)

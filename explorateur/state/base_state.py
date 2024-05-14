@@ -1,5 +1,6 @@
 import abc
-from typing import List, Union
+from typing import List, Union, Optional
+from explorateur.search.transition import Transition
 from explorateur.state.base_move import BaseMove
 
 
@@ -13,8 +14,10 @@ class BaseState(metaclass=abc.ABCMeta):
     def __init__(self):
         """ 
         Initializer for state.
-        For example, this can store variable and value assignments in the current state.
+            For example, this can store variable and value assignments in the current state.
         """
+        self._id: int = -1
+        self._transition: Optional[Transition] = None
 
     @abc.abstractmethod
     def execute(self, move: BaseMove) -> bool:
@@ -39,14 +42,14 @@ class BaseState(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_terminate(self, end_state: Union['BaseState', None]) -> bool:
+    def is_terminate(self, goal_state: Union['BaseState', None]) -> bool:
         """
         Checks if the current state is a termination state.
             If doing tree search, this can check if the state is a solution to the problem.
             If doing graph search, this can check if the state is equivalent to the given end state.
 
         Parameters:
-            end_state: The end state to compare with (optional).
+            goal_state: The end state to compare with (optional).
 
         Returns:
             bool: True if the current state is a termination state, False otherwise.
@@ -63,21 +66,22 @@ class BaseState(metaclass=abc.ABCMeta):
 
     def get_dot_label(self) -> str:
         """
-           Return a string label for dot graph node.
+       Return a string label for dot graph node.
 
-           Returns:
-               str: A string label to display in dot graph.
+       Returns:
+           str: A string label to display in dot graph.
         """
+        return str(self)
 
     def get_objective(self) -> float:
         """
-            Return the objective value of the state.
+        Return the objective value of the state.
 
-            Best-First Search requires an evaluation of states for ranking.
+        Best-First Search requires an evaluation of states for ranking.
 
-            Note, if this function returns the same value for two states
-            there will be an error because there is no comparator between abstract Base States.
+        Note, if this function returns the same value for two states
+        there will be an error because there is no comparator between abstract Base States.
 
-            Returns:
-                float: The objective function value for the state.
+        Returns:
+            float: The objective function value for the state.
         """

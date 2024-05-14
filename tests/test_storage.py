@@ -1,47 +1,14 @@
-import random
-from tests.test_base import BaseTest
-from typing import List
+from tests.test_base import BaseTest, EmptyState
 from explorateur.state.storage.queue import Queue
 from explorateur.state.storage.stack import Stack
 from explorateur.state.storage.priority_queue import PriorityQueue
-from explorateur.state.base_move import BaseMove
-from explorateur.state.base_state import BaseState
 
 
-class SimpleMove(BaseMove):
-
-    def __init__(self):
-        pass
-
-    def __str__(self) -> str:
-        pass
-
-
-class SimpleState(BaseState):
+class StorageState(EmptyState):
 
     def __init__(self, val):
+        super().__init__()
         self.val = val
-
-    def generate_vars(self):
-        pass
-
-    def get_moves(self) -> List[SimpleMove]:
-        pass
-
-    def is_terminate(self, end_state=None) -> bool:
-        pass
-
-    def execute(self, move: SimpleMove) -> bool:
-        pass
-
-    def __str__(self) -> str:
-        pass
-
-    def is_valid(self) -> bool:
-        pass
-
-    def get_dot_node_label(self, curr_iter_count: int) -> str:
-        pass
 
     def get_objective(self):
         if self.val == 2:
@@ -51,13 +18,12 @@ class SimpleState(BaseState):
 
 
 class StorageTests(BaseTest):
-    seed = random.randint(0, 100000)
 
     # can't test for contains() because it takes in a _BaseState
     def test_queue(self):
         q = Queue()
-        b1 = SimpleState(1)
-        b2 = SimpleState(2)
+        b1 = StorageState(1)
+        b2 = StorageState(2)
         q.insert(b1)
         self.assertTrue(q.contains(b1))
         q.insert(b2)
@@ -69,8 +35,8 @@ class StorageTests(BaseTest):
 
     def test_stack(self):
         s = Stack()
-        b1 = SimpleState(1)
-        b2 = SimpleState(2)
+        b1 = StorageState(1)
+        b2 = StorageState(2)
         s.insert(b1)
         self.assertTrue(s.contains(b1))
         s.insert(b2)
@@ -81,8 +47,8 @@ class StorageTests(BaseTest):
 
     def test_priority_queue(self):
         pq = PriorityQueue()
-        b1 = SimpleState(1)
-        b2 = SimpleState(2)
+        b1 = StorageState(1)
+        b2 = StorageState(2)
         pq.insert(b1)
         pq.insert(b2)
         self.assertEqual(pq.size(), 2)
