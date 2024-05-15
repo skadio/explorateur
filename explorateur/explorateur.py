@@ -1,5 +1,4 @@
 import copy as cp
-import sys
 import time
 from typing import Optional, List, Tuple
 
@@ -11,26 +10,26 @@ from explorateur.search.transition import Transition
 from explorateur.state.base_state import BaseState
 from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state.storage.factory import StorageFactory
-from explorateur.utils import check_true, All_Exploration_Types, All_Search_Types
+from explorateur.utils import check_true, All_Exploration_Types, All_Search_Types, Constants
 
 __version__ = __version__
 
 
 class Explorateur:
     """
-    The Explorateur library is designed to search for solutions.
+    Explorateur is a Python library to conduct State-Space-Search (SSS).
+    SSS is useful for solving problems that require searching over a collection of states.
+    Explorateur starts with a given initial state, and then, performs iterative search moves until
+    either a termination state is found, the search space is exhausted, or a stopping criteria,
+    such as the number of iterations, runtime limit, or maximum depth, has been reached.
+    Optionally, a goal state can be given as input to terminate the search when the goal state is found.
 
-    The search starts from a given initial state (as in Tree Search),
-    and optionally, toward a given goal state (as in Graph Search).
-
-    The exploration strategy is controlled by the exploration type parameter.
-    The exploration types include best-first, breadth-first, and depth-first search.
-
-    Explorateur implements a generic search functionality that operates on custom defined state and move.
-    The custom state inherits from BaseState and custom move inherits from BaseMove.
-
-    NB: Best-first search requires the custom state to also implement an objective function
-        to evaluate the quality of the state.
+    Explorateur performs generic state space search over problem-specific `BaseState` and `BaseMove` representations.
+    The behavior of the overall algorithm is controlled by the search strategy and the exploration strategy.
+    The search strategy can be `TreeSearch` over open states, or
+    `GraphSearch` over open states while storing the closed on to avoid visiting duplicate states.
+    The exploration strategy can be uninformed as in `BreadthFirst` and `DepthFirst`, or
+    informed as in `BestFirst` that assumes an objective function to evaluate the solution quality of a state.
     """
 
     def __init__(self, is_verbose=False):
@@ -41,6 +40,8 @@ class Explorateur:
 
         # Set verbosity
         self.is_verbose: bool = is_verbose
+
+        self._log("[Explorateur v." + str(__version__) + "]")
 
         # Solution state
         self.solution_state: Optional[BaseState] = None
@@ -58,6 +59,7 @@ class Explorateur:
 
         # Dot graph text representation of search
         self._dot_text: str = ""
+        self._dot_filename: str = ""
 
     def search(self,
                initial_state: BaseState,
@@ -65,10 +67,10 @@ class Explorateur:
                exploration_type: All_Exploration_Types = ExplorationType.DepthFirst(),
                search_type: All_Search_Types = SearchType.TreeSearch(),
                is_solution_path: bool = True,
-               max_depth: int = sys.maxsize,
-               max_moves: int = sys.maxsize,
+               max_depth: int = 100,
+               max_moves: int = 10000,
                max_runtime: int = None,
-               dot_file_path: str = None) -> bool:
+               dot_filename: str = None) -> bool:
         """
         This function performs search from the initial_state until:
             - a solution found, or
@@ -87,9 +89,9 @@ class Explorateur:
                                        If False, solution state is returned.
                                        Default, True.
             - max_depth Optional(int): Optional argument for the maximum depth to stop search.
-                                       Default, maxsize (no limit).
+                                       Default, 100.
             - max_moves Optional(int): Optional argument for the maximum number of moves to stop search.
-                                       Default, maxsize (no limit).
+                                       Default, 10,000 moves.
             - max_runtime Optional(int): Optional argument for the number of seconds the search should go on for.
                                          Default, None (no limit).
             - dot_file_path (str): Optional argument to write a graph dot representation of search iterations.
@@ -106,13 +108,13 @@ class Explorateur:
         """
 
         # Check arguments
-        self._log(">>> START Explorateur (v" + str(__version__)+")")
+        self._log_start(">>> START SEARCH", max_depth, max_moves, max_runtime)
         Explorateur._validate_search_args(initial_state, goal_state,
                                           exploration_type, search_type, is_solution_path,
-                                          max_depth, max_moves, max_runtime, dot_file_path)
+                                          max_depth, max_moves, max_runtime, dot_filename)
         
         # Reset rng, solution_states, collections, dot graph, start time, stats
-        self._reset_search()
+        self._reset_search(dot_filename)
 
         # Create storage for open states, and optionally, for closed states in graph search to avoid duplicate visits
         self._open_decisions = StorageFactory.create(exploration_type)
@@ -124,8 +126,7 @@ class Explorateur:
 
         # Check termination, else expand current state with possible moves
         # as open decisions for execution within depth
-        is_terminate, is_solution = self._is_terminate_or_expand(root, goal_state,
-                                                                 exploration_type, max_depth, dot_file_path)
+        is_terminate, is_solution = self._is_terminate_or_expand(root, goal_state, exploration_type, max_depth)
         if is_solution:
             if is_solution_path:
                 self.solution_path = self._get_solution_path()
@@ -138,9 +139,6 @@ class Explorateur:
             self.num_decisions += 1
             self._log("\nDecision " + str(self.num_decisions))
             self._log("Open decisions: " + str(self._open_decisions.size()))
-
-            # Check stopping conditions
-            self._check_stopping_criteria(self._start_time, self.num_decisions, max_runtime, max_moves, dot_file_path)
 
             # Pop the current decision from open decisions for execution
             current_decision = self._open_decisions.remove()
@@ -170,12 +168,11 @@ class Explorateur:
                           " from ID: " + str(current_decision.state._id) + " to ID: " + str(successor_state._id))
 
                 # Create dot node transition
-                self._log_dot(current_decision, successor_state, dot_file_path)
+                self._log_dot(current_decision, successor_state, color="")
 
-                # Check termination, else expand current state with possible moves
+                # Check termination, else expand successor state with possible moves
                 # as open decisions for execution within depth
-                is_terminate, is_solution = self._is_terminate_or_expand(successor_state, goal_state,
-                                                                         exploration_type, max_depth, dot_file_path)
+                is_terminate, is_solution = self._is_terminate_or_expand(successor_state, goal_state, exploration_type, max_depth)
                 if is_solution:
                     if is_solution_path:
                         self.solution_path = self._get_solution_path()
@@ -188,35 +185,39 @@ class Explorateur:
                 self._log("Skip infeasible successor. Num fails: " + str(self.num_failed_decisions))
 
                 # Create dot node transition to a failed node
-                self._log_dot(current_decision, None, dot_file_path)
+                self._log_dot(current_decision, None, color=Constants.FAIL_NODE_COLOR)
 
-        # No more open decisions left, search finished, save the dot
+            # Check stopping conditions before next iteration. If hits a limit, color last successor state
+            if self._is_search_limit(successor_state, self._start_time, self.num_decisions, max_runtime, max_moves):
+                return False
+
+        # No more open decisions left or limit reach and search finished, save the dot and return False
         self.total_time = time.perf_counter() - self._start_time
-        self._log_stats("<<< FINISH SEARCH - FAILURE - No solution! ")
-        self._log_dot_file(dot_file_path)
+        self._log_finish("<<< FINISH SEARCH - FAILURE - No solution! ")
+        self._log_dot_file()
         return False
 
-    def _check_stopping_criteria(self, start, num_moves, max_runtime, max_moves, dot_file_path):
-        stop_cause = ""
-
-        # Check stopping criteria: max_runtime
+    def _is_search_limit(self, state, start, num_moves, max_runtime, max_moves):
+        # Check max_runtime
+        stop_cause = None
         current_time = time.perf_counter()
         if max_runtime is not None and current_time - start > max_runtime:
-            stop_cause = "Max runtime reached"
+            stop_cause = "Max runtime reached " + str(max_runtime)
 
-        # Check stopping criteria: max_moves
-        if num_moves > max_moves:
-            stop_cause = "Max number of moves reached"
+        # Check max_moves
+        if num_moves >= max_moves:
+            stop_cause = "Max number of moves reached " + str(max_moves)
 
         # If stopped, log, save dot, and return None solution
         if stop_cause:
             self.total_time = current_time - start
-            self._log_stats("<<< FINISH SEARCH - STOP - No solution! " + stop_cause)
-            self._log_dot_file(dot_file_path)
-            return None
+            self._log_finish("<<< FINISH SEARCH - STOP - No solution! " + stop_cause)
+            self._log_dot(None, state, color=Constants.LIMIT_NODE_COLOR)  # mark it green
+            self._log_dot_file()
+            return True
+        return False
 
-    def _is_terminate_or_expand(self, state, goal_state,
-                                exploration_type, max_depth, dot_file_path) -> Tuple[bool, bool]:
+    def _is_terminate_or_expand(self, state, goal_state, exploration_type, max_depth) -> Tuple[bool, bool]:
 
         is_terminate, is_solution = False, False
 
@@ -226,9 +227,9 @@ class Explorateur:
             self.solution_state = state
             self.total_time = time.perf_counter() - self._start_time
             self._log("Successful termination for state: " + str(state))
-            self._log_stats("<<< FINISH SEARCH - SUCCESS - Solution Found!")
-            self._log_dot(None, state, dot_file_path)  # mark it green
-            self._log_dot_file(dot_file_path)
+            self._log_finish("<<< FINISH SEARCH - SUCCESS - Solution Found!")
+            self._log_dot(None, state, color=Constants.SUCCESS_NODE_COLOR)  # mark it green
+            self._log_dot_file()
             return is_terminate, is_solution
         else:
             self._log("Successor is not termination, add alternative moves")
@@ -236,9 +237,10 @@ class Explorateur:
         # If still within max depth bound, insert the successor into open states for exploration
         # Initial state does not have transition, so skip max depth for initial state
         if state._transition:
-            if state._transition.depth > max_depth:
+            if state._transition.depth >= max_depth:
                 # Don't terminate the whole search, but don't generate new open nodes
                 self._log("Max depth reached, not inserting new open node.")
+                self._log_dot(None, state, color=Constants.LIMIT_NODE_COLOR)
                 return is_terminate, is_solution
 
         # If no termination, add alternative moves to search -- decided by the user state!
@@ -250,7 +252,7 @@ class Explorateur:
 
         # Search for alternatives
         for move in moves:
-            self._log("Decision from move: " + str(move))
+            self._log("Decision for move: " + str(move))
 
             # Create new decision
             decision = Decision(state, move)
@@ -318,37 +320,44 @@ class Explorateur:
         if self.is_verbose:
             print(text)
 
-    def _log_dot(self, current_decision, successor_state, dot_file_path):
-        if not dot_file_path:
+    def _log_dot(self, current_decision, successor_state, color):
+        if not self._dot_filename:
             return
 
         if current_decision:
-            # If there is no successor, first add a fail node in red so that we can add an edge to it
+            # If there is no successor, first add a fail node with color so that we can add an edge to it
             if not successor_state:
                 self._dot_text += (str(self.num_decisions) +
                                    " [label=\"Fail: " + str(self.num_failed_decisions) + "\"" +
-                                   " shape=triangle style=filled fillcolor=red];\n")
+                                   " shape=triangle style=filled fillcolor="+ str(color) + "];\n")
 
+            # generic nodes with no color
             self._dot_text += "\"" + current_decision.state.get_dot_label() + "\" -> "
             self._dot_text += "\"" + successor_state.get_dot_label() + "\"" if successor_state else str(self.num_decisions)
             self._dot_text += " [label=\"" + current_decision.move.get_dot_label() + "\"];\n"
         else:
-            # decision is taken care of, mark successor as the green solution node
-            self._dot_text += "\"" + successor_state.get_dot_label() + "\" [style=filled fillcolor=green];\n"
+            # decision is taken care of, mark successor with the color
+            self._dot_text += "\"" + successor_state.get_dot_label() + "\" [style=filled fillcolor=" + str(color) + "];\n"
 
-    def _log_dot_file(self, dot_file_path):
-        if dot_file_path:
+    def _log_dot_file(self):
+        if self._dot_filename:
             self._dot_text += "}"
-            with open(dot_file_path, 'w') as dot_file:
+            with open(self._dot_filename, 'w') as dot_file:
                 dot_file.write(self._dot_text)
 
-    def _log_stats(self, info):
-        self._log(info +
+    def _log_start(self, info, max_depth, max_moves, max_runtime):
+        self._log("\n" + info +
+                  "\nMax Depth: " + str(max_depth) +
+                  "\nMax Moves: " + str(max_moves) +
+                  "\nMax Time: " + str(max_runtime) + "\n")
+
+    def _log_finish(self, info):
+        self._log("\n" + info +
                   "\nTotal Decisions: " + str(self.num_decisions) +
                   "\nTotal Failures: " + str(self.num_failed_decisions) +
-                  "\nTotal Time: " + str(round(self.total_time, 3)))
+                  "\nTotal Time: " + str(round(self.total_time, 3)) + "\n")
 
-    def _reset_search(self):
+    def _reset_search(self, dot_filename):
 
         # Clean solution states
         self.solution_state = None
@@ -366,6 +375,7 @@ class Explorateur:
 
         # Dot graph text representation of search, used if dot file given
         self._dot_text = "digraph G {\nspline=line;\n"
+        self._dot_filename = dot_filename
 
     @staticmethod
     def _validate_args(is_verbose) -> None:
@@ -375,9 +385,9 @@ class Explorateur:
     @staticmethod
     def _validate_search_args(initial_state, goal_state,
                               exploration_type, search_type, is_solution_path,
-                              max_depth, max_iterations, max_runtime, dot_file_path) -> None:
+                              max_depth, max_moves, max_runtime, dot_file_path) -> None:
 
-        check_true(initial_state is not None, TypeError("Initial state cannot be none."))
+        check_true(initial_state is not None, ValueError("Initial state cannot be none."))
         check_true(isinstance(initial_state, BaseState),
                    TypeError("Initial state must be BaseState type. Incorrect type: " + str(type(goal_state))))
 
@@ -398,19 +408,19 @@ class Explorateur:
                    TypeError("max_depth must be integer number of seconds. Incorrect: " + str(max_depth)))
 
         check_true(max_depth > 0,
-                   TypeError("max_depth must be positive. Incorrect: " + str(max_depth)))
+                   ValueError("max_depth must be positive. Incorrect: " + str(max_depth)))
 
-        check_true(isinstance(max_iterations, int),
-                   TypeError("max_iterations must be integer number of seconds. Incorrect: " + str(max_iterations)))
+        check_true(isinstance(max_moves, int),
+                   TypeError("max_iterations must be integer number of seconds. Incorrect: " + str(max_moves)))
 
-        check_true(max_iterations > 0,
-                   TypeError("max_iterations must be positive. Incorrect: " + str(max_iterations)))
+        check_true(max_moves > 0,
+                   ValueError("max_iterations must be positive. Incorrect: " + str(max_moves)))
 
         if max_runtime is not None:
             check_true(isinstance(max_runtime, int),
                        TypeError("max_runtime must be integer number of seconds. Incorrect: " + str(max_runtime)))
             check_true(max_runtime > 0,
-                       TypeError("max_runtime must be positive. Incorrect: " + str(max_runtime)))
+                       ValueError("max_runtime must be positive. Incorrect: " + str(max_runtime)))
 
         if dot_file_path is not None:
             check_true(isinstance(dot_file_path, str),

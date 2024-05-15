@@ -1,0 +1,29 @@
+digraph G {
+spline=line;
+1 [label="Fail: 1" shape=triangle style=filled fillcolor=red];
+"State ID: 0
+Assignment: {}
+Domains: {'x': [1, 2], 'y': [10, 20], 'z': [100, 200]}" -> 1 [label="x == 1"];
+"State ID: 0
+Assignment: {}
+Domains: {'x': [1, 2], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 1
+Assignment: {'x': 2}
+Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}" [label="x != 1"];
+"State ID: 1
+Assignment: {'x': 2}
+Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 2
+Assignment: {'x': 2, 'y': 10}
+Domains: {'x': [2], 'y': [10], 'z': [100, 200]}" [label="y == 10"];
+4 [label="Fail: 2" shape=triangle style=filled fillcolor=red];
+"State ID: 2
+Assignment: {'x': 2, 'y': 10}
+Domains: {'x': [2], 'y': [10], 'z': [100, 200]}" -> 4 [label="z == 100"];
+"State ID: 2
+Assignment: {'x': 2, 'y': 10}
+Domains: {'x': [2], 'y': [10], 'z': [100, 200]}" -> "State ID: 3
+Assignment: {'x': 2, 'y': 10, 'z': 200}
+Domains: {'x': [2], 'y': [10], 'z': [200]}" [label="z != 100"];
+"State ID: 3
+Assignment: {'x': 2, 'y': 10, 'z': 200}
+Domains: {'x': [2], 'y': [10], 'z': [200]}" [style=filled fillcolor=green];
+}

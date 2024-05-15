@@ -1,0 +1,73 @@
+digraph G {
+spline=line;
+"State ID: 0
+Assignment: {}
+Domains: {'x': [1, 2], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 1
+Assignment: {'x': 1}
+Domains: {'x': [1], 'y': [10, 20], 'z': [100, 200]}" [label="x == 1"];
+"State ID: 1
+Assignment: {'x': 1}
+Domains: {'x': [1], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 2
+Assignment: {'x': 1, 'y': 10}
+Domains: {'x': [1], 'y': [10], 'z': [100, 200]}" [label="y == 10"];
+"State ID: 2
+Assignment: {'x': 1, 'y': 10}
+Domains: {'x': [1], 'y': [10], 'z': [100, 200]}" -> "State ID: 3
+Assignment: {'x': 1, 'y': 10, 'z': 100}
+Domains: {'x': [1], 'y': [10], 'z': [100]}" [label="z == 100"];
+"State ID: 2
+Assignment: {'x': 1, 'y': 10}
+Domains: {'x': [1], 'y': [10], 'z': [100, 200]}" -> "State ID: 4
+Assignment: {'x': 1, 'y': 10, 'z': 200}
+Domains: {'x': [1], 'y': [10], 'z': [200]}" [label="z != 100"];
+"State ID: 1
+Assignment: {'x': 1}
+Domains: {'x': [1], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 5
+Assignment: {'x': 1, 'y': 20}
+Domains: {'x': [1], 'y': [20], 'z': [100, 200]}" [label="y != 10"];
+"State ID: 5
+Assignment: {'x': 1, 'y': 20}
+Domains: {'x': [1], 'y': [20], 'z': [100, 200]}" -> "State ID: 6
+Assignment: {'x': 1, 'y': 20, 'z': 100}
+Domains: {'x': [1], 'y': [20], 'z': [100]}" [label="z == 100"];
+"State ID: 5
+Assignment: {'x': 1, 'y': 20}
+Domains: {'x': [1], 'y': [20], 'z': [100, 200]}" -> "State ID: 7
+Assignment: {'x': 1, 'y': 20, 'z': 200}
+Domains: {'x': [1], 'y': [20], 'z': [200]}" [label="z != 100"];
+"State ID: 0
+Assignment: {}
+Domains: {'x': [1, 2], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 8
+Assignment: {'x': 2}
+Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}" [label="x != 1"];
+"State ID: 8
+Assignment: {'x': 2}
+Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 9
+Assignment: {'x': 2, 'y': 10}
+Domains: {'x': [2], 'y': [10], 'z': [100, 200]}" [label="y == 10"];
+"State ID: 9
+Assignment: {'x': 2, 'y': 10}
+Domains: {'x': [2], 'y': [10], 'z': [100, 200]}" -> "State ID: 10
+Assignment: {'x': 2, 'y': 10, 'z': 100}
+Domains: {'x': [2], 'y': [10], 'z': [100]}" [label="z == 100"];
+"State ID: 9
+Assignment: {'x': 2, 'y': 10}
+Domains: {'x': [2], 'y': [10], 'z': [100, 200]}" -> "State ID: 11
+Assignment: {'x': 2, 'y': 10, 'z': 200}
+Domains: {'x': [2], 'y': [10], 'z': [200]}" [label="z != 100"];
+"State ID: 8
+Assignment: {'x': 2}
+Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 12
+Assignment: {'x': 2, 'y': 20}
+Domains: {'x': [2], 'y': [20], 'z': [100, 200]}" [label="y != 10"];
+"State ID: 12
+Assignment: {'x': 2, 'y': 20}
+Domains: {'x': [2], 'y': [20], 'z': [100, 200]}" -> "State ID: 13
+Assignment: {'x': 2, 'y': 20, 'z': 100}
+Domains: {'x': [2], 'y': [20], 'z': [100]}" [label="z == 100"];
+"State ID: 12
+Assignment: {'x': 2, 'y': 20}
+Domains: {'x': [2], 'y': [20], 'z': [100, 200]}" -> "State ID: 14
+Assignment: {'x': 2, 'y': 20, 'z': 200}
+Domains: {'x': [2], 'y': [20], 'z': [200]}" [label="z != 100"];
+}

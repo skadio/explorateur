@@ -1,3 +1,4 @@
+import os
 from typing import Dict, Union, NamedTuple
 from explorateur.search.exploration_type import ExplorationType
 from explorateur.search.search_type import SearchType
@@ -20,6 +21,19 @@ class Constants(NamedTuple):
 
     default_seed = 123456
     """The default random seed."""
+
+    # Folder names
+    _TEST_DIR_NAME = "tests"
+    _DATA_DIR_NAME = "data"
+
+    # Data paths
+    _FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+    TEST_DATA_DIR = _FILE_DIR + os.sep + ".." + os.sep + _TEST_DIR_NAME + os.sep + _DATA_DIR_NAME
+
+    SUCCESS_NODE_COLOR = "green"
+    FAIL_NODE_COLOR = "red"
+    LIMIT_NODE_COLOR = "purple"
+
 
 def argmax(dictionary: Dict[Num, Num]) -> Num:
     """
