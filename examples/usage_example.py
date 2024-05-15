@@ -70,7 +70,7 @@ class MyState(BaseState):
 
 
 # Explorateur
-explorer = Explorateur()
+explorer = Explorateur(is_verbose=True)
 
 # Initial state
 initial_state = MyState({"x": [1, 2], "y": [10, 20], "z": [100, 200]})
