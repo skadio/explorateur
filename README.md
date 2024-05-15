@@ -23,7 +23,7 @@ The behavior of the overall algorithm is controlled by the _Search Strategy_ and
 
 ## Quick Start
 
-To use Explorateur, you need to define `BaseState` and `BaseMove`, with the quick start template below.  
+To use Explorateur, you need to define `BaseState` and `BaseMove` as in the quick start template below.  
 
 ```python
 from explorateur import Explorateur, BaseMove, BaseState, ExplorationType, SearchType
