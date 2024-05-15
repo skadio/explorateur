@@ -46,7 +46,7 @@ class MyState(BaseState):
 
     def __init__(self):
         # TODO Your problem specific state representation
-        super().__init__() # Make sure to initial the base state!
+        super().__init__() # Make sure to initialize the base state!
 
     def get_moves(self) -> List[MyMove]:
         # TODO Your branching decisions as a list of moves
