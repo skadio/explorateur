@@ -7,10 +7,10 @@ Explorateur performs **generic state-space-search** over **problem-specific stat
 Given an initial user state, Explorateur performs iterative search moves until a stopping condition is reached: 
 - A termination state is found
 - The search space is exhausted
-- Reached max iterations, time limit, depth 
-- Optionally, given a goal state, when the goal state is found.
+- Reached max iterations, runtime limit, max depth 
+- Optionally, given a goal state, a goal state is encountered.
 
-The behavior of the overall algorithm is controlled by the _search strategy_ and the _exploration strategy_. 
+The behavior of the overall algorithm is controlled by the _Search Strategy_ and the _Exploration Strategy_. 
 
 ### Search Strategy
 - `TreeSearch` over open states
