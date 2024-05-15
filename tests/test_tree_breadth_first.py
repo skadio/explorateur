@@ -54,7 +54,7 @@ class TreeBreadthTest(BaseTest):
         self.search(explorer,
                     initial_state,
                     goal_state=None,
-                    exploration_type=ExplorationType.DepthFirst(),
+                    exploration_type=ExplorationType.BreadthFirst(),
                     search_type=SearchType.TreeSearch(),
                     is_solution_path=True,
                     max_depth=100,
@@ -66,7 +66,7 @@ class TreeBreadthTest(BaseTest):
         # Solution label
         ground_truth_solution = {"x": 2, "y": 10, "z": 100}
 
-        self.assertEqual(explorer.num_decisions, 4)
+        self.assertEqual(explorer.num_decisions, 5)
         self.assertEqual(explorer.num_failed_decisions, 1)
         self.assertEqual(len(explorer.solution_path), 4)
         self.assertEqual(explorer.solution_path[-1], initial_state)

@@ -5,19 +5,6 @@ from tests.test_base import BaseTest, MyState, MyMove
 from explorateur import Explorateur, ExplorationType, SearchType
 
 
-# class FakeFails(MyState):
-#
-#     def execute(self, move: MyMove) -> bool:
-#         print("USER Execute:", move)
-#         var, constraint, val = move.var, move.constraint, move.val
-#
-#         if var == "x" and constraint == "==" and val == 1:
-#             return False
-#         if var == "z" and constraint == "==" and val == 100:
-#             return False
-#         return super().execute(move)
-#
-
 class TreeDepthTest(BaseTest):
 
     def test_tree_depth_feasible(self):

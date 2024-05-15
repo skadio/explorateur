@@ -1,8 +1,23 @@
 # Explorateur
 
-Explorateur is a Python library to conduct [State-Space-Search (SSS)](https://en.wikipedia.org/wiki/State_space_search). SSS is useful for solving problems that require searching over a collection of states. Explorateur starts with a given initial state, and then, performs iterative search moves until either a termination state is found, the search space is exhausted, or a stopping criteria, such as the number of iterations, runtime limit, or maximum depth, has been reached. Optionally, a goal state can be given as input to terminate the search when the goal state is found.
+Explorateur is a Python library to conduct [State-Space-Search (SSS)](https://en.wikipedia.org/wiki/State_space_search), a powerful framework for solving problems that require search over a collection of states. Explorateur performs **generic state space search** over **problem-specific states and moves**. The library performs the search while the user defines the `BaseState` and `BaseMove`.
 
-Explorateur performs generic state space search over problem-specific `BaseState` and `BaseMove` representations. The behavior of the overall algorithm is controlled by the search strategy and the exploration strategy. The search strategy can be `TreeSearch` over open states, or `GraphSearch` over open states while storing the closed on to avoid visiting duplicate states. The exploration strategy can be uninformed as in `BreadthFirst` and `DepthFirst`, or informed as in `BestFirst` that assumes an objective function to evaluate the solution quality of a state.  
+Given an initial user state, explorateur performs iterative search moves until a stopping condition is reached: 
+- A termination state is found
+- The search space is exhausted
+- Reached max iterations, time limit, depth 
+- Optionally, given a goal state, when the goal state is found.
+
+The behavior of the overall algorithm is controlled by the _search strategy_ and the _exploration strategy_. 
+
+The search strategy can be:
+- `TreeSearch` over open states
+- `GraphSearch` over open states while also storing the closed states to avoid visiting duplicates. 
+
+The exploration strategy can be: 
+- `BreadthFirst` in uninformed fashion 
+- `DepthFirst` in uninformed fashion
+- `BestFirst` in informed fashion assuming an objective function evaluates the solution quality of a state.
 
 ## Quick Start
 

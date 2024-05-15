@@ -414,7 +414,7 @@ class Explorateur:
                    TypeError("max_iterations must be integer number of seconds. Incorrect: " + str(max_moves)))
 
         check_true(max_moves > 0,
-                   ValueError("max_iterations must be positive. Incorrect: " + str(max_moves)))
+                   ValueError("max_moves must be positive. Incorrect: " + str(max_moves)))
 
         if max_runtime is not None:
             check_true(isinstance(max_runtime, int),
