@@ -1,3 +1,5 @@
+[![PyPI version fury.io](https://badge.fury.io/py/explorateur.svg)](https://pypi.python.org/pypi/explorateur/) [![PyPI license](https://img.shields.io/pypi/l/explorateur.svg)](https://pypi.python.org/pypi/explorateur/) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) [![Downloads](https://static.pepy.tech/personalized-badge/explorateur?period=total&units=international_system&left_color=grey&right_color=orange&left_text=Downloads)](https://pepy.tech/project/explorateur)
+
 # Explorateur
 
 Explorateur is a Python library to conduct [State-Space-Search (SSS)](https://en.wikipedia.org/wiki/State_space_search), a powerful framework for solving problems that require search over a collection of states. 
