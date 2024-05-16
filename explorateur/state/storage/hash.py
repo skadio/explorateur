@@ -1,4 +1,4 @@
-from typing import Set, Optional
+from typing import Set, Optional, Type
 
 from explorateur.search.decision import Decision
 from explorateur.state.storage.base_storage import BaseStorage

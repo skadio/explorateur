@@ -153,6 +153,13 @@ class Explorateur:
             current_decision = self._open_decisions.remove()
             self._log("Current decision: " + str(current_decision))
 
+            # Skip already visited successor, if graph search
+            # if self._closed_decisions and self._closed_decisions.contains(current_decision):
+            if self._closed_decisions and self._closed_decisions.contains(current_decision):
+                self._log("Skip adding decision. It is already visited.")
+                self.num_decisions -= 1
+                continue
+
             # Transition of the current state (there is no transition for initial moves)
             transition = current_decision.state._transition
             next_depth = transition.depth + 1 if transition else 1

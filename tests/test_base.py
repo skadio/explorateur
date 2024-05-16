@@ -42,22 +42,28 @@ class MyMove(BaseMove):
     def __str__(self) -> str:
         return str(self.var) + " " + self.constraint + " " + str(self.val)
 
+    # This is required for graph search to check contains on already visited decisions
     def __eq__(self, other):
-        """Overrides the default implementation"""
         if isinstance(other, MyMove):
             return self.var == other.var and \
                 self.constraint == other.constraint and \
                 self.val == other.val
         return False
 
+    # This is required for graph search when adding closed decision into hashset
+    def __hash__(self):
+        return hash((self.var, self.constraint, self.val))
+
 
 class MyState(BaseState):
 
     # Problem specific state representation
-    def __init__(self, var_to_domain, is_exhaustive_search=True, fake_fails=[]):
+    def __init__(self, var_to_domain, is_exhaustive_search=True, fake_fails=None):
         # IMPORTANT: Make sure to initialize the base state
         super().__init__()
 
+        if fake_fails is None:
+            fake_fails = []
         self.var_to_domain: Dict[str, List[int]] = var_to_domain
         self.var_to_val: Dict[str, int] = {}
         self.unassigned: List[str] = list(self.var_to_domain.keys())
@@ -121,23 +127,27 @@ class MyState(BaseState):
         text += "Domains: " + str(self.var_to_domain)
         return text
 
+    # This is required for graph search to check contains on already visited decisions
     def __eq__(self, other):
-        """Overrides the default implementation"""
         if isinstance(other, MyState):
             return self.unassigned == other.unassigned and \
                 self.var_to_val == other.var_to_val and \
                 self.var_to_domain == other.var_to_domain
         return False
 
+    # This is required for graph search when adding closed decision into hashset
+    def __hash__(self):
+        return hash((tuple(self.unassigned), tuple(self.var_to_val), tuple(self.var_to_domain)))
+
 
 class BaseTest(unittest.TestCase):
 
     def search(self,
-            explorer,
-            initial_state, goal_state,
-            exploration_type, search_type,
-            is_solution_path,
-            max_depth, max_moves, max_runtime, dot_filename, is_verbose):
+               explorer,
+               initial_state, goal_state,
+               exploration_type, search_type,
+               is_solution_path,
+               max_depth, max_moves, max_runtime, dot_filename, is_verbose):
 
         # Search for solutions
         if explorer.search(initial_state,

@@ -1,18 +1,6 @@
 from typing import Dict, List
-from explorateur import Explorateur, BaseMove, BaseState, ExplorationType, SearchType
-
-
-class MyMove(BaseMove):
-
-    # Define move object
-    def __init__(self, var, constraint, val):
-        self.var: str = var
-        self.constraint: str = constraint
-        self.val: int = val
-
-    # String representation, also used for edge labels in DOT graph
-    def __str__(self) -> str:
-        return str(self.var) + " " + self.constraint + " " + str(self.val)
+from explorateur import BaseState
+from move import MyMove
 
 
 class MyState(BaseState):
@@ -22,6 +10,7 @@ class MyState(BaseState):
         # IMPORTANT: Make sure to initialize the base state
         super().__init__()
 
+        # State is variable domains, value assigments, and unassigned vars
         self.var_to_domain: Dict[str, List[int]] = var_to_domain
         self.var_to_val: Dict[str, int] = {}
         self.unassigned: List[str] = list(self.var_to_domain.keys())
@@ -68,31 +57,3 @@ class MyState(BaseState):
         text += "Domains: " + str(self.var_to_domain)
         return text
 
-
-# Explorateur
-explorer = Explorateur(is_verbose=True)
-
-# Initial state
-initial_state = MyState({"x": [1, 2], "y": [10, 20], "z": [100, 200]})
-
-# Search for solutions
-if explorer.search(initial_state,
-                   goal_state=None,  # Optional goal state
-                   exploration_type=ExplorationType.DepthFirst(),
-                   search_type=SearchType.TreeSearch(),
-                   is_solution_path=True,
-                   dot_filename="usage_example.dot"):
-    print("Solution:", explorer.solution_state)
-    print("Solution Path:", *explorer.solution_path, sep="\n<-")
-else:
-    print("No solution found!")
-
-# Search statistics
-print("Total Decisions:", explorer.num_decisions)
-print("Total Failures:", explorer.num_failed_decisions)
-print("Total Time:", round(explorer.total_time, 3))
-
-assert explorer.num_decisions == 14
-assert explorer.num_failed_decisions == 0
-
-# Example DOT file viewer: https://dreampuf.github.io/GraphvizOnline

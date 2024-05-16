@@ -1,7 +1,10 @@
 from tests.test_base import BaseTest, EmptyState
 from explorateur.state.storage.queue import Queue
 from explorateur.state.storage.stack import Stack
+from explorateur.state.storage.hash import HashSet
 from explorateur.state.storage.priority_queue import PriorityQueue
+from explorateur.search.decision import Decision
+from tests.test_base import BaseTest, MyState, MyMove
 
 
 class StorageState(EmptyState):
@@ -17,7 +20,7 @@ class StorageState(EmptyState):
             return 10
 
 
-class StorageTests(BaseTest):
+class StorageTest(BaseTest):
 
     # can't test for contains() because it takes in a _BaseState
     def test_queue(self):
@@ -44,6 +47,41 @@ class StorageTests(BaseTest):
         self.assertEqual(b2, res)
         self.assertEqual(s.size(), 1)
         self.assertFalse(s.is_empty())
+
+    def test_hash(self):
+        state = MyState({"x": [1, 2], "y": [10, 20], "z": [100, 200]})
+        move = MyMove("x", "==", 1)
+
+        h = HashSet()
+        self.assertTrue(h.is_empty())
+
+        d = Decision(state, move)
+        print(d)
+
+        h.insert(d)
+        self.assertTrue(h.contains(d))
+        self.assertEqual(h.size(), 1)
+        self.assertFalse(h.is_empty())
+
+        d2 = Decision(state, move)
+        self.assertEqual(h.contains(d2), d2)
+
+        h.insert(d2)
+        self.assertEqual(h.size(), 1)
+
+        d3 = Decision(state, MyMove("x", "!=", 1))
+        self.assertIsNone(h.contains(d3))
+
+        x = h.remove()
+        self.assertEqual(x, d2)
+        self.assertIsNone(h.contains(d))
+        self.assertTrue(h.is_empty())
+        self.assertEqual(h.size(), 0)
+
+        h.insert(d)
+        h.insert(d3)
+        self.assertEqual(h.size(), 2)
+
 
     def test_priority_queue(self):
         # TODO

@@ -16,3 +16,16 @@ class Decision:
         if self.move:
             return str(self.state) + " " + str(self.move)
         return str(self.state)
+
+    # This is required for graph search to check contains on already visited decisions
+    def __eq__(self, other):
+        if isinstance(other, Decision):
+            return self.move == other.move and self.state == other.state
+        return False
+
+    # This is required for graph search when adding closed decision into hashset
+    def __hash__(self):
+        if self.move:
+            return hash((self.state.__hash__(), self.move.__hash__()))
+        else:
+            return hash((self.state.__hash__()))
