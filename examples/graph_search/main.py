@@ -23,7 +23,7 @@ args["search_type"] = SearchType.GraphSearch()
 args["is_solution_path"] = True
 args["max_depth"] = 100
 args["max_moves"] = 100
-args["max_runtime"] = 100000
+args["max_runtime"] = 100
 args["dot_filename"] = "output.dot"
 args["is_verbose"] = True
 
