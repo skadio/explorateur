@@ -142,6 +142,11 @@ class Explorateur:
             return True
         if is_terminate:
             return False
+        #
+        # # Mark the decision as visited, if graph search
+        # if self._closed_decisions:
+        #     self._log("Mark current decision as visited in closed decisions: " + str(self._closed_decisions.size()))
+        #     self._closed_decisions.insert(Decision(root, None))
 
         # START SEARCH
         while not self._open_decisions.is_empty():
