@@ -3,7 +3,7 @@ from state import MyState
 from explorateur.utils import run
 
 # Constraint Satisfaction Problem (CSP) with 3 variables each with 2 values in their domain
-var_to_domain={"x": [1, 2], "y": [10, 20], "z": [100, 200]}
+var_to_domain = {"x": [1, 2], "y": [10, 20], "z": [100, 200]}
 initial_state = MyState(var_to_domain)
 
 # Arguments
