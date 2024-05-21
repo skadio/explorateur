@@ -16,7 +16,9 @@
 
 Explorateur is a Python library to conduct [State-Space-Search (SSS)](https://en.wikipedia.org/wiki/State_space_search), a powerful framework for solving problems that require search over a collection of states. 
 
-Explorateur performs **generic state-space-search** over **problem-specific states and moves**. The user defines the `BaseState` and `BaseMove` and the library drives the search for solutions. The behavior of the search is controlled by the built-in _Search Strategy_ and the _Exploration Strategy_ and user-defined _moves_. Given an initial user state, Explorateur performs search moves iteratively until a stopping condition is reached.
+Explorateur performs **generic state-space-search** over **problem-specific states and moves**. The user defines the `BaseState` and `BaseMove` and the library drives the search for solutions. 
+
+The behavior of the search is controlled by the built-in _Search Strategy_ and the _Exploration Strategy_ and user-defined _moves_. Given an initial user state, Explorateur performs search moves iteratively until a stopping condition is reached.
 
  ### Search Strategy
 - `TreeSearch` over open states,
