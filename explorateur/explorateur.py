@@ -3,7 +3,6 @@ import time
 from typing import Optional, List, Tuple
 
 from explorateur._version import __version__
-from explorateur.search.decision import Decision
 from explorateur.search.exploration_type import ExplorationType
 from explorateur.search.search_type import SearchType
 from explorateur.search.transition import Transition
@@ -59,8 +58,8 @@ class Explorateur:
         self.solution_path: Optional[List[BaseState]] = None
 
         # State collections open and closed (for graph search only)
-        self._open_decisions: BaseStorage = None
-        self._closed_decisions: Optional[BaseStorage] = None
+        self._open: BaseStorage = None
+        self.closed: Optional[BaseStorage] = None
 
         # Statistics
         self._start_time: float = 0
@@ -121,17 +120,17 @@ class Explorateur:
         Explorateur._validate_search_args(initial_state, goal_state,
                                           exploration_type, search_type, is_solution_path,
                                           max_depth, max_moves, max_runtime, dot_filename)
-        
+
         # Reset rng, solution_states, collections, dot graph, start time, stats
         self._reset_search(dot_filename)
 
         # Create storage for open states, and optionally, for closed states in graph search to avoid duplicate visits
-        self._open_decisions = StorageFactory.create(exploration_type)
-        self._closed_decisions = StorageFactory.create(search_type)
+        self._open = StorageFactory.create(exploration_type)
+        self.closed = StorageFactory.create(search_type)
 
         # Root node root from the given initial state
         root = cp.deepcopy(initial_state)
-        root._id = self.num_decisions
+        root.id = self.num_decisions
 
         # Check termination, else expand current state with possible moves
         # as open decisions for execution within depth
@@ -142,74 +141,62 @@ class Explorateur:
             return True
         if is_terminate:
             return False
-        #
-        # # Mark the decision as visited, if graph search
-        # if self._closed_decisions:
-        #     self._log("Mark current decision as visited in closed decisions: " + str(self._closed_decisions.size()))
-        #     self._closed_decisions.insert(Decision(root, None))
 
         # START SEARCH
-        while not self._open_decisions.is_empty():
+        while not self._open.is_empty():
             self.num_decisions += 1
             self._log("\nDecision " + str(self.num_decisions))
-            self._log("Open decisions: " + str(self._open_decisions.size()))
+            self._log("Open decisions: " + str(self._open.size()))
 
-            # Pop the current decision from open decisions for execution
-            current_decision = self._open_decisions.remove()
-            self._log("Current decision: " + str(current_decision))
-
-            # Skip already visited successor, if graph search
-            # if self._closed_decisions and self._closed_decisions.contains(current_decision):
-            if self._closed_decisions and self._closed_decisions.contains(current_decision):
-                self._log("Skip adding decision. It is already visited.")
-                self.num_decisions -= 1
-                continue
+            # Pop the copied successor state from open for execution
+            successor = self._open.remove()
+            current = successor._transition.previous_state
+            move = successor._transition.move
+            self._log("Current decision: " + str(current))
 
             # Transition of the current state (there is no transition for initial moves)
-            transition = current_decision.state._transition
-            next_depth = transition.depth + 1 if transition else 1
-            self._log("Current transition: " + str(transition))
-
-            # Mark the decision as visited, if graph search
-            if self._closed_decisions:
-                self._log("Mark current decision as visited in closed decisions: " + str(self._closed_decisions.size()))
-                self._closed_decisions.insert(current_decision)
+            self._log("Current transition: " + str(current._transition))
 
             # Execute the move on a copy state
-            successor_state = cp.deepcopy(current_decision.state)
-            if successor_state.execute(current_decision.move):
+            if successor.execute(move):
                 self._log("Move is successful.")
 
-                # Set next depth and attach next transition to successor so that we can trace solution path
-                next_transition = Transition(previous_state=current_decision.state,
-                                             move=current_decision.move, depth=next_depth)
-                successor_state._transition = next_transition
-                successor_state._id = self.num_decisions - self.num_failed_decisions
-                self._log("Create next transition: " + str(next_transition) +
-                          " from ID: " + str(current_decision.state._id) + " to ID: " + str(successor_state._id))
+                successor.id = self.num_decisions - self.num_failed_decisions
+                self._log("Create next transition: " + str(successor._transition) +
+                          " from ID: " + str(current.id) + " to ID: " + str(successor.id))
 
-                # Create dot node transition
-                self._log_dot(current_decision, successor_state, color="")
+                # Mark the decision as visited, if graph search
+                if self.closed:
+                    self._log("Mark current decision as visited in closed decisions: " + str(self.closed.size()))
+                    self.closed.insert(current)
 
-                # Check termination, else expand successor state with possible moves
-                # as open decisions for execution within depth
-                is_terminate, is_solution = self._is_terminate_or_expand(successor_state, goal_state, exploration_type, max_depth)
-                if is_solution:
-                    if is_solution_path:
-                        self.solution_path = self._get_solution_path()
-                    return True
-                if is_terminate:
-                    return False
+                # Skip already visited successor, if graph search
+                if self.closed and self.closed.contains(successor):
+                    self._log("Skip adding decision. It is already visited. " + str(successor))
+                    self.num_decisions -= 1
+                else:
+                    # Create dot node transition
+                    self._log_dot(current, move, successor, color="")
+
+                    # Check termination, else expand successor state with possible moves for execution within depth
+                    is_terminate, is_solution = self._is_terminate_or_expand(successor, goal_state, exploration_type, max_depth)
+                    if is_solution:
+                        if is_solution_path:
+                            self.solution_path = self._get_solution_path()
+                        return True
+                    if is_terminate:
+                        return False
             else:
+                # Skip failed move and infeasible successor, reset failed transition
+                successor._transition = None
                 self.num_failed_decisions += 1
-                # Skip failed move and infeasible successor
                 self._log("Skip infeasible successor. Num fails: " + str(self.num_failed_decisions))
 
                 # Create dot node transition to a failed node
-                self._log_dot(current_decision, None, color=Constants.FAIL_NODE_COLOR)
+                self._log_dot(current, move, None, color=Constants.FAIL_NODE_COLOR)
 
             # Check stopping conditions before next iteration. If hits a limit, color last successor state
-            if self._is_search_limit(successor_state, self._start_time, self.num_decisions, max_runtime, max_moves):
+            if self._is_search_limit(successor, self._start_time, self.num_decisions, max_runtime, max_moves):
                 return False
 
         # No more open decisions left or limit reach and search finished, save the dot and return False
@@ -217,6 +204,57 @@ class Explorateur:
         self._log_finish("<<< FINISH SEARCH - FAILURE - No solution! ")
         self._log_dot_file()
         return False
+
+    def _is_terminate_or_expand(self, state, goal_state, exploration_type, max_depth) -> Tuple[bool, bool]:
+
+        is_terminate, is_solution = False, False
+
+        # Check termination condition -- decided by the user state!
+        if state.is_terminate(goal_state):
+            is_terminate, is_solution = True, True
+            self.solution_state = state
+            self.total_time = time.perf_counter() - self._start_time
+            self._log("Successful termination for state: " + str(state))
+            self._log_finish("<<< FINISH SEARCH - SUCCESS - Solution Found!")
+            move = state._transition.move if state._transition else None
+            self._log_dot(None, move, state, color=Constants.SUCCESS_NODE_COLOR)  # mark it green
+            self._log_dot_file()
+            return is_terminate, is_solution
+        else:
+            self._log("Successor is not termination, add alternative moves")
+
+        # If still within max depth bound, insert the successor into open states for exploration
+        # Initial state does not have transition, so skip max depth for initial state
+        if state._transition:
+            if state._transition.depth >= max_depth:
+                # Don't terminate the whole search, but don't generate new open nodes
+                self._log("Max depth reached, not inserting new open node.")
+                self._log_dot(None, state._transition.move, state, color=Constants.LIMIT_NODE_COLOR)
+                return is_terminate, is_solution
+
+        # If no termination, add alternative moves to search -- decided by the user state!
+        moves = state.get_moves()
+
+        # Reverse moves for depth first search, so the exploration follows user move order
+        if isinstance(exploration_type, ExplorationType.DepthFirst):
+            moves.reverse()
+
+        # Search for alternatives
+        for move in moves:
+            self._log("Decision for move: " + str(move))
+
+            # Create a copy successor with next transition
+            successor_state = cp.deepcopy(state)
+            transition = state._transition
+            next_depth = transition.depth + 1 if transition else 1
+            next_transition = Transition(previous_state=state, move=move, depth=next_depth)
+            successor_state._transition = next_transition
+
+            # Push successor to open storage for execution
+            self._log("Add open decision for executing " + str(successor_state._transition.move) + " on state\n" + str(state))
+            self._open.insert(successor_state)
+
+        return is_terminate, is_solution
 
     def _is_search_limit(self, state, start, num_moves, max_runtime, max_moves):
         # Check max_runtime
@@ -233,61 +271,10 @@ class Explorateur:
         if stop_cause:
             self.total_time = current_time - start
             self._log_finish("<<< FINISH SEARCH - STOP - No solution! " + stop_cause)
-            self._log_dot(None, state, color=Constants.LIMIT_NODE_COLOR)  # mark it green
+            self._log_dot(None, state._transition.move, state, color=Constants.LIMIT_NODE_COLOR)  # mark it green
             self._log_dot_file()
             return True
         return False
-
-    def _is_terminate_or_expand(self, state, goal_state, exploration_type, max_depth) -> Tuple[bool, bool]:
-
-        is_terminate, is_solution = False, False
-
-        # Check termination condition -- decided by the user state!
-        if state.is_terminate(goal_state):
-            is_terminate, is_solution = True, True
-            self.solution_state = state
-            self.total_time = time.perf_counter() - self._start_time
-            self._log("Successful termination for state: " + str(state))
-            self._log_finish("<<< FINISH SEARCH - SUCCESS - Solution Found!")
-            self._log_dot(None, state, color=Constants.SUCCESS_NODE_COLOR)  # mark it green
-            self._log_dot_file()
-            return is_terminate, is_solution
-        else:
-            self._log("Successor is not termination, add alternative moves")
-
-        # If still within max depth bound, insert the successor into open states for exploration
-        # Initial state does not have transition, so skip max depth for initial state
-        if state._transition:
-            if state._transition.depth >= max_depth:
-                # Don't terminate the whole search, but don't generate new open nodes
-                self._log("Max depth reached, not inserting new open node.")
-                self._log_dot(None, state, color=Constants.LIMIT_NODE_COLOR)
-                return is_terminate, is_solution
-
-        # If no termination, add alternative moves to search -- decided by the user state!
-        moves = state.get_moves()
-
-        # Reverse moves for depth first search, so the exploration follows user move order
-        if isinstance(exploration_type, ExplorationType.DepthFirst):
-            moves.reverse()
-
-        # Search for alternatives
-        for move in moves:
-            self._log("Decision for move: " + str(move))
-
-            # Create new decision
-            decision = Decision(state, move)
-
-            # Skip already visited successor, if graph search
-            if self._closed_decisions and self._closed_decisions.contains(decision):
-                self._log("Skip adding decision. It is already visited.")
-                continue
-
-            # Push successor to open storage for execution
-            self._log("Add open decision for executing " + str(decision.move) + " on state\n" + str(decision.state))
-            self._open_decisions.insert(decision)
-
-        return is_terminate, is_solution
 
     def _get_solution_path(self, is_initial_first=False) -> List[BaseState]:
         """
@@ -341,24 +328,24 @@ class Explorateur:
         if self.is_verbose:
             print(text)
 
-    def _log_dot(self, current_decision, successor_state, color):
+    def _log_dot(self, current, move, successor, color):
         if not self._dot_filename:
             return
 
-        if current_decision:
+        if current:
             # If there is no successor, first add a fail node with color so that we can add an edge to it
-            if not successor_state:
+            if not successor:
                 self._dot_text += (str(self.num_decisions) +
                                    " [label=\"Fail: " + str(self.num_failed_decisions) + "\"" +
                                    " shape=triangle style=filled fillcolor="+ str(color) + "];\n")
 
             # generic nodes with no color
-            self._dot_text += "\"" + current_decision.state.get_dot_label() + "\" -> "
-            self._dot_text += "\"" + successor_state.get_dot_label() + "\"" if successor_state else str(self.num_decisions)
-            self._dot_text += " [label=\"" + current_decision.move.get_dot_label() + "\"];\n"
+            self._dot_text += "\"" + current.get_dot_label() + "\" -> "
+            self._dot_text += "\"" + successor.get_dot_label() + "\"" if successor else str(self.num_decisions)
+            self._dot_text += " [label=\"" + move.get_dot_label() + "\"];\n"
         else:
             # decision is taken care of, mark successor with the color
-            self._dot_text += "\"" + successor_state.get_dot_label() + "\" [style=filled fillcolor=" + str(color) + "];\n"
+            self._dot_text += "\"" + successor.get_dot_label() + "\" [style=filled fillcolor=" + str(color) + "];\n"
 
     def _log_dot_file(self):
         if self._dot_filename:
@@ -385,8 +372,8 @@ class Explorateur:
         self.solution_path = None
 
         # Clean state collections
-        self._open_decisions = None
-        self._closed_decisions = None
+        self._open = None
+        self.closed = None
 
         # Initialize counters
         self._start_time = time.perf_counter()

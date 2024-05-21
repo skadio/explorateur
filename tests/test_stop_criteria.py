@@ -88,3 +88,31 @@ class StopCriteriaTest(BaseTest):
 
     def test_max_runtime(self):
         pass
+
+    def test_starting_solution(self):
+        # Explorateur
+        explorer = Explorateur(is_verbose=True)
+
+        # Initial state
+        initial_state = MyState({"x": [1], "y": [10], "z": [100]},
+                                is_exhaustive_search=False)
+        initial_state.unassigned = []
+
+        # Arguments
+        args = {}
+        args["initial_state"] = initial_state
+        args["goal_state"] = None
+        args["exploration_type"] = ExplorationType.DepthFirst()
+        args["search_type"] = SearchType.TreeSearch()
+        args["is_solution_path"] = True
+        args["max_depth"] = 100
+        args["max_moves"] = 100
+        args["max_runtime"] = 100
+        args["dot_filename"] = os.path.join(Constants.TEST_DATA_DIR, "stop_criteria.dot")
+        args["is_verbose"] = True
+
+        # Run
+        run(explorer, args)
+
+        self.assertEqual(explorer.num_decisions, 0)
+        self.assertEqual(explorer.num_failed_decisions, 0)

@@ -8,7 +8,7 @@ from explorateur.utils import run
 
 class GraphDepthTest(BaseTest):
 
-    def test_usage_example(self):
+    def test_graph_depth_first(self):
         # Explorateur
         explorer = Explorateur(is_verbose=True)
 

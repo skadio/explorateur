@@ -14,7 +14,6 @@ class TreeBreadthTest(BaseTest):
 
         # Initial state
         # Don't search the whole tree, stop at first feasible
-        # Fake a few failing decisions
         initial_state = MyState({"x": [1, 2], "y": [10, 20], "z": [100, 200]},
                                 is_exhaustive_search=False)
 

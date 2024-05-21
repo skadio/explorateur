@@ -18,19 +18,20 @@ goal_state = MyState(goal_vertex, graph)
 args = {}
 args["initial_state"] = initial_state
 args["goal_state"] = goal_state
-args["exploration_type"] = ExplorationType.DepthFirst()
+args["exploration_type"] = ExplorationType.BreadthFirst()
 args["search_type"] = SearchType.GraphSearch()
 args["is_solution_path"] = True
 args["max_depth"] = 100
 args["max_moves"] = 100
-args["max_runtime"] = 100
+args["max_runtime"] = 10000
 args["dot_filename"] = "output.dot"
 args["is_verbose"] = True
 
 # Explorateur
 explorer = Explorateur(is_verbose=True)
 run(explorer, args)
-assert explorer.num_decisions == 14
+
+assert explorer.num_decisions == 9
 assert explorer.num_failed_decisions == 0
 
 # Example DOT file viewer: https://dreampuf.github.io/GraphvizOnline

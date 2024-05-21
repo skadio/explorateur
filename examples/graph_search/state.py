@@ -38,15 +38,15 @@ class MyState(BaseState):
 
     # String representation, also used for node labels in DOT graph
     def __str__(self) -> str:
-        return str(self.v)
+        return str(self.id) + "\n" + str(self.v)
 
-    # This is required for graph search to check contains on already visited decisions
+    # This is required for graph search to check contains on already visited states
     def __eq__(self, other):
         if isinstance(other, MyState):
             return self.v == other.v
         return False
 
-    # This is required for graph search when adding closed decision into hashset
+    # This is required for graph search when adding closed states into hashset
     def __hash__(self):
         return hash(self.v)
 

@@ -1,7 +1,7 @@
 import abc
 from typing import Optional
 
-from explorateur.search.decision import Decision
+from explorateur.state.base_state import BaseState
 
 
 class BaseStorage(metaclass=abc.ABCMeta):
@@ -14,11 +14,11 @@ class BaseStorage(metaclass=abc.ABCMeta):
         """Initializer for the storage class."""
 
     @abc.abstractmethod
-    def insert(self, decision: Decision):
+    def insert(self, state: BaseState):
         """Inserts a state into storage."""
 
     @abc.abstractmethod
-    def remove(self) -> Decision:
+    def remove(self) -> BaseState:
         """Removes a state from storage."""
 
     @abc.abstractmethod
@@ -30,5 +30,5 @@ class BaseStorage(metaclass=abc.ABCMeta):
         """Returns the number of elements in the storage."""
 
     @abc.abstractmethod
-    def contains(self, decision: Decision) -> Optional[Decision]:
+    def contains(self, state: BaseState) -> Optional[BaseState]:
         """ Returns the state if it is in the storage, None otherwise."""

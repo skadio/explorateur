@@ -12,11 +12,11 @@ class BaseState(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def __init__(self):
-        """ 
+        """
         Initializer for state.
             For example, this can store variable and value assignments in the current state.
         """
-        self._id: int = -1
+        self.id: int = -1
         self._transition: Optional[Transition] = None
 
     @abc.abstractmethod

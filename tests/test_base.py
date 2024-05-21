@@ -122,7 +122,7 @@ class MyState(BaseState):
 
     # String representation, also used for node labels in DOT graph
     def __str__(self) -> str:
-        text = "State ID: " + str(self._id) + "\n"
+        text = "State ID: " + str(self.id) + "\n"
         text += "Assignment: " + str(self.var_to_val) + "\n"
         text += "Domains: " + str(self.var_to_domain)
         return text

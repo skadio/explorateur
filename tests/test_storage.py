@@ -3,7 +3,6 @@ from explorateur.state.storage.queue import Queue
 from explorateur.state.storage.stack import Stack
 from explorateur.state.storage.hash import HashSet
 from explorateur.state.storage.priority_queue import PriorityQueue
-from explorateur.search.decision import Decision
 from tests.test_base import BaseTest, MyState, MyMove
 
 
@@ -55,32 +54,25 @@ class StorageTest(BaseTest):
         h = HashSet()
         self.assertTrue(h.is_empty())
 
-        d = Decision(state, move)
-        print(d)
-
-        h.insert(d)
-        self.assertTrue(h.contains(d))
+        h.insert(state)
+        self.assertTrue(h.contains(state))
         self.assertEqual(h.size(), 1)
         self.assertFalse(h.is_empty())
 
-        d2 = Decision(state, move)
+        d2 = MyState({"x": [1, 2], "y": [10, 20], "z": [100, 200]})
         self.assertEqual(h.contains(d2), d2)
 
         h.insert(d2)
         self.assertEqual(h.size(), 1)
 
-        d3 = Decision(state, MyMove("x", "!=", 1))
-        self.assertIsNone(h.contains(d3))
-
         x = h.remove()
         self.assertEqual(x, d2)
-        self.assertIsNone(h.contains(d))
+        self.assertIsNone(h.contains(state))
         self.assertTrue(h.is_empty())
         self.assertEqual(h.size(), 0)
 
-        h.insert(d)
-        h.insert(d3)
-        self.assertEqual(h.size(), 2)
+        h.insert(state)
+        self.assertEqual(h.size(), 1)
 
 
     def test_priority_queue(self):

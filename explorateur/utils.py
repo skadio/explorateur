@@ -3,6 +3,7 @@ from typing import Dict, Union, NamedTuple
 from explorateur.search.exploration_type import ExplorationType
 from explorateur.search.search_type import SearchType
 
+
 Num = Union[int, float]
 """Num type is defined as integer or float."""
 
