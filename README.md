@@ -6,10 +6,10 @@ Explorateur is a Python library to conduct [State-Space-Search (SSS)](https://en
 
 Explorateur performs **generic state-space-search** over **problem-specific states and moves**. The user defines the `BaseState` and `BaseMove` and the library drives the search for solutions.
 
-Given an initial user state, Explorateur performs iterative search moves until a stopping condition is reached: 
-- A termination state is found
-- The search space is exhausted
-- Reached max iterations, runtime limit, max depth 
+Given an initial user state, Explorateur performs search moves iteratively until a stopping condition is reached: 
+- A termination state is found. 
+- The search space is exhausted. 
+- Hit stopping criteria such as max iterations, runtime limit, max depth. 
 - Optionally, given a goal state, a goal state is encountered.
 
 The behavior of the overall algorithm is controlled by the _Search Strategy_ and the _Exploration Strategy_. 
@@ -21,7 +21,7 @@ The behavior of the overall algorithm is controlled by the _Search Strategy_ and
 ### Exploration Strategy 
 - `BreadthFirst` in uninformed fashion 
 - `DepthFirst` in uninformed fashion
-- `BestFirst` in informed fashion assuming an objective function evaluates the solution quality of a state.
+- `BestFirst` in informed fashion with an objective function that evaluates the quality of a state.
 
 ## Quick Start
 
