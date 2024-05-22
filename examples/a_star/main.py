@@ -8,11 +8,15 @@ from explorateur.utils import run
 with open('../data/romania_graph.json') as json_file:
     graph = json.load(json_file)
 
+# Romania graph[node] = Dict[node, distance]
+with open('../data/romania_heuristic.json') as json_file:
+    node_to_heuristic = json.load(json_file)
+
 initial_vertex = "Arad"
-initial_state = MyState(initial_vertex, graph)
+initial_state = MyState(initial_vertex, graph, node_to_heuristic)
 
 goal_vertex = "Bucharest"
-goal_state = MyState(goal_vertex, graph)
+goal_state = MyState(goal_vertex, graph, node_to_heuristic)
 
 # Arguments
 args = {}

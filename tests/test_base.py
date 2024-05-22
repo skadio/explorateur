@@ -124,7 +124,8 @@ class MyState(BaseState):
     def __str__(self) -> str:
         text = "State ID: " + str(self.id) + "\n"
         text += "Assignment: " + str(self.var_to_val) + "\n"
-        text += "Domains: " + str(self.var_to_domain)
+        text += "Domains: " + str(self.var_to_domain) + "\n"
+        text += "Objective: " + str(self.get_objective())
         return text
 
     # This is required for graph search to check contains on already visited decisions
@@ -139,6 +140,16 @@ class MyState(BaseState):
     def __hash__(self):
         return hash((tuple(self.unassigned), tuple(self.var_to_val), tuple(self.var_to_domain)))
 
+    def get_objective(self) -> float:
+        objective = 0
+        for var in self.var_to_val:
+            if var in self.unassigned:
+                continue
+            else:
+                objective += self.var_to_val[var]
+
+        # Return -1, since minimization
+        return -1 * objective
 
 class BaseTest(unittest.TestCase):
 

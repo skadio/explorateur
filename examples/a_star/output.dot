@@ -1,0 +1,32 @@
+digraph G {
+spline=line;
+"0
+Arad" -> "1
+Zerind" [label="Zerind"];
+"0
+Arad" -> "2
+Sibiu" [label="Sibiu"];
+"0
+Arad" -> "3
+Timisoara" [label="Timisoara"];
+"1
+Zerind" -> "4
+Oradea" [label="Oradea"];
+"2
+Sibiu" -> "5
+Fagaras" [label="Fagaras"];
+"2
+Sibiu" -> "6
+Oradea" [label="Oradea"];
+"2
+Sibiu" -> "7
+Rimnicu" [label="Rimnicu"];
+"3
+Timisoara" -> "8
+Lugoj" [label="Lugoj"];
+"5
+Fagaras" -> "9
+Bucharest" [label="Bucharest"];
+"9
+Bucharest" [style=filled fillcolor=green];
+}

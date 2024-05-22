@@ -33,7 +33,7 @@ The behavior of the search is controlled by the built-in _Search Strategy_ and t
 - A termination state is found,
 - The search space is exhausted, 
 - A stopping criteria such as max iterations, runtime limit, max depth has been reached, 
-- (Optionally), The given goal state is encountered.
+- (Optionally) The given goal state is encountered.
 
 ## Quick Start
 
