@@ -20,12 +20,12 @@ class MyMove(BaseMove):
 
 
 class MyState(BaseState):
-    EMPTY = "| |"
+    EMPTY = "--"
     ALIVE = "A"
     DEAD = "X"
-    DIRECTIONS = [[0, 1],   # cell on the right
+    DIRECTIONS = [[0, 1],  # cell on the right
                   [0, -1],  # cell on the left
-                  [1, 0],   # cell on the bottom
+                  [1, 0],  # cell on the bottom
                   [-1, 0]]  # cell on the above
 
     # Problem specific state representation
@@ -105,8 +105,6 @@ class GODTest(BaseTest):
         explorer = Explorateur(is_verbose=True)
 
         # Initial state
-        # Don't search the whole tree, stop at first feasible
-        # Fake a few failing decisions
         initial_state = MyState(grid=[[MyState.ALIVE, MyState.ALIVE, MyState.EMPTY],
                                       [MyState.EMPTY, MyState.ALIVE, MyState.ALIVE],
                                       [MyState.EMPTY, MyState.ALIVE, MyState.DEAD]])
@@ -121,17 +119,52 @@ class GODTest(BaseTest):
         args["max_depth"] = 100
         args["max_moves"] = 100
         args["max_runtime"] = 100
-        args["dot_filename"] = os.path.join(Constants.TEST_DATA_DIR, "tree_god.dot")
+        args["dot_filename"] = os.path.join(Constants.TEST_DATA_DIR, "leet_god.dot")
         args["is_verbose"] = True
 
         # Run
         run(explorer, args)
 
-        # # Solution label
-        # ground_truth_solution = {"x": 1, "y": 10, "z": 100}
-        # self.assertEqual(explorer.num_decisions, 3)
-        # self.assertEqual(explorer.num_failed_decisions, 0)
+        # Solution label
+        ground_truth_solution = [[MyState.DEAD, MyState.DEAD, MyState.EMPTY],
+                                 [MyState.EMPTY, MyState.DEAD, MyState.DEAD],
+                                 [MyState.EMPTY, MyState.DEAD, MyState.DEAD]]
+
+        self.assertEqual(explorer.num_decisions, 4)
+        self.assertEqual(explorer.num_failed_decisions, 0)
+        self.assertEqual(len(explorer.solution_path), 5)
+        self.assertEqual(explorer.solution_state.grid, ground_truth_solution)
+        self.assertEqual(explorer.solution_state.num_alive, 0)
+
+    def test_game_of_death_no_solution(self):
+        # Explorateur
+        explorer = Explorateur(is_verbose=True)
+
+        # Initial state
+        # Don't search the whole tree, stop at first feasible
+        # Fake a few failing decisions
+        initial_state = MyState(grid=[[MyState.ALIVE, MyState.EMPTY, MyState.ALIVE],
+                                      [MyState.EMPTY, MyState.DEAD, MyState.EMPTY],
+                                      [MyState.ALIVE, MyState.EMPTY, MyState.ALIVE]])
+
+        # Arguments
+        args = {}
+        args["initial_state"] = initial_state
+        args["goal_state"] = None
+        args["exploration_type"] = ExplorationType.BreadthFirst()
+        args["search_type"] = SearchType.TreeSearch()
+        args["is_solution_path"] = True
+        args["max_depth"] = 100
+        args["max_moves"] = 100
+        args["max_runtime"] = 100
+        args["dot_filename"] = os.path.join(Constants.TEST_DATA_DIR, "leet_god.dot")
+        args["is_verbose"] = True
+
+        # Run
+        run(explorer, args)
+
+        # Solution label -- None
+        self.assertIsNone(explorer.solution_state)
+        self.assertIsNone(explorer.solution_path)
         # self.assertEqual(len(explorer.solution_path), 4)
         # self.assertEqual(explorer.solution_path[-1], initial_state)
-        # self.assertEqual(explorer.solution_state.var_to_val, ground_truth_solution)
-        # self.assertEqual(explorer.solution_state.unassigned, [])

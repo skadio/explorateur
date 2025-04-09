@@ -38,6 +38,7 @@ class Explorateur:
             - BreadthFirst in uninformed fashion
             - DepthFirst in uninformed fashion
             - BestFirst in informed fashion assuming an objective function evaluates the solution quality of a state.
+                By default, best-first search is minimization. To maximize, multiply the objective function by -1.
 
         To use Explorateur, you need to define BaseState and BaseMove, as in the quick start template.
     """
@@ -152,7 +153,8 @@ class Explorateur:
             successor = self._open.remove()
             current = successor._transition.previous_state
             move = successor._transition.move
-            self._log("Current decision: " + str(current))
+            self._log("Current decision state: " + str(current))
+            self._log("Current decision move: " + str(move))
 
             # Transition of the current state (there is no transition for initial moves)
             self._log("Current transition: " + str(current._transition))
@@ -167,12 +169,12 @@ class Explorateur:
 
                 # Mark the decision as visited, if graph search
                 if self.closed:
-                    self._log("Mark current decision as visited in closed decisions: " + str(self.closed.size()))
+                    self._log("Insert current decision state as visited in closed decisions: " + str(self.closed.size()))
                     self.closed.insert(current)
 
                 # Skip already visited successor, if graph search
                 if self.closed and self.closed.contains(successor):
-                    self._log("Skip adding decision. It is already visited. " + str(successor))
+                    self._log("Skip adding successor decision. It is already visited. " + str(successor))
                     self.num_decisions -= 1
                 else:
                     # Create dot node transition

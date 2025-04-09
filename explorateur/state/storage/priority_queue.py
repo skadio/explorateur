@@ -5,6 +5,8 @@ from explorateur.state.storage.base_storage import BaseStorage
 from explorateur.state.base_state import BaseState
 
 
+# Alternatively, we can use queue.PriorityQueue which is thread-safe
+# For single-thread applications, heapq is more efficient
 class PriorityQueue(BaseStorage):
     """  Class representing a priority queue. Root is the smallest element. """
 

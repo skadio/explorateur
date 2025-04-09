@@ -1,10 +1,10 @@
 TODOs:
 BestFirsSearch -> split into MinFirstSearch and MaxFirstSearch
-2. Breadth-first Search (BFS)
-Rotting Fruit (https://lnkd.in/gJkrAW4R)
-
 3. Dijkstra's Shortest Path
 Network Delay Time (https://lnkd.in/gfNXS85p)
+
+7. Bellman-Ford Shortest Path (for negative weight graphs)
+Cheapest Flight Path (https://lnkd.in/gN26WWEc)
 
 4. Topological Sort
 Foreign Dictionary (https://lnkd.in/giA97-RK)
@@ -15,14 +15,11 @@ Redundant Connection (https://lnkd.in/gN4qZdwi)
 6. Prim's or Kruskal's Minimum Spanning Tree
 Min Cost to Connect all Points (https://lnkd.in/gVNq7Euu)
 
-7. Bellman-Ford Shortest Path (for negative weight graphs)
-Cheapest Flight Path (https://lnkd.in/gN26WWEc)
-
 NOTES:
-depth-first search (DFS) (pick newest element),
-breadth first search (BFS) (pick oldest element)
-Dijkstra’s Algorithm / uniform cost search (pick element with lowest path cost),
-A-star search by choosing the node with lowest path cost plus heuristic value, and so on.
+depth-first search (DFS) picks the newest element
+breadth first search (BFS) picks the oldest element
+Dijkstra’s Algorithm / uniform cost search picks element with the lowest path cost
+A-star search by choosing the node with the lowest path cost plus heuristic value, and so on.
 
 A* is a modification of Dijkstra’s Algorithm that is optimized for a single destination.
 Dijkstra’s Algorithm can find paths to all locations;
@@ -49,7 +46,7 @@ The advantage of graph search obviously is that, if we finish the search of a no
 On the other hand, the tree search can visit the same node multiple times.
 The disadvantage of graph search is that it uses more memory (which we may or may not have) than tree search.
 This matters because graph search actually has exponential memory requirements in the worst case,
-making it impractical without either a really good search heuristic or an extremely simple problem.
+making it impractical without either a great search heuristic or an extremely simple problem.
 So, there is a trade-off between space and time when using graph search as opposed to tree search (or vice-versa).
 
 Occasionally, people may use the term tree search to refer to a tree traversal,
@@ -76,4 +73,5 @@ A* graph search algorithm, however, only makes this guarantee when it used with 
  (a stronger condition than admissibility).
 Consistent: regardless of search node explore, heuristic remains admissible
 
-Using state for the problem graph vertices and node for the traversal graph could definitely improve the clarity of the answer.
+Using state for the problem graph vertices and
+node for the traversal graph could definitely improve the clarity of the answer.
