@@ -34,37 +34,6 @@ class Constants(NamedTuple):
     FAIL_NODE_COLOR = "red"
     LIMIT_NODE_COLOR = "purple"
 
-    def search(self,
-               explorer,
-               initial_state, goal_state,
-               exploration_type, search_type,
-               is_solution_path,
-               max_depth, max_moves, max_runtime, dot_filename, is_verbose):
-
-        # Search for solutions
-        if explorer.search(initial_state,
-                           goal_state=goal_state,  # Optional goal state
-                           exploration_type=exploration_type,
-                           search_type=search_type,
-                           is_solution_path=is_solution_path,
-                           max_depth=max_depth,
-                           max_moves=max_moves,
-                           max_runtime=max_runtime,
-                           dot_filename=dot_filename):
-
-            if is_verbose:
-                print("Solution:", explorer.solution_state)
-                print("Solution Path:", *explorer.solution_path, sep="\n<-")
-        else:
-            if is_verbose:
-                print("No solution found!")
-
-        if is_verbose:
-            # Search statistics
-            print("Total Decisions:", explorer.num_decisions)
-            print("Total Failures:", explorer.num_failed_decisions)
-            print("Total Time:", round(explorer.total_time, 3))
-
 
 def run(explorer, args):
 

@@ -3,28 +3,38 @@ spline=line;
 1 [label="Fail: 1" shape=triangle style=filled fillcolor=red];
 "State ID: 0
 Assignment: {}
-Domains: {'x': [1, 2], 'y': [10, 20], 'z': [100, 200]}" -> 1 [label="x == 1"];
+Domains: {'x': [1, 2], 'y': [10, 20], 'z': [100, 200]}
+Objective: 0" -> 1 [label="x == 1"];
 "State ID: 0
 Assignment: {}
-Domains: {'x': [1, 2], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 1
+Domains: {'x': [1, 2], 'y': [10, 20], 'z': [100, 200]}
+Objective: 0" -> "State ID: 1
 Assignment: {'x': 2}
-Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}" [label="x != 1"];
+Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}
+Objective: -2" [label="x != 1"];
 "State ID: 1
 Assignment: {'x': 2}
-Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 2
+Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}
+Objective: -2" -> "State ID: 2
 Assignment: {'x': 2, 'y': 10}
-Domains: {'x': [2], 'y': [10], 'z': [100, 200]}" [label="y == 10"];
+Domains: {'x': [2], 'y': [10], 'z': [100, 200]}
+Objective: -12" [label="y == 10"];
 "State ID: 1
 Assignment: {'x': 2}
-Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}" -> "State ID: 3
+Domains: {'x': [2], 'y': [10, 20], 'z': [100, 200]}
+Objective: -2" -> "State ID: 3
 Assignment: {'x': 2, 'y': 20}
-Domains: {'x': [2], 'y': [20], 'z': [100, 200]}" [label="y != 10"];
+Domains: {'x': [2], 'y': [20], 'z': [100, 200]}
+Objective: -22" [label="y != 10"];
 "State ID: 2
 Assignment: {'x': 2, 'y': 10}
-Domains: {'x': [2], 'y': [10], 'z': [100, 200]}" -> "State ID: 4
+Domains: {'x': [2], 'y': [10], 'z': [100, 200]}
+Objective: -12" -> "State ID: 4
 Assignment: {'x': 2, 'y': 10, 'z': 100}
-Domains: {'x': [2], 'y': [10], 'z': [100]}" [label="z == 100"];
+Domains: {'x': [2], 'y': [10], 'z': [100]}
+Objective: -112" [label="z == 100"];
 "State ID: 4
 Assignment: {'x': 2, 'y': 10, 'z': 100}
-Domains: {'x': [2], 'y': [10], 'z': [100]}" [style=filled fillcolor=green];
+Domains: {'x': [2], 'y': [10], 'z': [100]}
+Objective: -112" [style=filled fillcolor=green];
 }

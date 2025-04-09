@@ -2,5 +2,6 @@ digraph G {
 spline=line;
 "State ID: 0
 Assignment: {}
-Domains: {'x': [1], 'y': [10], 'z': [100]}" [style=filled fillcolor=green];
+Domains: {'x': [1], 'y': [10], 'z': [100]}
+Objective: 0" [style=filled fillcolor=green];
 }

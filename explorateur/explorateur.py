@@ -403,11 +403,12 @@ class Explorateur:
             check_true(isinstance(goal_state, BaseState),
                        TypeError("Goal state must be BaseState type. Incorrect type: " + str(type(goal_state))))
 
-        check_true(isinstance(exploration_type, All_Exploration_Types),
-                   TypeError("Exploration type is not allowed " + str(exploration_type)))
+        # Turning off as generic types lead to an error (Python issue)
+        # check_true(isinstance(exploration_type, All_Exploration_Types),
+        #            TypeError("Exploration type is not allowed " + str(exploration_type)))
 
-        check_true(isinstance(search_type, All_Search_Types),
-                   TypeError("Search type is not allowed " + str(search_type)))
+        # check_true(isinstance(search_type, All_Search_Types),
+        #            TypeError("Search type is not allowed " + str(search_type)))
 
         check_true(isinstance(is_solution_path, bool),
                    TypeError("is_solution_path must be boolean " + str(is_solution_path)))
