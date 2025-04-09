@@ -1,0 +1,53 @@
+digraph G {
+spline=line;
+"ID: 0
+A A | |
+| | A A
+| | A X
+ALIVE: 5
+" -> "ID: 1
+A A | |
+| | A X
+| | X X
+ALIVE: 3
+" [label="Kill cells {(1, 2), (2, 1)}"];
+"ID: 1
+A A | |
+| | A X
+| | X X
+ALIVE: 3
+" -> "ID: 2
+A A | |
+| | X X
+| | X X
+ALIVE: 2
+" [label="Kill cells {(1, 1)}"];
+"ID: 2
+A A | |
+| | X X
+| | X X
+ALIVE: 2
+" -> "ID: 3
+A X | |
+| | X X
+| | X X
+ALIVE: 1
+" [label="Kill cells {(0, 1)}"];
+"ID: 3
+A X | |
+| | X X
+| | X X
+ALIVE: 1
+" -> "ID: 4
+X X | |
+| | X X
+| | X X
+ALIVE: 0
+" [label="Kill cells {(0, 0)}"];
+"ID: 4
+X X | |
+| | X X
+| | X X
+ALIVE: 0
+" [style=filled fillcolor=green];
+}

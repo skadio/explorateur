@@ -78,7 +78,7 @@ class MyState(BaseState):
         # TODO Your state string, also used for node labels in DOT graph
         pass
 
-# Explarateur
+# Explorateur
 explorer = Explorateur()
 
 # Initial state

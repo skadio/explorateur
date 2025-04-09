@@ -3,33 +3,6 @@ from typing import Dict, List
 from explorateur import Explorateur, BaseMove, BaseState, ExplorationType, SearchType
 
 
-class EmptyMove(BaseMove):
-
-    def __init__(self):
-        pass
-
-    def __str__(self) -> str:
-        pass
-
-
-class EmptyState(BaseState):
-
-    def __init__(self):
-        super().__init__()
-
-    def get_moves(self):
-        pass
-
-    def is_terminate(self, goal_state):
-        pass
-
-    def execute(self, move):
-        pass
-
-    def __str__(self):
-        pass
-
-
 class MyMove(BaseMove):
 
     # Define move object
@@ -151,6 +124,7 @@ class MyState(BaseState):
         # Return -1, since minimization
         return -1 * objective
 
+
 class BaseTest(unittest.TestCase):
 
     def search(self,
@@ -198,3 +172,7 @@ class BaseTest(unittest.TestCase):
 
         for index, val in enumerate(list1):
             self.assertAlmostEqual(val, list2[index])
+
+
+def matrix_to_str(matrix):
+    return "\n".join([" ".join(map(str, row)) for row in matrix])
