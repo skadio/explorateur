@@ -25,25 +25,25 @@ The behavior of the search is controlled by the built-in _Search Strategy_ and t
 - `GraphSearch` over open states while also storing the closed states to avoid visiting duplicates. 
 
 ### Exploration Strategy 
-- `BreadthFirst` in uninformed fashion,
-- `DepthFirst` in uninformed fashion,
-- `BestFirst` in informed fashion with an objective function that evaluates the quality of a state.
+- `BreadthFirst` in an uninformed fashion,
+- `DepthFirst` in an uninformed fashion,
+- `BestFirst` in an informed fashion with an objective function that evaluates the quality of a state.
 
 ### Stopping Conditions 
 - A termination state is found,
 - The search space is exhausted, 
-- A stopping criteria such as max iterations, runtime limit, max depth has been reached, 
+- A stopping criterion such as max iterations, runtime limit, or max depth has been reached, 
 - (Optionally) The given goal state is encountered.
 
 ## Quick Start
 
-To use Explorateur, you need to define `BaseState` and `BaseMove` as in the template below.  
+To use Explorateur, you must define `BaseState` and `BaseMove` as in the template below.  
 
 ```python
 from explorateur import Explorateur, BaseMove, BaseState, ExplorationType, SearchType
 
 
-# TODO Implement your own Search Moves
+# Implement your Search Moves
 class MyMove(BaseMove):
 
     def __init__(self):
@@ -55,11 +55,11 @@ class MyMove(BaseMove):
         pass
 
 
-# TODO Implement your own Search State 
+# Implement your own Search State 
 class MyState(BaseState):
 
     def __init__(self):
-        # TODO Your problem specific state representation
+        # TODO Your problem-specific state representation
         super().__init__() # Make sure to initialize the base state!
 
     def get_moves(self) -> List[MyMove]:
@@ -108,7 +108,7 @@ print("Total Time:", explorer.total_time)
 ## Examples
 
 * **Backtracking Tree-Search:** A toy [Constraint Satisfaction Problem](examples/backtrack_tree_search/main.py) to find a solution via backtracking tree search as depicted in [search visualization](https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0D%0Aspline%3Dline%3B%0D%0A%22State%20ID%3A%200%0D%0AAssignment%3A%20%7B%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%2C%202%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%201%0D%0AAssignment%3A%20%7B'x'%3A%201%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22x%20%3D%3D%201%22%5D%3B%0D%0A%22State%20ID%3A%201%0D%0AAssignment%3A%20%7B'x'%3A%201%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%202%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22y%20%3D%3D%2010%22%5D%3B%0D%0A%22State%20ID%3A%202%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%203%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%2C%20'z'%3A%20100%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%5D%7D%22%20%5Blabel%3D%22z%20%3D%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%202%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%204%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2010%2C%20'z'%3A%20200%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B200%5D%7D%22%20%5Blabel%3D%22z%20!%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%201%0D%0AAssignment%3A%20%7B'x'%3A%201%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%205%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22y%20!%3D%2010%22%5D%3B%0D%0A%22State%20ID%3A%205%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%206%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%2C%20'z'%3A%20100%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%5D%7D%22%20%5Blabel%3D%22z%20%3D%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%205%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%207%0D%0AAssignment%3A%20%7B'x'%3A%201%2C%20'y'%3A%2020%2C%20'z'%3A%20200%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B200%5D%7D%22%20%5Blabel%3D%22z%20!%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%200%0D%0AAssignment%3A%20%7B%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B1%2C%202%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%208%0D%0AAssignment%3A%20%7B'x'%3A%202%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22x%20!%3D%201%22%5D%3B%0D%0A%22State%20ID%3A%208%0D%0AAssignment%3A%20%7B'x'%3A%202%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%209%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22y%20%3D%3D%2010%22%5D%3B%0D%0A%22State%20ID%3A%209%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2010%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%2C%20'z'%3A%20100%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%5D%7D%22%20%5Blabel%3D%22z%20%3D%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%209%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2011%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2010%2C%20'z'%3A%20200%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%5D%2C%20'z'%3A%20%5B200%5D%7D%22%20%5Blabel%3D%22z%20!%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%208%0D%0AAssignment%3A%20%7B'x'%3A%202%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B10%2C%2020%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2012%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20%5Blabel%3D%22y%20!%3D%2010%22%5D%3B%0D%0A%22State%20ID%3A%2012%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2013%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%2C%20'z'%3A%20100%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%5D%7D%22%20%5Blabel%3D%22z%20%3D%3D%20100%22%5D%3B%0D%0A%22State%20ID%3A%2012%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B100%2C%20200%5D%7D%22%20-%3E%20%22State%20ID%3A%2014%0D%0AAssignment%3A%20%7B'x'%3A%202%2C%20'y'%3A%2020%2C%20'z'%3A%20200%7D%0D%0ADomains%3A%20%7B'x'%3A%20%5B2%5D%2C%20'y'%3A%20%5B20%5D%2C%20'z'%3A%20%5B200%5D%7D%22%20%5Blabel%3D%22z%20!%3D%20100%22%5D%3B%0D%0A%7D).
-* **Graph Search:** The classical [Romanian Graph Problem](examples/graph_search/main.py) solved with a goal state as depicted in [search visualization](https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0D%0Aspline%3Dline%3B%0D%0A%220%0D%0AArad%22%20-%3E%20%221%0D%0AZerind%22%20%5Blabel%3D%22Zerind%22%5D%3B%0D%0A%220%0D%0AArad%22%20-%3E%20%222%0D%0ASibiu%22%20%5Blabel%3D%22Sibiu%22%5D%3B%0D%0A%220%0D%0AArad%22%20-%3E%20%223%0D%0ATimisoara%22%20%5Blabel%3D%22Timisoara%22%5D%3B%0D%0A%221%0D%0AZerind%22%20-%3E%20%224%0D%0AOradea%22%20%5Blabel%3D%22Oradea%22%5D%3B%0D%0A%222%0D%0ASibiu%22%20-%3E%20%225%0D%0AFagaras%22%20%5Blabel%3D%22Fagaras%22%5D%3B%0D%0A%222%0D%0ASibiu%22%20-%3E%20%226%0D%0AOradea%22%20%5Blabel%3D%22Oradea%22%5D%3B%0D%0A%222%0D%0ASibiu%22%20-%3E%20%227%0D%0ARimnicu%22%20%5Blabel%3D%22Rimnicu%22%5D%3B%0D%0A%223%0D%0ATimisoara%22%20-%3E%20%228%0D%0ALugoj%22%20%5Blabel%3D%22Lugoj%22%5D%3B%0D%0A%225%0D%0AFagaras%22%20-%3E%20%229%0D%0ABucharest%22%20%5Blabel%3D%22Bucharest%22%5D%3B%0D%0A%229%0D%0ABucharest%22%20%5Bstyle%3Dfilled%20fillcolor%3Dgreen%5D%3B%0D%0A%7D). Note that 
+* **Graph Search:** The classical [Romanian Graph Problem](examples/graph_search/main.py) solved with a goal state as depicted in [search visualization](https://dreampuf.github.io/GraphvizOnline/#digraph%20G%20%7B%0D%0Aspline%3Dline%3B%0D%0A%220%0D%0AArad%22%20-%3E%20%221%0D%0AZerind%22%20%5Blabel%3D%22Zerind%22%5D%3B%0D%0A%220%0D%0AArad%22%20-%3E%20%222%0D%0ASibiu%22%20%5Blabel%3D%22Sibiu%22%5D%3B%0D%0A%220%0D%0AArad%22%20-%3E%20%223%0D%0ATimisoara%22%20%5Blabel%3D%22Timisoara%22%5D%3B%0D%0A%221%0D%0AZerind%22%20-%3E%20%224%0D%0AOradea%22%20%5Blabel%3D%22Oradea%22%5D%3B%0D%0A%222%0D%0ASibiu%22%20-%3E%20%225%0D%0AFagaras%22%20%5Blabel%3D%22Fagaras%22%5D%3B%0D%0A%222%0D%0ASibiu%22%20-%3E%20%226%0D%0AOradea%22%20%5Blabel%3D%22Oradea%22%5D%3B%0D%0A%222%0D%0ASibiu%22%20-%3E%20%227%0D%0ARimnicu%22%20%5Blabel%3D%22Rimnicu%22%5D%3B%0D%0A%223%0D%0ATimisoara%22%20-%3E%20%228%0D%0ALugoj%22%20%5Blabel%3D%22Lugoj%22%5D%3B%0D%0A%225%0D%0AFagaras%22%20-%3E%20%229%0D%0ABucharest%22%20%5Blabel%3D%22Bucharest%22%5D%3B%0D%0A%229%0D%0ABucharest%22%20%5Bstyle%3Dfilled%20fillcolor%3Dgreen%5D%3B%0D%0A%7D). Note the use of `__eq__` and `__hash__` to enable graph-based search to handle state comparison and hashing.
 
 ## Installation 
 Explorateur can be installed from PyPI using `pip install explorateur`
@@ -146,7 +146,7 @@ For example:
 $ python -m unittest -v tests.test_usage_example.UsageExampleTest.test_usage_example
 ```
 
-To confirm that installation was successful, try importing Explorateur after `pip install explorateur`
+To confirm that the installation was successful, try importing Explorateur after `pip install explorateur`
 
 ```
 import explorateur
