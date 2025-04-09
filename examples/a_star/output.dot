@@ -1,32 +1,89 @@
 digraph G {
 spline=line;
 "0
-Arad" -> "1
-Zerind" [label="Zerind"];
+Arad
+Backward Cost 0
+Forward Cost 366
+Total Cost 366" -> "1
+Zerind
+Backward Cost 75
+Forward Cost 374
+Total Cost 449" [label="Zerind"];
 "0
-Arad" -> "2
-Sibiu" [label="Sibiu"];
+Arad
+Backward Cost 0
+Forward Cost 366
+Total Cost 366" -> "2
+Sibiu
+Backward Cost 140
+Forward Cost 253
+Total Cost 393" [label="Sibiu"];
 "0
-Arad" -> "3
-Timisoara" [label="Timisoara"];
-"1
-Zerind" -> "4
-Oradea" [label="Oradea"];
+Arad
+Backward Cost 0
+Forward Cost 366
+Total Cost 366" -> "3
+Timisoara
+Backward Cost 118
+Forward Cost 329
+Total Cost 447" [label="Timisoara"];
 "2
-Sibiu" -> "5
-Fagaras" [label="Fagaras"];
+Sibiu
+Backward Cost 140
+Forward Cost 253
+Total Cost 393" -> "4
+Oradea
+Backward Cost 291
+Forward Cost 380
+Total Cost 671" [label="Oradea"];
 "2
-Sibiu" -> "6
-Oradea" [label="Oradea"];
+Sibiu
+Backward Cost 140
+Forward Cost 253
+Total Cost 393" -> "5
+Rimnicu
+Backward Cost 220
+Forward Cost 193
+Total Cost 413" [label="Rimnicu"];
 "2
-Sibiu" -> "7
-Rimnicu" [label="Rimnicu"];
-"3
-Timisoara" -> "8
-Lugoj" [label="Lugoj"];
+Sibiu
+Backward Cost 140
+Forward Cost 253
+Total Cost 393" -> "6
+Fagaras
+Backward Cost 239
+Forward Cost 176
+Total Cost 415" [label="Fagaras"];
 "5
-Fagaras" -> "9
-Bucharest" [label="Bucharest"];
+Rimnicu
+Backward Cost 220
+Forward Cost 193
+Total Cost 413" -> "7
+Craiova
+Backward Cost 366
+Forward Cost 160
+Total Cost 526" [label="Craiova"];
+"5
+Rimnicu
+Backward Cost 220
+Forward Cost 193
+Total Cost 413" -> "8
+Pitesti
+Backward Cost 317
+Forward Cost 100
+Total Cost 417" [label="Pitesti"];
+"6
+Fagaras
+Backward Cost 239
+Forward Cost 176
+Total Cost 415" -> "9
+Bucharest
+Backward Cost 450
+Forward Cost 0
+Total Cost 450" [label="Bucharest"];
 "9
-Bucharest" [style=filled fillcolor=green];
+Bucharest
+Backward Cost 450
+Forward Cost 0
+Total Cost 450" [style=filled fillcolor=green];
 }

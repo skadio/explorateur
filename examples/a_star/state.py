@@ -44,8 +44,9 @@ class MyState(BaseState):
     # String representation, also used for node labels in DOT graph
     def __str__(self) -> str:
         return (str(self.id) + "\n" + str(self.v) +
-                "\nBackward Cost" + str(self.cost_backward) +
-                "\nForward Cost" + str(self.cost_forward[self.v]))
+                "\nBackward Cost " + str(self.cost_backward) +
+                "\nForward Cost " + str(self.cost_forward[self.v]) +
+                "\nTotal Cost " + str(self.cost_backward + self.cost_forward[self.v]))
 
     # This is required for graph search to check contains on already visited states
     def __eq__(self, other):

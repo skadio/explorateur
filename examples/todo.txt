@@ -1,3 +1,5 @@
+BestFirsSearch -> split into MinFirstSearch and MaxFirstSearch
+
 depth-first search (DFS) (pick newest element),
 breadth first search (BFS) (pick oldest element)
 Dijkstra’s Algorithm / uniform cost search (pick element with lowest path cost),
