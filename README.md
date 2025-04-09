@@ -27,7 +27,7 @@ The behavior of the search is controlled by the built-in _Search Strategy_ and t
 ### Exploration Strategy 
 - `BreadthFirst` in an uninformed fashion,
 - `DepthFirst` in an uninformed fashion,
-- `BestFirst` in an informed fashion with an objective function that evaluates the quality of a state.
+- `BestFirst` in an informed fashion with an objective function that evaluates the quality of a state. By default, the best first search is set to minimize. To maximize, multiply your objective function by -1.
 
 ### Stopping Conditions 
 - A termination state is found,

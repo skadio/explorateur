@@ -78,6 +78,8 @@ class BaseState(metaclass=abc.ABCMeta):
         Return the objective value of the state.
 
         Best-First Search requires an evaluation of states for ranking.
+        By default, Best-First Search is set to minimization.
+        To maximize, multiply your objective by -1.  
 
         Note, if this function returns the same value for two states
         there will be an error because there is no comparator between abstract Base States.
