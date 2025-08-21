@@ -1,0 +1,17 @@
+digraph G {
+spline=line;
+"Obj:6.67" -> "Obj:6.74" [label="x_2<=3"];
+"Obj:6.67" -> "Obj:8.00" [label="x_2>=4"];
+"Obj:6.74" -> "Obj:6.80" [label="x_1<=0"];
+"Obj:6.74" -> "Obj:9.33" [label="x_1>=1"];
+5 [label="Fail: 1" shape=triangle style=filled fillcolor=red];
+"Obj:6.80" -> 5 [label="x_0<=0"];
+"Obj:6.80" -> "Obj:7.17" [label="x_0>=1"];
+"Obj:7.17" -> "Obj:7.20" [label="x_2<=2"];
+"Obj:7.17" -> "Obj:9.00" [label="x_2>=3"];
+9 [label="Fail: 2" shape=triangle style=filled fillcolor=red];
+"Obj:7.20" -> 9 [label="x_0<=1"];
+"Obj:7.20" -> "Obj:7.67" [label="x_0>=2"];
+"Obj:7.67" -> "Obj:8.00" [label="x_2<=0"];
+"Obj:7.67" -> "Obj:8.00" [label="x_2>=1"];
+}

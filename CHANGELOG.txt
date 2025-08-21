@@ -3,6 +3,8 @@ CHANGELOG
 =========
 
 -------------------------------------------------------------------------------
-May 15, 2024 1.0.0
+August 22, 2025 1.3.0
 -------------------------------------------------------------------------------
-Initial release. Stable
+- Added Branch and Bound algorithm using Google OR-Tools as the linear programming solver.
+- Added examples for the Branch and Bound algorithm.
+- Added test for the Branch and Bound algorithm.
