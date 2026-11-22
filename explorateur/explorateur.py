@@ -96,8 +96,9 @@ class Explorateur:
                                                           Default, ExplorationType.DepthFirst().
             - search_type Optional(SearchType): The search method to decide whether to store visited states.
                                                 Default, SearchType.TreeSearch().
-            - is_solution_path (bool): If True, path starting from solution state back to initial_state is returned.
-                                       If False, solution state is returned.
+            - is_solution_path (bool): If True, stores the path from the solution state back to initial_state
+                                       in self.solution_path when a solution is found.
+                                       If False, self.solution_path remains None.
                                        Default, True.
             - max_depth Optional(int): Optional argument for the maximum depth to stop search.
                                        Default, 100.
@@ -110,10 +111,12 @@ class Explorateur:
                                    Default, None (no dot file saved).
                                    Example dot graph visualizer: https://dreampuf.github.io/GraphvizOnline/
         Returns:
-            - If no solution found or the search hits one of the stopping criteria, returns False.
-            - if a solution is found and is_solution_path is set to False, returns the solution state.
-            - If a solution is found, and is_solution_path is set to True, returns a list of solution states,
-                denoting the path from solution state back to the initial_state.
+            bool: True if a solution is found; False if the search space is exhausted or a search limit
+                stops the search without a solution.
+
+            The solution is stored in self.solution_state. If is_solution_path is True, self.solution_path
+            stores the states in order from the solution back to the initial state.
+            Both attributes remain None if no solution is found.
         """
 
         # Check arguments
